@@ -27,3 +27,7 @@ Data Science Angle: Implement machine learning models to detect fraudulent activ
 Overview: Create a platform that provides cybersecurity training modules, quizzes, and simulations for users to learn about common security threats (e.g., phishing, malware).
 Security Focus: Ensure the platform itself is secure, with proper user authentication and data handling.
 Data Science Angle: Analyze user progress, provide personalized recommendations for further training, and adapt training content based on user behavior.
+8. Elo Rating System Platform
+Overview: This would be a platform that allows managers of board game or esports leagues to set up game tracking and automatically build an elo system for that. Like existing platforms, it would provide tournament support, but the elo system would be what sets it apart.
+Security Focus: Players and league managers would have their own accounts. League managers could grant players the ability to self-report game scores, or they could set it up so they must verify the results.
+Data Science Angle: Apart from the obvious data analysis inherent in generating elo scores, game results would have to be kept in a database.
