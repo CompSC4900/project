@@ -4,8 +4,8 @@ Overview: Build a web application for secure online voting in elections or organ
 Security Focus: Implement end-to-end encryption, user authentication (e.g., multi-factor authentication), and auditing to ensure data integrity.
 Data Science Angle: Analyze voting patterns or develop a feature that predicts outcomes based on historical data.
 
-"I want to do this!":
-"I would be ok with doing this": Zephirin, Andrew
+"I want to do this!": 
+"I would be ok with doing this": Zephirin, Andrew, Canon
 "I don't want to do this":
 
 
@@ -14,8 +14,8 @@ Overview: Create a web app that helps users manage their finances, track expense
 Security Focus: Secure handling of sensitive financial data, encryption of data at rest and in transit, and secure user authentication.
 Data Science Angle: Implement machine learning algorithms to provide users with spending insights or financial predictions based on their habits.
 
-"I want to do this!":
-"I would be ok with doing this": Zephirin, Andrew
+"I want to do this!": 
+"I would be ok with doing this": Zephirin, Andrew, Canon
 "I don't want to do this":
 
 
@@ -24,7 +24,7 @@ Overview: Develop a platform that allows patients to book appointments, view the
 Security Focus: Compliance with regulations like HIPAA, encryption, and role-based access control to protect patient data.
 Data Science Angle: Use data analytics to provide insights into patient care, optimize scheduling, or predict patient needs.
 
-"I want to do this!":
+"I want to do this!": Canon
 "I would be ok with doing this": Zephirin, Andrew
 "I don't want to do this":
 
@@ -34,7 +34,7 @@ Overview: Create a web application that visualizes and analyzes data collected f
 Security Focus: Secure data collection from IoT devices, data integrity checks, and secure data storage.
 Data Science Angle: Develop predictive models for traffic management, pollution control, or energy usage based on collected data.
 
-"I want to do this!": Zephirin, 
+"I want to do this!": Zephirin, Canon
 "I would be ok with doing this": Andrew
 "I don't want to do this":
 
@@ -45,7 +45,7 @@ Security Focus: Implement strong encryption, secure user authentication, and per
 Data Science Angle: Analyze collaboration patterns or provide insights on file usage and access.
 
 "I want to do this!":
-"I would be ok with doing this": Zephirin, Andrew
+"I would be ok with doing this": Zephirin, Andrew, Canon
 "I don't want to do this":
 
 
@@ -55,7 +55,7 @@ Security Focus: Secure payment processing, protection against SQL injection and 
 Data Science Angle: Implement machine learning models to detect fraudulent activities in real-time, such as unusual purchasing patterns.
 
 "I want to do this!":
-"I would be ok with doing this": Zephirin, Andrew
+"I would be ok with doing this": Zephirin, Andrew, Canon
 "I don't want to do this":
 
 
@@ -66,7 +66,7 @@ Data Science Angle: Analyze user progress, provide personalized recommendations 
 
 "I want to do this!":
 "I would be ok with doing this": Zephirin, 
-"I don't want to do this": Andrew
+"I don't want to do this": Andrew, Canon
 
 
 8. Elo Rating System Platform
@@ -75,6 +75,6 @@ Security Focus: Players and league managers would have their own accounts. Leagu
 Data Science Angle: Apart from the obvious data analysis inherent in generating elo scores, game results would have to be kept in a database.
 
 "I want to do this!": Zephirin, Andrew
-"I would be ok with doing this":
+"I would be ok with doing this": Canon
 "I don't want to do this":
 
