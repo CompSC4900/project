@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Clinic360 - Login</title>
+	<!-- temporary CSS just to lay stuff out -->
+	<style>
+		body {
+			margin: 0;
+		}
+		#main-container {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			width: 100vw;
+			height: 100vh;
+		}
+		#central-container {
+			width: min(100%, 500px);
+		}
+		#message {
+			color: red;
+		}
+		input {
+			margin: 10px 0;
+		}
+		input[type=text] {
+			width: 100%;
+		}
+	</style>
+	<!-- this file contains the login() function -->
+	<script src="accounts.js"></script>
+</head>
+<body>
+	<!-- main container that fills up the screen -->
+	<div id="main-container">
+		<!-- central container to nicely display everything in the center of the screen -->
+		<form id="central-container" action="javascript:login()">
+			<!-- form fields -->
+			<label for="email">Email:</label> <br>
+			<input type="text" id="email">
+			<label for="password">Password:</label> <br>
+			<input type="text" id="password">
+			<!-- element to display error messages to the user -->
+				<span id="message" hidden></span>
+			<!-- submit button -->
+			<input type="submit" value="Login">
+			<!-- button to redirect to account creation -->
+			<button type="button" onclick="location.href = 'create-account.html';">Create an Account</button>
+		</form>
+	</div>
+</body>
+</html>
