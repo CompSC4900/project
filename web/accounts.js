@@ -55,14 +55,13 @@ function createAccount() {
 		return;
 	}
 	delete user.password2;
-	// now that we've validated everything, we can add the user to the database
+	// now that we've validated everything, we can attempt to add the user to the database
 	if (!addUser(user)) {
-		return
+		return //username or email is a duplicate
 	}
-	// set the current user to the new user
-	window.sessionStorage.setItem("activeUser", user.username);
-	// redirect the user to the home page
-	window.location.href = "home.html";
+	
+	// Account Creation Success: redirect the user to the login page
+	window.location.href = "login.html";
 }
 
 /**
@@ -71,7 +70,7 @@ function createAccount() {
  * the user was successfully added.
  * TODO: change from local to server-side storage
  **/
-function addUser(user) {
+function addUser(newUser) {
 	// retrieve the users list from local storage and parse it into a js array
 	let users = window.sessionStorage.getItem("users");
 	if (users == null) {
@@ -81,18 +80,18 @@ function addUser(user) {
 	}
 	// validate that the new user's username and email is unique
 	for (otherUser of users) {
-		if (otherUser.username == user.username) {
+		if (otherUser.username == newUser.username) {
 			displayMessage("That user already exists");
 			return false;
-		} else if (otherUser.email == user.email) {
+		} else if (otherUser.email.toLowerCase() == newUser.email.toLowerCase()) {
 			displayMessage("That email is already being used");
 			return false;
 		}
 	}
 	// add the new user and transform the users array back into JSON
-	users.push(user);
+	users.push(newUser);
 	users = JSON.stringify(users);
-	// update the local storage
+	// update the session storage
 	window.sessionStorage.setItem("users", users);
 	return true;
 }
