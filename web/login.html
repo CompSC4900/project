@@ -17,7 +17,7 @@
 		#central-container {
 			width: min(100%, 500px);
 		}
-		#message {
+		span {
 			color: red;
 		}
 		input {
@@ -40,8 +40,8 @@
 			<input type="text" id="email">
 			<label for="password">Password:</label> <br>
 			<input type="text" id="password">
-			<!-- element to display error messages to the user -->
-				<span id="message" hidden></span>
+			<!-- Error message: email or password was incorrect -->
+				<span id="invalidEmailPassword" hidden></span>
 			<!-- submit button -->
 			<input type="submit" value="Login">
 			<!-- button to redirect to account creation -->

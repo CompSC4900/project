@@ -17,7 +17,7 @@
 		#central-container {
 			width: min(100%, 500px);
 		}
-		#message {
+		span {
 			color: red;
 		}
 		input {
@@ -37,15 +37,21 @@
 		<form id="central-container" action="javascript:createAccount()">
 			<!-- form fields -->
 			<label for="username">Username:</label> <br>
-			<input type="text" id="username">
+			<input type="text" id="username" required>
+			<!-- Error message: no format right now (just can't be left blank) -->
+				<span id="illegalUsername" hidden></span>
 			<label for="email">Email:</label> <br>
-			<input type="text" id="email">
+			<input type="text" id="email" required>
+			<!-- Error message: email did not meet criteria -->
+				<span id="illegalEmail" hidden></span>
 			<label for="password">Password:</label> <br>
-			<input type="text" id="password">
+			<input type="text" id="password" required>
+			<!-- Error message: password did not meet criteria -->
+				<span id="illegalPassword" hidden></span>
 			<label for="password2">Retype Password:</label> <br>
-			<input type="text" id="password2">
-			<!-- element to display error messages to the user -->
-				<span id="message" hidden></span>
+			<input type="text" id="password2" required>
+			<!-- Error message: retyped password is not the same -->
+				<span id="mismatchedPassword" hidden></span>
 			<!-- submit button -->
 			<input type="submit" value="Create Account">
 		</form>
