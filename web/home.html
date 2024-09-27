@@ -1,9 +1,95 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Clinic360 - Home</title>
+    <title>Clinic360 - Home</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Main container */
+        .container {
+            display: flex;
+            justify-content: center;
+            margin-top: 300px;
+            height: calc(100vh - 100px); /* Subtracting height of the header */
+        }
+
+        /* Header with logo */
+        .header {
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+            background-color: #11bfebb7;
+            color: white;
+            font-size: 24px;
+            position: fixed;
+            top: 0;
+        }
+
+        .logo {
+            display: inline-block;
+            width: 150px;
+            height: auto;
+        }
+
+        /* Calendar section */
+        .calendar {
+            width: 60%;
+            height: 100%;
+            background-color: #f0f0f0;
+            margin: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Right container */
+        .right-container {
+            display: right;
+     
+            justify-content: space-between;
+            width: 30%;
+            height: 50%;
+        }
+
+        /* Test results and Messages sections */
+        .test-results, .Messages {
+            background-color: #f9f9f9;
+            margin: 20px;
+            height: 20%; /* Each section takes half the height of the right container */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+    </style>
 </head>
 <body>
-	<!-- TODO -->
+    <!-- Header section for logo -->
+    <div class="header">
+        <img src="logo.png" alt="Clinic360 Logo" class="logo">
+    </div>
+
+    <!-- Main content container -->
+    <div class="container">
+        <!-- Calendar section on the left -->
+        <div class="calendar">
+            <h2>Calendar</h2>
+            <!-- Add your calendar content here -->
+        </div>
+
+        <!-- Right container with Test Results and Messages stacked -->
+        <div class="right-container">
+            <!-- Test Results section -->
+            <div class="test-results">
+                <h2>Test Results</h2>
+                <!-- Add test results content here -->
+            </div>
+
+            <!-- Messages section -->
+            <div class="Messages">
+                <h2>Messages From Provider</h2>
+                <!-- Add Messages content here -->
+            </div>
+        </div>
+    </div>
 </body>
 </html>
