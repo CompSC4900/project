@@ -2,39 +2,89 @@
 <html>
 <head>
 	<title>Clinic360 - Login</title>
-	<!-- temporary CSS just to lay stuff out -->
+	<link rel="icon" type="image/png" href="Logo.png">
 	<style>
-		body {
+		body, html {
 			margin: 0;
+			padding: 0;
+			width: 100%;
+			height: 100%;
+			font-family: Arial;
 		}
+
+		/* (Behind window) background */
+		body {
+			background-color: #00b4d8;		
+		}
+
 		#main-container {
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			width: 100vw;
-			height: 100vh;
-		}
-		#central-container {
-			width: min(100%, 500px);
-		}
-		span {
-			color: red;
-		}
-		input {
-			margin: 10px 0;
-		}
-		input[type=text] {
 			width: 100%;
+			height: 100%;
+		}
+		
+		/* White login window */
+		#central-container {
+			background: white;
+			padding: 30px; 					 
+			border-radius: 8px;
+			width: 400px;
+		}
+
+		/* Input fields  */ 
+		input[type=text], input[type=password] {
+			width: 95%;
+			padding: 10px;
+			margin: 15px 0;
+			border: 1px solid  lightgray;
+			border-radius: 4px;
+		}
+
+		/* Stuff for Login Button  */ 
+		input[type=submit] {
+			width: 100%;
+			background-color: #00b4d8;
+			color: white;
+			padding: 10px;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;		
+		}
+
+		button {
+			width: 100%;
+			background-color: white;
+			color: #00b4d8;
+			padding: 10px;
+			border: 2px solid #00b4d8;
+			border-radius: 4px;
+			cursor: pointer;
+			margin-top: 10px;
+		}
+
+
+
+		/* Error text */
+		span {
+			display: block;
+			margin-top: 10px;
+			color: red;
+			font-size: 14px;
 		}
 	</style>
 	<!-- this file contains the login() function -->
 	<script src="accounts.js"></script>
 </head>
+
+
 <body>
 	<!-- main container that fills up the screen -->
 	<div id="main-container">
 		<!-- central container to nicely display everything in the center of the screen -->
 		<form id="central-container" action="javascript:login()">
+			<img src="logo.svg" alt="Clinic360 Logo" style="height: 10pc; display: block; margin: 0 auto;">
 			<!-- form fields -->
 			<label for="email">Email:</label> <br>
 			<input type="text" id="email">
