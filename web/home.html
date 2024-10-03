@@ -21,17 +21,16 @@
         /* Header with logo */
         .header {
             width: 100%;
-            text-align: center; /* Change to move logo*/
-            padding: 20px;
+            height: 70px;
             background-image:linear-gradient(rgba(8, 206, 255, 0.527),rgba(255, 255, 255, 0)); /* Heading Gradient */
             position: fixed;
+            display: flex;
             top: 0;
         }
 
         .logo {
-            display: inline-block;
-            width: 150px;
             height: auto;
+            margin: 5px 20px;
         }
 
         /* Calendar section */
@@ -59,12 +58,26 @@
             box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
             border-radius: 10px;
         }
+        
+        /* Navigation button for header bar */
+        .navigation {
+        	flex-grow: 1;
+        	background-color: #1490fc;
+        	border: 0;
+        	margin: 10px 20px;
+        	border-radius: 10px;
+        	cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <!-- Header section for logo -->
     <div class="header">
+    	<!-- logo at the left side of the header -->
         <img src="logo.svg" alt="Clinic360 Logo" class="logo">
+        <!-- navigation buttons will expand to fill space -->
+        <button class="navigation">Example Navigation Button #1</button>
+        <button class="navigation">Example Navigation Button #2</button>
     </div>
 	<!----------------------------->
 
