@@ -38,10 +38,7 @@
         .calendar {
             width: 40%;
             height: 62.5%;
-            background-color: #f0f0f0;
             margin: 20px;
-            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
-            border-radius: 10px;
         }
 
         /* Right container */
@@ -52,12 +49,16 @@
         }
 
         /* Test results and Messages sections */
-        .test-results, .Messages {
-            background-color: #f9f9f9;
+        .test-results, .messages {
             margin: 20px;
             height: 20%; /* Each section takes half the height of the right container */
-            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
-            border-radius: 10px;
+        }
+        
+        /* Base panel class */
+        .panel {
+        	background-color: #f0f0f0;
+        	border-radius: 10px;
+        	box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
         }
         
         /* Navigation button for header bar */
@@ -69,9 +70,33 @@
         	border-radius: 10px;
         	cursor: pointer;
         }
+        
+        /* User profile picture */
+        #user-picture {
+        	height: 100%;
+        	object-fit: fill;
+        	border-radius: 50%;
+        }
+        
+        #username {
+        	margin-left: 10px;
+        	margin-right: 5px;
+        	align-self: center;
+        }
+        
+        /* Container for profile picture and username */
+        .user-card {
+        	height: calc(100% - 30px);
+        	display: flex;
+        	flex-shrink: 1;
+        	margin: 10px 20px;
+        	padding: 5px;
+        	box-shadow: none;
+        }
     </style>
+    <script src="home.js"></script>
 </head>
-<body>
+<body onload="loadHomepage()">
     <!-- Header section for logo -->
     <div class="header">
     	<!-- logo at the left side of the header -->
@@ -79,13 +104,17 @@
         <!-- navigation buttons will expand to fill space -->
         <button class="navigation">Example Navigation Button #1</button>
         <button class="navigation">Example Navigation Button #2</button>
+        <div class="user-card panel">
+        	<img src="dummy-pfp.png" alt="User Picture" id="user-picture">
+        	<span id="username"></span>
+        </div>
     </div>
 	<!----------------------------->
 
     <!-- Main content container -->
     <div class="container">
         <!-- Calendar section on the left -->
-        <div class="calendar">
+        <div class="calendar panel">
             <h2 style="color: #03045e; text-align: center;">Calendar</h2>
             <!-- Add your calendar content here -->
 
@@ -95,14 +124,14 @@
         <!-- Right container with Test Results and Messages stacked -->
         <div class="right-container">
             <!-- Test Results section -->
-            <div class="test-results">
+            <div class="test-results panel">
                 <h2 style="color: #03045e; text-align: center; padding-top: 15px;">Test Results</h2>
                 <!-- Add test results content here -->
 
             </div>
 
             <!-- Messages section -->
-            <div class="Messages">
+            <div class="messages panel">
                 <h2 style="color: #03045e; text-align: center;  padding-top: 15px;">Messages From Provider</h2> 
                 <!-- Add Messages content here -->
 
