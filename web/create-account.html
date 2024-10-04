@@ -5,91 +5,105 @@
 	<link rel="icon" type="image/png" href="Logo.png">
 	<!-- temporary CSS just to lay stuff out -->
 	<style>
-		body {
+		body, html {
 			margin: 0;
-			background-color: rgb(226, 231, 231); /*Page Background color */
-			font-family: Arial, sans-serif;
+			padding: 0;
+			width: 100%;
+			height: 100%;
+			font-family: Arial;
 		}
+
+		/* (Behind window) background */
+		body {
+			background-color: #00b4d8;		
+		}
+
 		#main-container {
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			width: 100vw;
-			height: 100vh;
-		}
-		#central-container {
-			width: min(100%, 500px);
-		}
-		span {
-			color: red;
-		}
-		input {
-			margin: 10px 0;
-		}
-		input[type=text] {
 			width: 100%;
+			height: 100%;
+		}
+		
+		/* White login window */
+		#central-container {
+			background: white;
+			padding: 30px; 					 
+			border-radius: 8px;
+			width: 400px;
 		}
 
-		/* Header with logo */
-        .header {
-            width: 100%;
-            height: 70px;
-            background-image:linear-gradient(rgba(8, 206, 255, 0.527),rgba(255, 255, 255, 0)); /* Heading Gradient */
-            position: fixed;
-            display: flex;
-            top: 0;
-        }
-
-		.logo {
+		/* Input fields  */ 
+		input[type=text], input[type=password] {
+			width: 95%;
 			padding: 10px;
-            height: 100%;
-            margin: auto;
-        }
+			margin: 15px 0;
+			border: 1px solid  lightgray;
+			border-radius: 4px;
+		}
 
-		/* Base panel class */
-        .panel {
-        	background-color: #f0f0f0;
-        	border-radius: 10px;
-        	box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
-			padding: 20px 28px 20px 20px;
-        }
-		
+		/* Stuff for Login Button  */ 
+		input[type=submit] {
+			width: 100%;
+			background-color: #00b4d8;
+			color: white;
+			padding: 10px;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;		
+		}
+
+		button {
+			width: 100%;
+			background-color: white;
+			color: #00b4d8;
+			padding: 10px;
+			border: 2px solid #00b4d8;
+			border-radius: 4px;
+			cursor: pointer;
+			margin-top: 10px;
+		}
+
+
+
+		/* Error text */
+		span {
+			display: block;
+			margin-top: 10px;
+			color: red;
+			font-size: 14px;
+		}
 	</style>
 	<!-- this file contains the createAccount() function -->
 	<script src="accounts.js"></script>
 </head>
 <body>
-	<div class="header">
-		<img src="logo.svg" alt="Clinic360 Logo" class="logo">
-	</div>
-
 	<!-- main container that fills up the screen -->
 	<div id="main-container">
-		<!-- panel surrounding the form to make it look pretty -->
-		<div class="panel">
-			<!-- central container to nicely display everything in the center of the screen -->
-			<form id="central-container" action="javascript:createAccount()">
-				<!-- form fields -->
-				<label for="username">Username:</label> <br>
-				<input type="text" id="username" required>
-				<!-- Error message: no format right now (just can't be left blank) -->
-					<span id="illegalUsername" hidden></span>
-				<label for="email">Email:</label> <br>
-				<input type="text" id="email" required>
-				<!-- Error message: email did not meet criteria -->
-					<span id="illegalEmail" hidden></span>
-				<label for="password">Password:</label> <br>
-				<input type="text" id="password" required>
-				<!-- Error message: password did not meet criteria -->
-					<span id="illegalPassword" hidden></span>
-				<label for="password2">Retype Password:</label> <br>
-				<input type="text" id="password2" required>
-				<!-- Error message: retyped password is not the same -->
-					<span id="mismatchedPassword" hidden></span>
-				<!-- submit button -->
-				<input type="submit" value="Create Account">
-			</form>
-		</div>
+		<!-- central container to nicely display everything in the center of the screen -->
+		<form id="central-container" action="javascript:createAccount()">
+			<img src="logo.svg" alt="Clinic360 Logo" style="height: 10pc; display: block; margin: 0 auto;">
+			<!-- form fields -->
+			<label for="username">Username:</label> <br>
+			<input type="text" id="username" required>
+			<!-- Error message: no format right now (just can't be left blank) -->
+				<span id="illegalUsername" hidden></span>
+			<label for="email">Email:</label> <br>
+			<input type="text" id="email" required>
+			<!-- Error message: email did not meet criteria -->
+				<span id="illegalEmail" hidden></span>
+			<label for="password">Password:</label> <br>
+			<input type="text" id="password" required>
+			<!-- Error message: password did not meet criteria -->
+				<span id="illegalPassword" hidden></span>
+			<label for="password2">Retype Password:</label> <br>
+			<input type="text" id="password2" required>
+			<!-- Error message: retyped password is not the same -->
+				<span id="mismatchedPassword" hidden></span>
+			<!-- submit button -->
+			<input type="submit" value="Create Account">
+		</form>
 	</div>
 </body>
 </html>
