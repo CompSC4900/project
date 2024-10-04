@@ -93,6 +93,46 @@
         	padding: 5px;
         	box-shadow: none;
         }
+
+        /* dropdown container */
+        .dropdown {
+            position: relative;
+        }
+
+        /* dropdown button customizer */
+        .dropbutton {
+        	background-color: #1490fc;
+            color: black;
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        /* dropdown links container */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width:160px;
+            
+        }
+        /* dropdown links customization */
+        .dropdown-content a {
+            color: black;
+            text-decoration: none;
+            display: block;
+        }
+        /* customize dropdown menu when hovering */
+        .dropdown-content a:hover {
+            background-color: #08CEFF;
+        }
+        /* customize visibility of dropdown menu */
+        .dropdown:hover .dropdown-content {
+            background-color: white;
+            display: block;
+        }
+
     </style>
     <script src="home.js"></script>
 </head>
@@ -101,6 +141,17 @@
     <div class="header">
     	<!-- logo at the left side of the header -->
         <img src="logo.svg" alt="Clinic360 Logo" class="logo">
+        <!-- Dropdown menu-->
+         <div class="dropdown">
+            <!-- button to trigger dropdown options-->
+            <button class="dropbutton">Menu</button>
+            <div class="dropdown-content">
+                <!-- dropdown links-->
+                <a href="#">Page 1</a>
+                <a href="#">Page 2</a>
+                <a href="#">Page 3</a>
+            </div>
+         </div>
         <!-- navigation buttons will expand to fill space -->
         <button class="navigation">Example Navigation Button #1</button>
         <button class="navigation">Example Navigation Button #2</button>
