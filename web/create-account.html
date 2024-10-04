@@ -6,6 +6,8 @@
 	<style>
 		body {
 			margin: 0;
+			background-color: rgb(226, 231, 231); /*Page Background color */
+			font-family: Arial, sans-serif;
 		}
 		#main-container {
 			display: flex;
@@ -26,35 +28,67 @@
 		input[type=text] {
 			width: 100%;
 		}
+
+		/* Header with logo */
+        .header {
+            width: 100%;
+            height: 70px;
+            background-image:linear-gradient(rgba(8, 206, 255, 0.527),rgba(255, 255, 255, 0)); /* Heading Gradient */
+            position: fixed;
+            display: flex;
+            top: 0;
+        }
+
+		.logo {
+			padding: 10px;
+            height: 100%;
+            margin: auto;
+        }
+
+		/* Base panel class */
+        .panel {
+        	background-color: #f0f0f0;
+        	border-radius: 10px;
+        	box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+			padding: 20px 28px 20px 20px;
+        }
+		
 	</style>
 	<!-- this file contains the createAccount() function -->
 	<script src="accounts.js"></script>
 </head>
 <body>
+	<div class="header">
+		<img src="logo.svg" alt="Clinic360 Logo" class="logo">
+	</div>
+
 	<!-- main container that fills up the screen -->
 	<div id="main-container">
-		<!-- central container to nicely display everything in the center of the screen -->
-		<form id="central-container" action="javascript:createAccount()">
-			<!-- form fields -->
-			<label for="username">Username:</label> <br>
-			<input type="text" id="username" required>
-			<!-- Error message: no format right now (just can't be left blank) -->
-				<span id="illegalUsername" hidden></span>
-			<label for="email">Email:</label> <br>
-			<input type="text" id="email" required>
-			<!-- Error message: email did not meet criteria -->
-				<span id="illegalEmail" hidden></span>
-			<label for="password">Password:</label> <br>
-			<input type="text" id="password" required>
-			<!-- Error message: password did not meet criteria -->
-				<span id="illegalPassword" hidden></span>
-			<label for="password2">Retype Password:</label> <br>
-			<input type="text" id="password2" required>
-			<!-- Error message: retyped password is not the same -->
-				<span id="mismatchedPassword" hidden></span>
-			<!-- submit button -->
-			<input type="submit" value="Create Account">
-		</form>
+		<!-- panel surrounding the form to make it look pretty -->
+		<div class="panel">
+			<!-- central container to nicely display everything in the center of the screen -->
+			<form id="central-container" action="javascript:createAccount()">
+				<!-- form fields -->
+				<label for="username">Username:</label> <br>
+				<input type="text" id="username" required>
+				<!-- Error message: no format right now (just can't be left blank) -->
+					<span id="illegalUsername" hidden></span>
+				<label for="email">Email:</label> <br>
+				<input type="text" id="email" required>
+				<!-- Error message: email did not meet criteria -->
+					<span id="illegalEmail" hidden></span>
+				<label for="password">Password:</label> <br>
+				<input type="text" id="password" required>
+				<!-- Error message: password did not meet criteria -->
+					<span id="illegalPassword" hidden></span>
+				<label for="password2">Retype Password:</label> <br>
+				<input type="text" id="password2" required>
+				<!-- Error message: retyped password is not the same -->
+					<span id="mismatchedPassword" hidden></span>
+				<!-- submit button -->
+				<input type="submit" value="Create Account">
+			</form>
+		</div>
 	</div>
 </body>
 </html>
