@@ -96,19 +96,18 @@
 
         /* dropdown container */
         .dropdown {
+        	margin: 10px 20px;
             position: relative;
         }
 
         /* dropdown button customizer */
         .dropbutton {
-        	background-color: #1490fc;
-            color: black;
-            padding: 10px 20px;
-            margin: 10px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
+        	flex-grow: 0;
+        	margin: 0;
+        	padding: 0 20px;
+        	height: 100%;
         }
+        
         /* dropdown links container */
         .dropdown-content {
             display: none;
@@ -117,16 +116,19 @@
             min-width:160px;
             
         }
+        
         /* dropdown links customization */
         .dropdown-content a {
             color: black;
             text-decoration: none;
             display: block;
         }
+        
         /* customize dropdown menu when hovering */
         .dropdown-content a:hover {
             background-color: #08CEFF;
         }
+        
         /* customize visibility of dropdown menu */
         .dropdown:hover .dropdown-content {
             background-color: white;
@@ -142,16 +144,16 @@
     	<!-- logo at the left side of the header -->
         <img src="logo.svg" alt="Clinic360 Logo" class="logo">
         <!-- Dropdown menu-->
-         <div class="dropdown">
+        <div class="dropdown">
             <!-- button to trigger dropdown options-->
-            <button class="dropbutton">Menu</button>
+            <button class="navigation dropbutton">Menu</button>
             <div class="dropdown-content">
                 <!-- dropdown links-->
                 <a href="#">Page 1</a>
                 <a href="#">Page 2</a>
                 <a href="#">Page 3</a>
             </div>
-         </div>
+        </div>
         <!-- navigation buttons will expand to fill space -->
         <button class="navigation">Example Navigation Button #1</button>
         <button class="navigation">Example Navigation Button #2</button>
