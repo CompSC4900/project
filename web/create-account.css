@@ -1,0 +1,116 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: Arial;
+}
+
+/* (Behind window) background */
+body {
+    background-color: #00b4d8;		
+}
+
+
+#main-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+/* White login window */
+#central-container {
+    background: white;
+    padding: 30px; 					 
+    border-radius: 8px;
+    width: 30%;
+}
+/* Adjusts form width based on window size (relative to a PC) */
+@media (max-width: 1500px){
+    #central-container{
+        width: 50%;
+    }
+}
+
+/* Styling for TEXT and DATE input fields  */ 
+input[type=text], input[type=date] {
+    margin-top: 10px;
+    border: 1px solid  lightgray;
+    width: 100%;
+    padding: 10px;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+
+/* Styling for SUBMIT button  */ 
+input[type=submit] {
+    background-color: #00b4d8;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: 5px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 4px;
+    box-sizing: border-box;		
+}
+
+
+/* Styling for ERROR messages (span tags) */
+span {
+    display: none;
+    color: red;
+    font-size: 14px;
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+/* Aligns CITY, STATE, ZIP evenly in a row */
+.address-row {
+    display: flex;
+    gap: 10px;
+    width:100%;
+}
+/* Styling for the SELECT input box. This matches its style with the other input boxes */
+.address-row select{
+    width: 100%;
+    margin-top: 10px;
+    border: 1px solid lightgray;
+    padding: 10px;
+    border-radius: 4px; 
+}
+
+/* The following code formats the DoB, Gender, and Phone Number input fields of this form */
+/* Flexbox container for Date of Birth, Gender, and Phone */
+.dob-gender-phone-row {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    width: 100%;
+}
+
+/* General input container style */
+.input-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.gender-options {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Shorten phone number and DoB fields */
+#phoneNum, #DoB {
+    width: 140px;
+}
+
+
+
+
+
