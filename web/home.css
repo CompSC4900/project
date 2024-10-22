@@ -5,14 +5,6 @@ body, html {
     background-color: rgb(226, 231, 231); /*Page Background color */
 }
 
-/* Main container */
-.container {
-    display: flex;
-    justify-content: center;
-    margin-top: 300px;
-    height: calc(100vh - 300px); /* Subtracting height of the margin */
-}
-
 /* Header with logo */
 .header {
     width: 100%;
@@ -28,24 +20,43 @@ body, html {
     margin: 5px 20px;
 }
 
+/* Main container */
+.container {
+    width: 80%;
+    display: flex;
+    justify-content: center;
+    margin-top: 300px;
+    height: calc(100vh - 300px); /* Subtracting height of the margin */
+    gap: 50px;
+    margin-left:auto;
+}
+
+/* Wraps the calendar and button together */
+.calendar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers the content horizontally */
+    width: 60%; /* This controls the width of the calendar and button */
+}
+
 /* Calendar section */
 .calendar {
-    width: 40%;
+    width: 100%;
     height: 62.5%;
     margin: 20px;
 }
 
 /* Right container */
 .right-container {
-    display: right;
-    width: 30%;
     height: 75%;
+    width:80%;
 }
 
 /* Test results and Messages sections */
 .test-results, .messages {
-    margin: 20px;
     height: 20%; /* Each section takes half the height of the right container */
+    width: 80%;
+    
 }
 
 /* Base panel class */
@@ -127,4 +138,34 @@ body, html {
 .dropdown:hover .dropdown-content {
     background-color: white;
     display: block;
+}
+
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    width: 850px;
+    height: 700px;
+    max-width: 90%;
+    max-height: 80%;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 24px;
+    cursor: pointer;
 }

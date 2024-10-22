@@ -5,6 +5,7 @@
  **/
 function loadHomepage() {
 	loadUserCard();
+	loadAppointmentPage();
 }
 
 /**
@@ -18,4 +19,30 @@ function loadUserCard() {
 		username = "Not Logged In"
 	}
 	usernameHTML.innerText = username;
+}
+
+function loadAppointmentPage(){
+	// Handle showing the popup when the appointment button is clicked
+	const appointmentButton = document.getElementById("appointment-button");
+	const closeButton = document.getElementById("closePopup");
+	const popup = document.getElementById("popup");
+
+	if (appointmentButton) {
+		appointmentButton.addEventListener("click", function() {
+			popup.style.display = "flex";
+		});
+	}
+
+	if (closeButton) {
+		closeButton.addEventListener("click", function() {
+			popup.style.display = "none";
+		});
+	}
+
+	// Close the popup when clicking outside of the popup content
+	window.addEventListener("click", function(event) {
+		if (event.target === popup) {
+			popup.style.display = "none";
+		}
+	});
 }
