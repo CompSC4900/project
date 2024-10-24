@@ -1,16 +1,17 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
     <title>Clinic360 - Home</title>
-    <link rel="icon" type="image/png" href="Logo.png">
-    <link rel="stylesheet" href="home.css">
-    <script src="home.js"></script>
+    <link rel="icon" type="image/png" href="{% static 'logo.png' %}">
+    <link rel="stylesheet" href="{% static 'home.css' %}">
+    <script src="{% static 'home.js' %}"></script>
 </head>
 <body onload="loadHomepage()">
     <!-- Header section for logo -->
     <div class="header">
     	<!-- logo at the left side of the header -->
-        <img src="logo.svg" alt="Clinic360 Logo" class="logo">
+        <img src="{% static 'logo.svg' %}" alt="Clinic360 Logo" class="logo">
         <!-- Dropdown menu-->
         <div class="dropdown">
             <!-- button to trigger dropdown options-->
@@ -26,7 +27,7 @@
         <button class="navigation">Example Navigation Button #1</button>
         <button class="navigation">Example Navigation Button #2</button>
         <div class="user-card panel">
-        	<img src="dummy-pfp.png" alt="User Picture" id="user-picture">
+        	<img src="{% static 'dummy-pfp.png' %}" alt="User Picture" id="user-picture">
         	<span id="username"></span>
         </div>
     </div>

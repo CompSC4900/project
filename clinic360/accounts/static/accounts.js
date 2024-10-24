@@ -23,7 +23,7 @@ function login() {
 			// set the active user to the user we found
 			window.sessionStorage.setItem("activeUser", user.username);
 			// redirect to the home page
-			window.location.href = "home.html";
+			window.location.href = "/home/";
 			return;
 		}
 	}
@@ -60,7 +60,7 @@ function createAccount() {
 		//add user to session storage
 		addUser(user);
 		// Account Creation Success: redirect the user to the login page
-		window.location.href = "login.html";
+		window.location.href = "/login/";
 	}
 }
 

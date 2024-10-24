@@ -1,18 +1,19 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
 	<title>Clinic360 - Create an Account</title>
-	<link rel="icon" type="image/png" href="Logo.png">
-	<link rel="stylesheet" href="create-account.css">
+	<link rel="icon" type="image/png" href="{% static 'logo.png' %}">
+	<link rel="stylesheet" href="{% static 'create-account.css' %}">
 	<!-- this file contains the createAccount() function -->
-	<script src="accounts.js"></script>
+	<script src="{% static 'accounts.js' %}"></script>
 </head>
 <body>
 	<!-- main container that fills up the screen -->
 	<div id="main-container"> 
 		<!-- central container to nicely display everything in the center of the screen -->
 		<form id="central-container" action="javascript:createAccount()">
-			<img src="logo.svg" alt="Clinic360 Logo" style="height: 10pc; display: block; margin: 0 auto;">
+			<img src="{% static 'logo.svg' %}" alt="Clinic360 Logo" style="height: 10pc; display: block; margin: 0 auto;">
 			
 			<!-- form fields -->
 			<!--Name fields-->
