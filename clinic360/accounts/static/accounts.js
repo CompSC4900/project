@@ -56,11 +56,25 @@ function createAccount() {
 	if(!regExp(user)){
 		return; //input failed tests
 	}else{ //input passed all tests
-		delete user.password2;
-		//add user to session storage
-		addUser(user);
-		// Account Creation Success: redirect the user to the login page
-		window.location.href = "/login/";
+	    // get the form data
+		const form = document.getElementById("central-container");
+		const formData = new FormData(form);
+		formData.set("phonenumber", user['phoneNum']); // make sure we have the striped version of the phone number
+		fetch("/create-account/ajax/", {
+		    method: "POST",
+		    body: formData
+		})
+		.then((response) => {
+		    if (response.ok) {
+		        location.href = "/login/"
+		    } else {
+		    	// this shouldn't happen unless the user tampers with our client-side validation
+		        displayMessage("server error", "mismatchedPassword");
+		    }
+		})
+		.catch(() => {
+		    displayMessage("unable to connect to server", "mismatchedPassword");
+		});
 	}
 }
 
@@ -131,8 +145,9 @@ function regExp(user){
 	}else{
 		document.getElementById("illegalGender").style.display = 'none';
 	}
-	//Phone Number: must be in (xxx) xxx-xxxx
-	const phoneNumRegex = /^\(\d{3}\) \d{3}-\d{4}$/;
+	// Phone Number: strips random parethesis, dashes, and spaces that people might insert for human readability
+	user.phoneNum = user.phoneNum.replaceAll(/[\(\)\- ]/g, "");
+	const phoneNumRegex = /^\d{10}$/;
 	if(!phoneNumRegex.test(user.phoneNum)){
 		displayMessage(null, "illegalPhoneNum");
 		valid = false;

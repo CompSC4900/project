@@ -18,23 +18,23 @@
 			<!-- form fields -->
 			<!--Name fields-->
 			<label for="fName">Name:</label><br>
-			<input type="text" id="fname" placeholder="*First Name" required><br>
+			<input type="text" id="fname" name="fname" placeholder="*First Name" required><br>
 			<span id="illegalFName">*Cannot exceed 50 characters</span>
-			<input type="text" id="lname" placeholder="*Last Name" required><br>
+			<input type="text" id="lname" name="lname" placeholder="*Last Name" required><br>
 			<span id="illegalLName">*Cannot exceed 50 characters</span><br>
 
 			<!--Address fields-->
 			<label for="address">Home Address:</label> <br>
-			<input type="text" id="address" placeholder="*Address" required><br>
+			<input type="text" id="address" name="address" placeholder="*Address" required><br>
 			<span id="illegalAddress">*Cannot exceed 50 characters</span>
 			<div class="address-row">
 				<div class= "input-container">
-					<input type="text" id="city" placeholder="*City" required>
+					<input type="text" id="city" name="city" placeholder="*City" required>
 					<span id="illegalCity" class="addressError" >*Invalid city</span>
 				</div>
 				<!-- State field dropdown menu-->
 				<div class="input-container">
-					<select id="state" required>
+					<select id="state" name="state" required>
 						<option value="" disabled selected>*Select State</option>
 						<option value="AL">Alabama</option>
 						<option value="AK">Alaska</option>
@@ -90,7 +90,7 @@
 					<span id="illegalState" class="addressError">*Please select a state</span>
 				</div>
 				<div class="input-container">
-					<input type="text" id="zip" placeholder="*Zip" required>
+					<input type="text" id="zip" name="zip" placeholder="*Zip" required>
 					<span id="illegalZip" class="addressError">*Must be a 5-digit number</span><br>
 				</div>
 			</div>
@@ -99,7 +99,7 @@
 			<div class="dob-gender-phone-row">
 				<div class="input-container">
 					<label for="DoB">Date of Birth:</label>
-					<input type="date" id="DoB" required placeholder="mm/dd/yyyy" maxlength="8">
+					<input type="date" id="DoB" name="dob" required placeholder="mm/dd/yyyy" maxlength="8">
 					<span id="illegalDoB">*Invalid date of birth</span>
 				</div>
 
@@ -116,16 +116,16 @@
 
 				<div class="input-container">
 					<label for="phoneNum">Phone Number:</label>
-					<input type="text" id="phoneNum" required placeholder="(xxx) xxx-xxxx" maxlength="14">
+					<input type="text" id="phoneNum" name="phonenumber" required placeholder="(xxx) xxx-xxxx" maxlength="14">
 					<span id="illegalPhoneNum">*Invalid phone number: (xxx) xxx-xxxx</span><br>
 				</div>
 			</div>
 			
 			<!--Email and Password fields-->
 			<label for="email">Email:</label> <br>
-			<input type="text" id="email" required><br>
+			<input type="text" id="email" name="email" required><br>
 				<span id="illegalEmail"></span><br>
-			<label for="password">Password:</label> <br>
+			<label for="password" name="password">Password:</label> <br>
 			<input type="text" id="password" required>
 				<span id="illegalPassword">Weak Password! It must be at least 8 characters long and contain 1 upper and lower case letter, a number, and a special character (!, @, $)</span><br>
 			<label for="password2">Retype Password:</label><br>
