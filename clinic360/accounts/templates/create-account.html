@@ -13,6 +13,7 @@
 	<div id="main-container"> 
 		<!-- central container to nicely display everything in the center of the screen -->
 		<form id="central-container" action="javascript:createAccount()">
+		    {% csrf_token %}
 			<img src="{% static 'logo.svg' %}" alt="Clinic360 Logo" style="height: 10pc; display: block; margin: 0 auto;">
 			
 			<!-- form fields -->

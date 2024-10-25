@@ -14,15 +14,18 @@
 	<!-- main container that fills up the screen -->
 	<div id="main-container">
 		<!-- central container to nicely display everything in the center of the screen -->
-		<form id="central-container" action="javascript:login()">
+		<form id="central-container" method="post" action="{% url 'login' %}">
+		    {% csrf_token %}
 			<img src="{% static 'logo.svg' %}" alt="Clinic360 Logo" style="height: 10pc; display: block; margin: 0 auto;">
 			<!-- form fields -->
-			<label for="email">Email:</label> <br>
-			<input type="text" id="email">
-			<label for="password">Password:</label> <br>
-			<input type="text" id="password">
+			{{ form.username.label_tag }} <br>
+			{{ form.username }}
+			{{ form.password.label_tag }} <br>
+			{{ form.password }}
 			<!-- Error message: email or password was incorrect -->
-				<span id="invalidEmailPassword" hidden></span>
+			{% if form.errors %}
+				<span id="invalidEmailPassword">Invalid username or password</span>
+			{% endif %}
 			<!-- submit button -->
 			<input type="submit" value="Login">
 			<!-- button to redirect to account creation -->
