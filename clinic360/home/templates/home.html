@@ -28,7 +28,13 @@
         <button class="navigation">Example Navigation Button #2</button>
         <div class="user-card panel">
         	<img src="{% static 'dummy-pfp.png' %}" alt="User Picture" id="user-picture">
-        	<span id="username"></span>
+        	<span id="username">
+            	{% if user.is_authenticated %}
+            	{{user.firstName}} {{user.lastName}}
+            	{% else %}
+            	Not Logged In
+            	{% endif %}
+        	</span>
         </div>
     </div>
 	<!----------------------------->

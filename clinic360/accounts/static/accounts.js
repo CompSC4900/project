@@ -1,37 +1,4 @@
 /**
- * Validate the email and password pair from the HTML elements with ids "email"
- * and "password". If validation is successful, update local storage to
- * indicate the user is logged in and redirect them to the homepage, otherwise
- * display an error message.
- * TODO: server side validation, password encryption
- **/
-function login() {
-	const failureMessage = "Invalid email or password";
-	// get the email and password from HTML
-	let email = document.getElementById("email").value;
-	let password = document.getElementById("password").value;
-	// get the list of users from local storage
-	let usersJSON = window.sessionStorage.getItem("users");
-	if (usersJSON == null) {
-		displayMessage(failureMessage, "invalidEmailPassword");
-		return;
-	}
-	let users = JSON.parse(window.sessionStorage.getItem("users"));
-	// try to find a user with a matching username and password
-	for (user of users) {
-		if (user.email == email && user.password == password) {
-			// set the active user to the user we found
-			window.sessionStorage.setItem("activeUser", user.username);
-			// redirect to the home page
-			window.location.href = "/home/";
-			return;
-		}
-	}
-	// we did not find a matching user
-	displayMessage(failureMessage, "invalidEmailPassword");
-}
-
-/**
  * Extract the new account's name (first and last), address (street, city, state, zip), date of birth, gender
  * phone number, email, and password from form using input tag IDs. The first external function call is to regExp(), which 
  * validates user input. The second, addUser(), adds the user to session storage if input passes all validation tests
@@ -198,27 +165,6 @@ function regExp(user){
 	}
 
 	return valid;
-}
-
-/**
- * Add a user to the database
- * TODO: change from local to server-side storage
- **/
-function addUser(newUser) {
-	
-	// retrieve the users list from local storage and parse it into a js array
-	let users = window.sessionStorage.getItem("users");
-	if (users == null) {
-		users = [];
-	} else {
-		users = JSON.parse(users);
-	}
-	
-	// add the new user and transform the users array back into JSON
-	users.push(newUser);
-	users = JSON.stringify(users);
-	// update the session storage
-	window.sessionStorage.setItem("users", users);
 }
 
 /**

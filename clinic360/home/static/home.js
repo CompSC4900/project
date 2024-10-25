@@ -4,21 +4,7 @@
  * itself for readability.
  **/
 function loadHomepage() {
-	loadUserCard();
 	loadAppointmentPage();
-}
-
-/**
- * Load the username of the user to display it on the homepage.
- * TODO: load profile picture as well
- **/
-function loadUserCard() {
-	usernameHTML = document.getElementById("username");
-	username = window.sessionStorage.getItem("activeUser");
-	if (username == undefined) { // if there is no active user, display "Not Logged In"
-		username = "Not Logged In"
-	}
-	usernameHTML.innerText = username;
 }
 
 function loadAppointmentPage(){
