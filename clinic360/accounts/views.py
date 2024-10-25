@@ -15,12 +15,13 @@ def createAccount(request):
     template = loader.get_template('create-account.html')
     return HttpResponse(template.render())
 
-@csrf_exempt # must be csrf exempt because the user is not logged in yet    
+@csrf_exempt # TODO: investigate why this is needed
 def createAccountAjax(request):
     if request.method == "POST":
         formData = request.POST
         try:
-            Clinic360User(formData)
+            newUser = Clinic360User(formData)
+            newUser.save()
             return JsonResponse({}, status=200)
         except ValueError:
             return JsonResponse({"error": ""}, status=400)

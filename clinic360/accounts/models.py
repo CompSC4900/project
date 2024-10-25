@@ -39,3 +39,4 @@ class Clinic360User(AbstractBaseUser):
             else:
                 raise ValueError()
             phoneNumber = formData["phonenumber"]
+            set_password(formData["password"])
