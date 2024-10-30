@@ -27,13 +27,18 @@ body {
     width: 400px;
 }
 
+.spacer {
+    height: 10px;
+}
+
 /* Input fields  */ 
-input[type=text], input[type=password] {
-    width: 95%;
+input, select {
+    width: 100%;
     padding: 10px;
-    margin: 15px 0;
+    margin: 5px 0;
     border: 1px solid  lightgray;
     border-radius: 4px;
+    box-sizing: border-box;
 }
 
 /* Stuff for Login Button  */ 
@@ -58,12 +63,29 @@ button {
     margin-top: 10px;
 }
 
-
-
 /* Error text */
 span {
     display: block;
-    margin-top: 10px;
     color: red;
     font-size: 14px;
+}
+
+/* Aligns CITY, STATE, ZIP evenly in a row */
+.input-row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+/* General input container style */
+.input-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.errorlist {
+    color: red;
+    padding-left: 10px;
+    margin: 5px 0;
 }

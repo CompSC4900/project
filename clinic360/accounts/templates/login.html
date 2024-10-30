@@ -4,9 +4,7 @@
 <head>
 	<title>Clinic360 - Login</title>
 	<link rel="icon" type="image/png" href="{% static 'logo.png' %}">
-	<link rel="stylesheet" href="{% static 'login.css' %}">
-	<!-- this file contains the login() function -->
-	<script src="{% static 'accounts.js' %}"></script>
+	<link rel="stylesheet" href="{% static 'accounts.css' %}">
 </head>
 
 
@@ -17,15 +15,18 @@
 		<form id="central-container" method="post" action="{% url 'login' %}">
 		    {% csrf_token %}
 			<img src="{% static 'logo.svg' %}" alt="Clinic360 Logo" style="height: 10pc; display: block; margin: 0 auto;">
+			<div class="spacer"></div>
 			<!-- form fields -->
 			{{ form.username.label_tag }} <br>
 			{{ form.username }}
+			<div class="spacer"></div>
 			{{ form.password.label_tag }} <br>
 			{{ form.password }}
 			<!-- Error message: email or password was incorrect -->
 			{% if form.errors %}
 				<span id="invalidEmailPassword">Invalid username or password</span>
 			{% endif %}
+			<div class="spacer"></div>
 			<!-- submit button -->
 			<input type="submit" value="Login">
 			<!-- button to redirect to account creation -->

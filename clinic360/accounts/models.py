@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 class Clinic360UserManager(BaseUserManager):
-    # TODO: input validation
     def create_user(self, email, firstName, lastName, address, city, state, zipCode, birthDate, gender, phoneNumber, password):
         email = self.normalize_email(email)
         user = self.model(
