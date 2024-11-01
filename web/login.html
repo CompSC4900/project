@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Clinic360 - Login</title>
+	<link rel="icon" type="image/png" href="Logo.png">
+	<link rel="stylesheet" href="login.css">
+	<!-- this file contains the login() function -->
+	<script src="accounts.js"></script>
+</head>
+
+
+<body>
+	<!-- main container that fills up the screen -->
+	<div id="main-container">
+		<!-- central container to nicely display everything in the center of the screen -->
+		<form id="central-container" action="javascript:login()">
+			<img src="logo.svg" alt="Clinic360 Logo" style="height: 10pc; display: block; margin: 0 auto;">
+			<!-- form fields -->
+			<label for="email">Email:</label> <br>
+			<input type="text" id="email">
+			<label for="password">Password:</label> <br>
+			<input type="text" id="password">
+			<!-- Error message: email or password was incorrect -->
+				<span id="invalidEmailPassword" hidden></span>
+			<!-- submit button -->
+			<input type="submit" value="Login">
+			<!-- button to redirect to account creation -->
+			<button type="button" onclick="location.href = 'create-account.html';">Create an Account</button>
+		</form>
+	</div>
+</body>
+</html>

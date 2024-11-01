@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clinic360 - Home</title>
+    <link rel="icon" type="image/png" href="Logo.png">
+    <link rel="stylesheet" href="home.css">
+    <script src="home.js"></script>
+</head>
+<body onload="loadHomepage()">
+    <!-- Header section for logo -->
+    <div class="header">
+    	<!-- logo at the left side of the header -->
+        <img src="logo.svg" alt="Clinic360 Logo" class="logo">
+        <!-- Dropdown menu-->
+        <div class="dropdown">
+            <!-- button to trigger dropdown options-->
+            <button class="navigation dropbutton">Menu</button>
+            <div class="dropdown-content">
+                <!-- dropdown links-->
+                <a href="#">Page 1</a>
+                <a href="#">Page 2</a>
+                <a href="#">Page 3</a>
+            </div>
+        </div>
+        <!-- navigation buttons will expand to fill space -->
+        <button class="navigation">Example Navigation Button #1</button>
+        <button class="navigation">Example Navigation Button #2</button>
+        <div class="user-card panel">
+        	<img src="dummy-pfp.png" alt="User Picture" id="user-picture">
+        	<span id="username"></span>
+        </div>
+    </div>
+	<!----------------------------->
+
+    <!-- Main content container -->
+    <div class="container">
+        <!-- Calendar section on the left -->
+        <div class="calendar panel">
+            <h2 style="color: #03045e; text-align: center;">Calendar</h2>
+            <!-- Add your calendar content here -->
+
+
+        </div>
+
+        <!-- Right container with Test Results and Messages stacked -->
+        <div class="right-container">
+            <!-- Test Results section -->
+            <div class="test-results panel">
+                <h2 style="color: #03045e; text-align: center; padding-top: 15px;">Test Results</h2>
+                <!-- Add test results content here -->
+
+            </div>
+
+            <!-- Messages section -->
+            <div class="messages panel">
+                <h2 style="color: #03045e; text-align: center;  padding-top: 15px;">Messages From Provider</h2> 
+                <!-- Add Messages content here -->
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>
