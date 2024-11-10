@@ -59,7 +59,7 @@
 		</div>
 	</div>
 	<div class="header">
-		<img src="{% static 'logo.svg' %}" alt="Clinic360 Logo" class="logo">
+		<a href="{% url 'home' %}"><img src="{% static 'logo.svg' %}" alt="Clinic360 Logo" class="logo"></a>
 		<div class="dropdown">
 			<button class="navigation dropbutton">Menu</button>
 			<div class="dropdown-content">
@@ -68,8 +68,8 @@
 				<a href="#">Page 3</a>
 			</div>
 		</div>
-		<button class="navigation">Example Navigation Button #1</button>
-		<button class="navigation">Example Navigation Button #2</button>
+		<a class="anav" href="{% url 'calendar' %}">Calendar</a>
+        <a class="anav" href="#">Example Navigation Button #2</a>
 		<div class="user-card panel">
 			<img src="{% static 'dummy-pfp.png' %}" alt="User Picture" id="user-picture">
 			<span id="username"></span>

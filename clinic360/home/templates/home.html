@@ -11,7 +11,7 @@
     <!-- Header section for logo -->
     <div class="header">
     	<!-- logo at the left side of the header -->
-        <img src="{% static 'logo.svg' %}" alt="Clinic360 Logo" class="logo">
+        <a href="{% url 'home' %}"><img src="{% static 'logo.svg' %}" alt="Clinic360 Logo" class="logo"></a>
         <!-- Dropdown menu-->
         <div class="dropdown">
             <!-- button to trigger dropdown options-->
@@ -24,8 +24,8 @@
             </div>
         </div>
         <!-- navigation buttons will expand to fill space -->
-        <button class="navigation">Example Navigation Button #1</button>
-        <button class="navigation">Example Navigation Button #2</button>
+        <a class="anav" href="{% url 'calendar' %}">Calendar</a>
+        <a class="anav" href="#">Example Navigation Button #2</a>
         <div class="user-card panel">
         	<img src="{% static 'dummy-pfp.png' %}" alt="User Picture" id="user-picture">
         	<span id="username">
