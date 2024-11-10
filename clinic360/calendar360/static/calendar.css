@@ -10,13 +10,24 @@ a:link, a:visited {
 
 .container {
     margin-top: 80px;
-    width: 100%;
+    margin-left: 20%;
+    margin-right: 20%;
+    width: 60%;
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
+    overflow: auto;
+}
+
+.appointment-button {
+    width: 50%;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    padding: 10px;
 }
 
 .calendar {
-    width: 60%;
+    width: 100%;
 }
 
 .popup {
@@ -56,6 +67,7 @@ a:link, a:visited {
     position: fixed;
     display: flex;
     top: 0;
+    z-index: 1;
 }
 .logo {
     height: 60px;
