@@ -12,5 +12,17 @@ function loadCalendarPage() {
         if (event.target === popup) {
             popup.style.display = "none";
         }
+
+        if (event.target === schedulingPopup) {
+            schedulingPopup.style.display = "none";
+        }
     });
+}
+
+function showSchedulingPopup() {
+    document.getElementById('schedulingPopup').style.display = 'flex';
+}
+
+function closeSchedulingPopup() {
+    document.getElementById('schedulingPopup').style.display = 'none';
 }
