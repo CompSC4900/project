@@ -1,162 +1,147 @@
+/* General Page Styling */
 body, html {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
-    background-color: rgb(226, 231, 231); /*Page Background color */
+    background-color: rgb(226, 231, 231); /* Page Background color */
 }
 
+/* Links Styling */
 a:link, a:visited {
     color: black;
+    text-decoration: none;
 }
 
-/* Header with logo */
+/* Header Styling */
 .header {
     width: 100%;
     height: 70px;
-    background-image:linear-gradient(rgba(8, 206, 255, 0.527),rgba(255, 255, 255, 0)); /* Heading Gradient */
+    background-image: linear-gradient(rgba(52, 152, 245, 0.8), rgba(255, 255, 255, 0)); /* Heading Gradient */
     position: fixed;
     display: flex;
+    align-items: center;
     top: 0;
+    padding: 0 20px;
+    padding-right: 40px; /* Extra padding on the right to prevent cutoff */
+
+    z-index: 1000;
+    
 }
 
 .logo {
-    height: 60px;
-    margin: 5px 20px;
+    height: 50px;
+    margin-right: 20px; /* Adds space between the logo and the Calendar link */
 }
 
-/* Main container */
-.container {
-    width: 80%;
-    display: flex;
-    justify-content: center;
-    margin-top: 300px;
-    height: calc(100vh - 300px); /* Subtracting height of the margin */
-    gap: 50px;
-    margin-left:auto;
-}
 
-/* Wraps the calendar and button together */
-.calendar-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Centers the content horizontally */
-    width: 60%; /* This controls the width of the calendar and button */
-}
-
-/* Calendar section */
-.calendar {
-    width: 100%;
-    height: 62.5%;
-    margin: 20px;
-}
-
-/* Right container */
-.right-container {
-    height: 75%;
-    width:80%;
-}
-
-/* Test results and Messages sections */
-.test-results, .messages {
-    height: 20%; /* Each section takes half the height of the right container */
-    width: 80%;
-    
-}
-
-/* Base panel class */
-.panel {
-    background-color: #f0f0f0;
-    border-radius: 10px;
-    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
-}
-
-/* Navigation button for header bar */
-.navigation {
-    flex-grow: 1;
-    background-color: #1490fc;
-    border: 0;
-    margin: 10px 20px;
-    border-radius: 10px;
-    cursor: pointer;
-}
-
-/* Navigation link for header bar */
+/* Header Navigation Links */
 .anav {
-    flex-grow: 1;
-    background-color: #1490fc;
-    border: 0;
-    margin: 10px 20px;
+    background-color: rgb(226, 231, 231); /* Matches page background */
+    color: #03045e; /* Blue text color */
     border-radius: 10px;
-    cursor: pointer;
-    text-decoration: none;
+    padding: 15px 20px;
     text-align: center;
-    padding: 16px 0px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-right: 10px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+
 }
 
-/* User profile picture */
+/* Profile Section in Header */
+.user-card {
+    display: flex;
+    align-items: center;
+    background-color: #f0f0f0;
+    border-radius: 20px;
+    padding: 5px 15px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    margin-left: auto; /* Moves .user-card to the right side */
+    margin-right: 30px;
+}
+
 #user-picture {
-    height: 100%;
-    object-fit: fill;
+    height: 40px;
+    width: 40px;
     border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
 }
 
 #username {
-    margin-left: 10px;
-    margin-right: 5px;
-    align-self: center;
+    font-weight: bold;
+    color: #333;
 }
 
-/* Container for profile picture and username */
-.user-card {
-    height: calc(100% - 30px);
+/* Main Content Container */
+.container {
+    width: 90%;
+    margin: 100px auto 0; /* Top margin adjusted to fit header */
     display: flex;
-    flex-shrink: 1;
-    margin: 10px 20px;
-    padding: 5px;
-    box-shadow: none;
+    justify-content: space-between;
+    gap: 30px;
 }
 
-/* dropdown container */
-.dropdown {
-    margin: 10px 20px;
-    position: relative;
+/* Calendar Container */
+.calendar-container {
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px; /* Adjusted gap */
 }
 
-/* dropdown button customizer */
-.dropbutton {
-    flex-grow: 0;
-    margin: 0;
-    padding: 0 20px;
-    height: 100%;
+.calendar.panel {
+    width: 100%;
+    padding: 10px;
+    background-color: #f7f7f7;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    max-height: 300px; /* Set a maximum height */
+    overflow: auto; /* Add scroll if needed */
+    max-height: 80%;
 }
 
-/* dropdown links container */
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: white;
-    min-width:160px;
-    
+#calendar {
+    width: 100%;
 }
 
-/* dropdown links customization */
-.dropdown-content a {
-    color: black;
-    text-decoration: none;
-    display: block;
+/* Appointment Button */
+.appointment-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #03045e; /* Dark blue background for button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* customize dropdown menu when hovering */
-.dropdown-content a:hover {
-    background-color: #08CEFF;
+/* Right-Side Panels (Test Results & Messages) */
+.right-container {
+    width: 35%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
-/* customize visibility of dropdown menu */
-.dropdown:hover .dropdown-content {
-    background-color: white;
-    display: block;
+.test-results, .messages {
+    background-color: #f0f0f0;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    font-size: 18px;
+    font-weight: bold;
+    color: #03045e;
+    text-align: center;
 }
 
+/* Popup Modal Styling */
 .popup {
     display: none;
     position: fixed;
@@ -167,22 +152,27 @@ a:link, a:visited {
     background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
     justify-content: center;
     align-items: center;
+    z-index: 2000;
 }
 
 .popup-content {
     background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    width: 850px;
-    height: 700px;
-    max-width: 90%;
-    max-height: 80%;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    position: relative; /* Added for close button positioning */
 }
 
-.close {
+.close-appointment-button {
     position: absolute;
     top: 10px;
-    right: 20px;
-    font-size: 24px;
+    right: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    background: none;
+    border: none;
     cursor: pointer;
 }

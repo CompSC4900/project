@@ -60,19 +60,26 @@
 	</div>
 	<div class="header">
 		<a href="{% url 'home' %}"><img src="{% static 'logo.svg' %}" alt="Clinic360 Logo" class="logo"></a>
-		<div class="dropdown">
-			<button class="navigation dropbutton">Menu</button>
-			<div class="dropdown-content">
-				<a href="#">Page 1</a>
-				<a href="#">Page 2</a>
-				<a href="#">Page 3</a>
-			</div>
-		</div>
-		<a class="anav" href="{% url 'calendar' %}">Calendar</a>
-        <a class="anav" href="#">Example Navigation Button #2</a>
+
+
+        </a>
+        <a class="anav" href="{% url 'calendar' %}" style="color: #333; display: flex; align-items: center;">
+            <img src="{% static 'calendar.svg' %}" alt="Calendar Icon" style="height: 24px; margin-right: 8px;">
+            Calendar
+        </a>
+        <a class="anav" href="#" style="color: #333; display: flex; align-items: center;">
+            <img src="{% static 'message.svg' %}" alt="Messages Icon" style="height: 24px; margin-right: 8px;">
+            Messages
+        </a>
 		<div class="user-card panel">
-			<img src="{% static 'dummy-pfp.png' %}" alt="User Picture" id="user-picture">
-			<span id="username"></span>
+            <img src="{% static 'dummy-pfp.png' %}" alt="User Picture" id="user-picture">
+            <span id="username">
+                {% if user.is_authenticated %}
+                    {{ user.firstName }} {{ user.lastName }}
+                {% else %}
+                    Not Logged In
+                {% endif %}
+            </span>
 		</div>
 	</div>
 </body>
