@@ -16,6 +16,6 @@ time_choices = [
 ]
 
 class CreateAppointmentForm(forms.Form):
-    appointment_title = forms.CharField(max_length=100)
+    appointment_title = forms.CharField(label="Appointment Title", max_length=100)
     time = forms.ChoiceField(choices=time_choices)
-    am_pm = forms.ChoiceField(choices=[("AM","AM"),("PM","PM")])
+    am_pm = forms.ChoiceField(label="am/pm", choices=[("AM","AM"),("PM","PM")])

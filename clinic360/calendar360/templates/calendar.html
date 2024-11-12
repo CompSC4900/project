@@ -66,14 +66,21 @@
 					{{ form.appointment_title.label_tag }}
 					{{ form.appointment_title }}
 					{{ form.appointment_title.errors }}
+					<div class="spacer"></div>
 
-					{{ form.time.label_tag }}
-					{{ form.time }}
-					{{ form.time.errors }}
+					<div class="input-row">
+						<div class="input-container">
+						{{ form.time.label_tag }}
+						{{ form.time }}
+						{{ form.time.errors }}
+						</div>
 
-					{{ form.am_pm.label_tag }}
-					{{ form.am_pm }}
-					{{ form.am_pm.errors }}
+						<div class="input-container">
+						{{ form.am_pm.label_tag }}
+						{{ form.am_pm }}
+						{{ form.am_pm.errors }}
+						</div>
+					</div>
 
 				</form>
 
