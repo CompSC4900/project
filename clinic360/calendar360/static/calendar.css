@@ -14,8 +14,8 @@ body, html {
     top: 0;
     padding: 0 20px;
     padding-right: 40px; /* Extra padding on the right to prevent cutoff */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
-    /* z-index: 1000; commented this out because the header was covering up close buttons for popups */
+
+    z-index: 1000;
     
 }
 
@@ -98,14 +98,7 @@ a:link, a:visited {
     font-size: 24px;
     cursor: pointer;
 }
-.header {
-    width: 100%;
-    height: 70px;
-    background-image:linear-gradient(rgba(8, 206, 255, 0.527),rgba(255, 255, 255, 0)); /* Heading Gradient */
-    position: fixed;
-    display: flex;
-    top: 0;
-}
+
 .logo {
     height: 50px;
     margin-right: 20px; /* Adds space between the logo and the Calendar link */
