@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Clinic360 - Messages</title>
+	<link rel="icon" type="image/png" href="{% static 'logo.png' %}">
+	<link rel="stylesheet" href="{% static 'messages.css' %}">
+</head>
+
+
+<body onload="loadMessagesPage()">
+	<div class="container">
+        <h2>Messages</h2>
+        <div class="empty-box">
+            <!--content here-->
+        </div>
+	</div>
+
+	<div class="header">
+		<a href="{% url 'home' %}"><img src="{% static 'logo.svg' %}" alt="Clinic360 Logo" class="logo"></a>
+
+
+        </a>
+        <a class="anav" href="{% url 'calendar' %}" style="color: #333; display: flex; align-items: center;">
+            <img src="{% static 'calendar.svg' %}" alt="Calendar Icon" style="height: 24px; margin-right: 8px;">
+            Calendar
+        </a>
+        <a class="anav" href="#" style="color: #333; display: flex; align-items: center;">
+            <img src="{% static 'message.svg' %}" alt="Messages Icon" style="height: 24px; margin-right: 8px;">
+            Messages
+        </a>
+		<div class="user-card panel">
+            <img src="{% static 'dummy-pfp.png' %}" alt="User Picture" id="user-picture">
+            <span id="username">
+                {% if user.is_authenticated %}
+                    {{ user.firstName }} {{ user.lastName }}
+                {% else %}
+                    Not Logged In
+                {% endif %}
+            </span>
+		</div>
+	</div>
+</body>
+</html>
