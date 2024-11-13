@@ -1,62 +1,10 @@
 from django import forms
 from django.core.validators import RegexValidator
-from django.contrib.auth import password_validation
-
-state_choices = [
-    ("AL", "Alabama"),
-    ("AK", "Alaska"),
-    ("AZ", "Arizona"),
-    ("AR", "Arkansas"),
-    ("CA", "California"),
-    ("CO", "Colorado"),
-    ("CT", "Connecticut"),
-    ("DE", "Delaware"),
-    ("FL", "Florida"),
-    ("GA", "Georgia"),
-    ("HI", "Hawaii"),
-    ("ID", "Idaho"),
-    ("IL", "Illinois"),
-    ("IN", "Indiana"),
-    ("IA", "Iowa"),
-    ("KS", "Kansas"),
-    ("KY", "Kentucky"),
-    ("LA", "Louisiana"),
-    ("ME", "Maine"),
-    ("MD", "Maryland"),
-    ("MA", "Massachusetts"),
-    ("MI", "Michigan"),
-    ("MN", "Minnesota"),
-    ("MS", "Mississippi"),
-    ("MO", "Missouri"),
-    ("MT", "Montana"),
-    ("NE", "Nebraska"),
-    ("NV", "Nevada"),
-    ("NH", "New Hampshire"),
-    ("NJ", "New Jersey"),
-    ("NM", "New Mexico"),
-    ("NY", "New York"),
-    ("NC", "North Carolina"),
-    ("ND", "North Dakota"),
-    ("OH", "Ohio"),
-    ("OK", "Oklahoma"),
-    ("OR", "Oregon"),
-    ("PA", "Pennsylvania"),
-    ("RI", "Rhode Island"),
-    ("SC", "South Carolina"),
-    ("SD", "South Dakota"),
-    ("TN", "Tennessee"),
-    ("TX", "Texas"),
-    ("UT", "Utah"),
-    ("VT", "Vermont"),
-    ("VA", "Virginia"),
-    ("WA", "Washington"),
-    ("WV", "West Virginia"),
-    ("WI", "Wisconsin"),
-    ("WY", "Wyoming"),
-    ("DC", "District of Columbia"),
-]
+from django.contrib.auth.forms import UserCreationForm
+from .models import Clinic360User
 
 # TODO: convert to UserCreationForm
+'''
 class CreateAccountForm(forms.Form):
     first_name = forms.CharField(max_length=50)
     last_name = forms.CharField(max_length=50)
@@ -100,3 +48,33 @@ class CreateAccountForm(forms.Form):
         if password != password2:
             self.add_error("password2", "Passwords do not match")
         return cleaned_data
+'''
+
+class Clinic360UserCreationForm(UserCreationForm):
+    zip_code = forms.CharField(
+        validators=[RegexValidator(
+            regex=r'^\d{5}$',
+            message='Zip code must be 5 digits',
+        )],
+        max_length=5,
+    )
+    phone_number = forms.CharField(
+        validators=[RegexValidator(
+            regex=r'^\(?\d{3}\)?[-. ]?\d{3}[-. ]?\d{4}$',
+            message='Invalid phone number format. Try XXX-XXX-XXXX',
+        )],
+        max_length=14,
+        min_length=10,
+    )
+
+    class Meta:
+        model = Clinic360User
+        fields = ['email', 'first_name', 'last_name', 'address', 'city', 'state', 'zip_code', 'birth_date', 'gender', 'phone_number', 'password1', 'password2']
+        widgets = {
+            "birth_date": forms.DateInput(attrs={"type": "date"}),
+        }
+        
+    def clean_phone_number(self):
+        uncleaned_number = self.cleaned_data['phone_number']
+        cleaned_number = ''.join(filter(str.isdigit, uncleaned_number))
+        return cleaned_number

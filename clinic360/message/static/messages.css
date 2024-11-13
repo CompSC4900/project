@@ -1,0 +1,196 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+.header {
+    width: 100%;
+    height: 70px;
+    background-image: linear-gradient(rgba(52, 152, 245, 0.8), rgba(255, 255, 255, 0)); /* Heading Gradient */
+    position: fixed;
+    display: flex;
+    align-items: center;
+    top: 0;
+    padding: 0 20px;
+    padding-right: 40px; /* Extra padding on the right to prevent cutoff */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+    /* z-index: 1000; commented this out because the header was covering up close buttons for popups */
+    
+}
+
+/* Links Styling */
+a:link, a:visited {
+    color: black;
+    text-decoration: none;
+}
+
+/* Header Navigation Links */
+.anav {
+    background-color: rgb(226, 231, 231); /* Matches page background */
+    color: #03045e; /* Blue text color */
+    border-radius: 10px;
+    padding: 15px 20px;
+    text-align: center;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-right: 10px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+
+}
+
+.container {
+    margin-top: 80px;
+    margin-left: 20%;
+    margin-right: 20%;
+    width: 60%;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    overflow: auto;
+}
+
+.appointment-button {
+    width: 50%;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    padding: 10px;
+}
+
+.calendar {
+    width: 100%;
+}
+
+.spacer {
+    height: 10px;
+}
+
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+}
+
+.popup-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    width: 850px;
+    height: 700px;
+    max-width: 90%;
+    max-height: 80%;
+    display: flex;
+    flex-direction: column;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 24px;
+    cursor: pointer;
+}
+.header {
+    width: 100%;
+    height: 70px;
+    background-image:linear-gradient(rgba(8, 206, 255, 0.527),rgba(255, 255, 255, 0)); /* Heading Gradient */
+    position: fixed;
+    display: flex;
+    top: 0;
+}
+.logo {
+    height: 50px;
+    margin-right: 20px; /* Adds space between the logo and the Calendar link */
+}
+
+
+.dropdown {
+    margin: 10px 20px;
+    position: relative;
+}
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width:160px;
+    
+}
+
+.user-card {
+    display: flex;
+    align-items: center;
+    background-color: #f0f0f0;
+    border-radius: 20px;
+    padding: 5px 15px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    margin-left: auto; /* Moves .user-card to the right side */
+    margin-right: 30px;
+}
+
+#user-picture {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+}
+
+#username {
+    font-weight: bold;
+    color: #333;
+}
+.panel {
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.dropbutton {
+    flex-grow: 0;
+    margin: 0;
+    padding: 0 20px;
+    height: 100%;
+}
+.dropdown-content a {
+    color: black;
+    text-decoration: none;
+    display: block;
+}
+.dropdown-content a:hover {
+    background-color: #08CEFF;
+}
+.dropdown:hover .dropdown-content {
+    background-color: white;
+    display: block;
+}
+
+/* Input fields  */ 
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid  lightgray;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* Aligns time-related fields in the appointment scheduling popup (copied from account creation css) */
+.input-row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.input-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}

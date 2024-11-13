@@ -1,3 +1,4 @@
 clinic360/*/__pycache__
 clinic360/*/migrations
 clinic360/db.sqlite3
+.DS_Store

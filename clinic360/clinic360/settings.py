@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'accounts',
     'home',
     'calendar360',
+    'message'
 ]
 
 MIDDLEWARE = [
