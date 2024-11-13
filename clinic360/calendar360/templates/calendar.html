@@ -2,117 +2,109 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Clinic360 - Calendar</title>
-	<link rel="icon" type="image/png" href="{% static 'logo.png' %}">
-	<link rel="stylesheet" href="{% static 'calendar.css' %}">
+    <title>Clinic360 - Calendar</title>
+    <link rel="icon" type="image/png" href="{% static 'logo.png' %}">
+    <link rel="stylesheet" href="{% static 'calendar.css' %}">
 
-	<!-- Initialization code for FullCalendar JavaScript library -->
-	<meta charset='utf-8' />
-	<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
-	<script>
-		document.addEventListener('DOMContentLoaded', function() {
-			var calendarEl = document.getElementById('calendar');
-			var calendar = new FullCalendar.Calendar(calendarEl, {
-				initialView: 'dayGridMonth', 
-
-				// These are placeholder events to show the format that each event's data is stored in
-				events: [
-					{ title: 'all day event', start: '2024-10-24' }, 
-					{ title: 'event from 3pm to 4pm', start: '2024-10-23T15:00:00', end: '2024-10-23T16:00:00' }
-				], 
-
-				// Javascript to make popup with event info appear on event click
-				eventClick: function(info) { 
-					document.getElementById('eventTitle').textContent = info.event.title;
-
-					const popup = document.getElementById("popup");
-
-					popup.style.display = 'flex';
-				}, 
-			});
-			calendar.render();
-		});
-	</script>
-
-	<script src="{% static 'calendar.js' %}"></script>
+    <meta charset='utf-8' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
 </head>
 
-
 <body onload="loadCalendarPage()">
-	<div class="container">
-		<!-- Calendar div object -->
-		<div class="calendar" id='calendar'></div>
+    <div class="header">
+        <a href="{% url 'home' %}"><img src="{% static 'logo.svg' %}" alt="Clinic360 Logo" class="logo"></a>
 
-		<!-- Event Popup -->
-		<div id="popup" class="popup">
-			<div class="popup-content">
-				<span class="close" id="closePopup">&times;</span>
-				<h2><span id="eventTitle"></span></h2>
-			</div>
-		</div>
-
-		<!-- Appointment Scheduling Button -->
-		<button class="appointment-button" onclick="showSchedulingPopup()">Schedule an Appointment</button>
-
-		<!-- Appointment Scheduling Popup -->
-		 <div id="schedulingPopup" class="popup">
-			<div class="popup-content">
-				<span class="close" onclick="closeSchedulingPopup()">&times;</span>
-				<h2>Schedule an Appointment</h2>
-
-				<!-- Appointment Scheduling Form -->
-				<form id="appointmentForm" action="/calendar/" method="post">
-
-					{{ form.appointment_title.label_tag }}
-					{{ form.appointment_title }}
-					{{ form.appointment_title.errors }}
-					<div class="spacer"></div>
-
-					<div class="input-row">
-						<div class="input-container">
-						{{ form.time.label_tag }}
-						{{ form.time }}
-						{{ form.time.errors }}
-						</div>
-
-						<div class="input-container">
-						{{ form.am_pm.label_tag }}
-						{{ form.am_pm }}
-						{{ form.am_pm.errors }}
-						</div>
-					</div>
-
-				</form>
-
-
-
-
-			</div>
-		 </div>
-	</div>
-	<div class="header">
-		<a href="{% url 'home' %}"><img src="{% static 'logo.svg' %}" alt="Clinic360 Logo" class="logo"></a>
-
-
-        </a>
         <a class="anav" href="{% url 'calendar' %}" style="color: #333; display: flex; align-items: center;">
             <img src="{% static 'calendar.svg' %}" alt="Calendar Icon" style="height: 24px; margin-right: 8px;">
             Calendar
         </a>
-        <a class="anav" href="#" style="color: #333; display: flex; align-items: center;">
+        <a class="anav" href="{% url 'messages' %}" style="color: #333; display: flex; align-items: center;">
             <img src="{% static 'message.svg' %}" alt="Messages Icon" style="height: 24px; margin-right: 8px;">
             Messages
         </a>
-		<div class="user-card panel">
+        <div class="user-card panel">
             <img src="{% static 'dummy-pfp.png' %}" alt="User Picture" id="user-picture">
             <span id="username">
                 {% if user.is_authenticated %}
-                    {{ user.firstName }} {{ user.lastName }}
+                    {{ user.first_name }} {{ user.last_name }}
                 {% else %}
                     Not Logged In
                 {% endif %}
             </span>
-		</div>
-	</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="calendar" id='calendar'></div>
+
+        <div id="popup" class="popup">
+            <div class="popup-content">
+                <span class="close" id="closePopup">&times;</span>
+                <h2><span id="eventTitle"></span></h2>
+            </div>
+        </div>
+
+        <button class="appointment-button" onclick="showSchedulingPopup()">Schedule an Appointment</button>
+
+        <div id="schedulingPopup" class="popup">
+            <div class="popup-content">
+                <span class="close" onclick="closeSchedulingPopup()">&times;</span>
+                <h2>Schedule an Appointment</h2>
+
+                <form id="appointmentForm" action="/calendar/" method="post">
+                    {{ form.appointment_title.label_tag }}
+                    {{ form.appointment_title }}
+                    {{ form.appointment_title.errors }}
+                    <div class="spacer"></div>
+
+                    <div class="input-row">
+                        <div class="input-container">
+                        {{ form.time.label_tag }}
+                        {{ form.time }}
+                        {{ form.time.errors }}
+                        </div>
+
+                        <div class="input-container">
+                        {{ form.am_pm.label_tag }}
+                        {{ form.am_pm }}
+                        {{ form.am_pm.errors }}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                events: [
+                    { title: 'all day event', start: '2024-10-24' },
+                    { title: 'event from 3pm to 4pm', start: '2024-10-23T15:00:00', end: '2024-10-23T16:00:00' }
+                ],
+                eventClick: function(info) {
+                    document.getElementById('eventTitle').textContent = info.event.title;
+                    document.getElementById("popup").style.display = 'flex';
+                }
+            });
+            calendar.render();
+
+            // Check for schedule parameter in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('schedule') === 'true') {
+                showSchedulingPopup();
+            }
+        });
+
+        function showSchedulingPopup() {
+            document.getElementById('schedulingPopup').style.display = 'flex';
+        }
+
+        function closeSchedulingPopup() {
+            document.getElementById('schedulingPopup').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
