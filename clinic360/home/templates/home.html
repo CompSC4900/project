@@ -26,7 +26,7 @@
             <img src="{% static 'dummy-pfp.png' %}" alt="User Picture" id="user-picture">
             <span id="username">
                 {% if user.is_authenticated %}
-                    {{ user.firstName }} {{ user.lastName }}
+                    {{ user.first_name }} {{ user.last_name }}
                 {% else %}
                     Not Logged In
                 {% endif %}
