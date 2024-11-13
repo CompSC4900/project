@@ -16,11 +16,9 @@ def createAccount(request):
     if request.method == "POST":
         form = Clinic360UserCreationForm(request.POST)
         try:
-            print("success")
             form.save()
             return redirect("/login/")
         except ValueError:
-            print("error")
             pass
     else:
         form = Clinic360UserCreationForm()
