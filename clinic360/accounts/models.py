@@ -111,3 +111,8 @@ class Clinic360User(AbstractBaseUser):
     USERNAME_FIELD = "email"
     EMAIL_FIELD = "email"
     REQUIRED_FIELDS = ["first_name", "last_name", "address", "city", "state", "zip_code", "birth_date", "gender", "phone_number"]
+    
+class Patient(Clinic360User):
+    doctor = models.ForeignKey(Clinic360User, on_delete=models.CASCADE, related_name="treated_patients", null=True)
+    
+    objects = Clinic360UserManager()
