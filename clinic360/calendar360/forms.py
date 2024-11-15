@@ -17,5 +17,11 @@ time_choices = [
 
 class CreateAppointmentForm(forms.Form):
     appointment_title = forms.CharField(label="Appointment Title", max_length=100)
-    time = forms.ChoiceField(choices=time_choices)
-    am_pm = forms.ChoiceField(label="am/pm", choices=[("AM","AM"),("PM","PM")])
+
+    start_time = forms.ChoiceField(label="Start Time", choices=time_choices)
+    am_pm1 = forms.ChoiceField(label="am/pm", choices=[("AM","AM"),("PM","PM")])
+    start_date = forms.CharField(label="Start Date", max_length=10, widget=forms.TextInput(attrs={'placeholder': 'YYYY-MM-DD'}))
+
+    end_time = forms.ChoiceField(label="End Time", choices=time_choices)
+    am_pm2 = forms.ChoiceField(label="am/pm", choices=[("AM","AM"),("PM","PM")])
+    end_date = forms.CharField(label="End Date", max_length=10, widget=forms.TextInput(attrs={'placeholder': 'YYYY-MM-DD'}))

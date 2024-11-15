@@ -8,6 +8,7 @@
 
     <meta charset='utf-8' />
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+	<script src="{% static 'calendar.js' %}"></script>
 </head>
 
 <body onload="loadCalendarPage()">
@@ -59,17 +60,44 @@
 
                     <div class="input-row">
                         <div class="input-container">
-                        {{ form.time.label_tag }}
-                        {{ form.time }}
-                        {{ form.time.errors }}
+                        {{ form.start_time.label_tag }}
+                        {{ form.start_time }}
+                        {{ form.start_time.errors }}
                         </div>
 
                         <div class="input-container">
-                        {{ form.am_pm.label_tag }}
-                        {{ form.am_pm }}
-                        {{ form.am_pm.errors }}
+                        {{ form.am_pm1.label_tag }}
+                        {{ form.am_pm1 }}
+                        {{ form.am_pm1.errors }}
                         </div>
+
+						<div class="input-container">
+							{{ form.start_date.label_tag }}
+							{{ form.start_date }}
+							{{ form.start_date.errors }}
+						</div>
                     </div>
+
+					<div class="input-row">
+						<div class="input-container">
+							{{ form.end_time.label_tag }}
+							{{ form.end_time }}
+							{{ form.end_time.errors }}
+						</div>
+
+						<div class="input-container">
+							{{ form.am_pm2.label_tag }}
+							{{ form.am_pm2 }}
+							{{ form.am_pm2.errors }}
+						</div>
+
+						<div class="input-container">
+							{{ form.end_date.label_tag }}
+							{{ form.end_date }}
+							{{ form.end_date.errors }}
+						</div>
+					</div>
+
                 </form>
             </div>
         </div>
