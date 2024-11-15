@@ -53,6 +53,8 @@
                 <h2>Schedule an Appointment</h2>
 
                 <form id="appointmentForm" action="/calendar/" method="post">
+					{% csrf_token %}
+
                     {{ form.appointment_title.label_tag }}
                     {{ form.appointment_title }}
                     {{ form.appointment_title.errors }}
@@ -97,6 +99,9 @@
 							{{ form.end_date.errors }}
 						</div>
 					</div>
+
+					<!-- Submit Button -->
+					<input type="submit" value="Schedule Appointment">
 
                 </form>
             </div>
