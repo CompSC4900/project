@@ -47,12 +47,15 @@ def calendar(request):
             startHour = applyPMOffset(formData['start_hour'], formData['am_pm1'])
             endHour = applyPMOffset(formData['end_hour'], formData['am_pm2'])
 
+            # These python variables are necessary for FullCalendar to recognize them, they probably need to be stored.
+            appointmentTitle = formData['appointment_title']
             startTime = formData['start_date'] + "T" + startHour + ":" + formData['start_minute'] + ":00"
             endTime = formData['end_date'] + "T" + endHour + ":" + formData['end_minute'] + ":00"
+            description = formData['description']
 
 
 
-            return HttpResponse('Start Time: ' + startTime + '\nEnd Time: ' + endTime)
+            return HttpResponse('Appointment Title: ' + appointmentTitle + '\nStart Time: ' + startTime + '\nEnd Time: ' + endTime + '\nDescription: ' + description)
     else:
         form = CreateAppointmentForm()
 

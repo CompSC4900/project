@@ -23,14 +23,20 @@ minute_choices = [
 ]
 
 class CreateAppointmentForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.label_suffix = ""
+
     appointment_title = forms.CharField(label="Appointment Title", max_length=100)
 
-    start_hour = forms.ChoiceField(label="Start Hour", choices=hour_choices)
-    start_minute = forms.ChoiceField(label="Start Minute", choices=minute_choices)
+    start_hour = forms.ChoiceField(label="Start", choices=hour_choices)
+    start_minute = forms.ChoiceField(label="\n", choices=minute_choices)
     am_pm1 = forms.ChoiceField(label="am/pm", choices=[("AM","AM"),("PM","PM")])
     start_date = forms.CharField(label="Start Date", max_length=10, widget=forms.TextInput(attrs={'placeholder': 'YYYY-MM-DD'}))
 
-    end_hour = forms.ChoiceField(label="End Hour", choices=hour_choices)
-    end_minute = forms.ChoiceField(label="End Minute", choices=minute_choices)
+    end_hour = forms.ChoiceField(label="End", choices=hour_choices)
+    end_minute = forms.ChoiceField(label="\n", choices=minute_choices)
     am_pm2 = forms.ChoiceField(label="am/pm", choices=[("AM","AM"),("PM","PM")])
     end_date = forms.CharField(label="End Date", max_length=10, widget=forms.TextInput(attrs={'placeholder': 'YYYY-MM-DD'}))
+
+    description = forms.CharField(label="Description", max_length=1000)

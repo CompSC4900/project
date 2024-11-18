@@ -185,7 +185,6 @@ input, select {
 .input-container {
     display: flex;
     flex-direction: column;
-    width: 100%;
 }
 
 .appointment-button {
