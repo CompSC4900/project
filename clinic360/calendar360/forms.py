@@ -1,27 +1,36 @@
 from django import forms
 
-time_choices = [
-    ("1:00","1:00"),
-    ("2:00", "2:00"),
-    ("3:00","3:00"),
-    ("4:00","4:00"),
-    ("5:00","5:00"),
-    ("6:00","6:00"),
-    ("7:00","7:00"),
-    ("8:00","8:00"),
-    ("9:00","9:00"),
-    ("10:00","10:00"),
-    ("11:00","11:00"),
-    ("12:00","12:00"),
+hour_choices = [
+    ("1","1:"),
+    ("2","2:"),
+    ("3","3:"),
+    ("4","4:"),
+    ("5","5:"),
+    ("6","6:"),
+    ("7","7:"),
+    ("8","8:"),
+    ("9","9:"),
+    ("10","10:"),
+    ("11","11:"),
+    ("12","12:"),
+]
+
+minute_choices = [
+    ("00","00"),
+    ("15","15"),
+    ("30","30"),
+    ("45","45"),
 ]
 
 class CreateAppointmentForm(forms.Form):
     appointment_title = forms.CharField(label="Appointment Title", max_length=100)
 
-    start_time = forms.ChoiceField(label="Start Time", choices=time_choices)
+    start_hour = forms.ChoiceField(label="Start Hour", choices=hour_choices)
+    start_minute = forms.ChoiceField(label="Start Minute", choices=minute_choices)
     am_pm1 = forms.ChoiceField(label="am/pm", choices=[("AM","AM"),("PM","PM")])
     start_date = forms.CharField(label="Start Date", max_length=10, widget=forms.TextInput(attrs={'placeholder': 'YYYY-MM-DD'}))
 
-    end_time = forms.ChoiceField(label="End Time", choices=time_choices)
+    end_hour = forms.ChoiceField(label="End Hour", choices=hour_choices)
+    end_minute = forms.ChoiceField(label="End Minute", choices=minute_choices)
     am_pm2 = forms.ChoiceField(label="am/pm", choices=[("AM","AM"),("PM","PM")])
     end_date = forms.CharField(label="End Date", max_length=10, widget=forms.TextInput(attrs={'placeholder': 'YYYY-MM-DD'}))

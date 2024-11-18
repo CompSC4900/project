@@ -62,15 +62,21 @@
 
                     <div class="input-row">
                         <div class="input-container">
-                        {{ form.start_time.label_tag }}
-                        {{ form.start_time }}
-                        {{ form.start_time.errors }}
+                            {{ form.start_hour.label_tag }}
+                            {{ form.start_hour }}
+                            {{ form.start_hour.errors }}
                         </div>
 
                         <div class="input-container">
-                        {{ form.am_pm1.label_tag }}
-                        {{ form.am_pm1 }}
-                        {{ form.am_pm1.errors }}
+                            {{ form.start_minute.label_tag }}
+                            {{ form.start_minute }}
+                            {{ form.start_minute.errors }}
+                        </div>
+
+                        <div class="input-container">
+                            {{ form.am_pm1.label_tag }}
+                            {{ form.am_pm1 }}
+                            {{ form.am_pm1.errors }}
                         </div>
 
 						<div class="input-container">
@@ -82,10 +88,16 @@
 
 					<div class="input-row">
 						<div class="input-container">
-							{{ form.end_time.label_tag }}
-							{{ form.end_time }}
-							{{ form.end_time.errors }}
+							{{ form.end_hour.label_tag }}
+							{{ form.end_hour }}
+							{{ form.end_hour.errors }}
 						</div>
+
+                        <div class="input-container">
+                            {{ form.end_minute.label_tag }}
+                            {{ form.end_minute }}
+                            {{ form.end_minute.errors }}
+                        </div>
 
 						<div class="input-container">
 							{{ form.am_pm2.label_tag }}
