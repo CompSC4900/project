@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from .models import Appointment
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -9,6 +10,9 @@ class CreateAppointmentForm(forms.ModelForm):
     class Meta:
         model = Appointment
         exclude = ["appointment_for"]
+        labels = {
+            "time": "Time (Schedule at Least One Week in Advance):"
+        }
         widgets = {
             "time": forms.DateInput(attrs={"type": "datetime-local"})
         }
