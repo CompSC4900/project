@@ -58,14 +58,12 @@
 
     <!-- Calendar Script -->
     <script>
+        events = {{ events_json|safe }}
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                events: [
-                    { title: 'All Day Event', start: '2024-10-24' },
-                    { title: '3pm-4pm Event', start: '2024-10-23T15:00:00', end: '2024-10-23T16:00:00' }
-                ],
+                events,
                 eventClick: function(info) {
                     alert('Event: ' + info.event.title);
                 }

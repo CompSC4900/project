@@ -6,6 +6,20 @@ from .models import Appointment
 from datetime import timedelta
 import json
 
+def get_events_json(user):
+    events = []
+    appointments = Appointment.objects.filter(appointment_for=user)
+    for appointment in appointments:
+        end_time = appointment.time + timedelta(minutes=30)
+        event = {
+            "title": appointment.appointment_title,
+            "start": appointment.time.isoformat(),
+            "end": end_time.isoformat(),
+            "description": appointment.description,
+        }
+        events.append(event)
+    return json.dumps(events)
+
 def calendar(request):
     if not request.user.is_authenticated:
         return redirect("/login/")
@@ -20,19 +34,10 @@ def calendar(request):
         except ValueError:
             show_popup = True
     else:
+        if 'schedule' in request.GET.dict():
+            show_popup = True
         form = CreateAppointmentForm()
         
-    events = []
-    appointments = Appointment.objects.all()
-    for appointment in appointments:
-        end_time = appointment.time + timedelta(minutes=30)
-        event = {
-            "title": appointment.appointment_title,
-            "start": appointment.time.isoformat(),
-            "end": end_time.isoformat(),
-            "description": appointment.description,
-        }
-        events.append(event)
-    events_json = json.dumps(events)
+    events_json = get_events_json(request.user)
     
     return render(request, "calendar.html", context={"events_json": events_json, "show_popup": show_popup, "form": form})
