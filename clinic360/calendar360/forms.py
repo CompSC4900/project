@@ -1,42 +1,27 @@
 from django import forms
+from .models import Appointment
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
-hour_choices = [
-    ("1","1:"),
-    ("2","2:"),
-    ("3","3:"),
-    ("4","4:"),
-    ("5","5:"),
-    ("6","6:"),
-    ("7","7:"),
-    ("8","8:"),
-    ("9","9:"),
-    ("10","10:"),
-    ("11","11:"),
-    ("12","12:"),
-]
+min_notice = timedelta(weeks=1) # require 1 week of notice for scheduled appointments
 
-minute_choices = [
-    ("00","00"),
-    ("15","15"),
-    ("30","30"),
-    ("45","45"),
-]
+class CreateAppointmentForm(forms.ModelForm):
+    class Meta:
+        model = Appointment
+        exclude = ["appointment_for"]
+        widgets = {
+            "time": forms.DateInput(attrs={"type": "datetime-local"})
+        }
 
-class CreateAppointmentForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.label_suffix = ""
-
-    appointment_title = forms.CharField(label="Appointment Title", max_length=100)
-
-    start_hour = forms.ChoiceField(label="Start", choices=hour_choices)
-    start_minute = forms.ChoiceField(label="\n", choices=minute_choices)
-    am_pm1 = forms.ChoiceField(label="am/pm", choices=[("AM","AM"),("PM","PM")])
-    start_date = forms.CharField(label="Start Date", max_length=10, widget=forms.TextInput(attrs={'placeholder': 'YYYY-MM-DD'}))
-
-    end_hour = forms.ChoiceField(label="End", choices=hour_choices)
-    end_minute = forms.ChoiceField(label="\n", choices=minute_choices)
-    am_pm2 = forms.ChoiceField(label="am/pm", choices=[("AM","AM"),("PM","PM")])
-    end_date = forms.CharField(label="End Date", max_length=10, widget=forms.TextInput(attrs={'placeholder': 'YYYY-MM-DD'}))
-
-    description = forms.CharField(label="Description", max_length=1000)
+    def clean_time(self):
+        time = self.cleaned_data["time"]
+        current_date = datetime.now(ZoneInfo("UTC"))
+        if time < current_date + min_notice:
+            raise ValidationError("Must schedule an appointment at least a week in advance.")
+        return time
+    
+    def save(self, user):
+        instance = super().save(commit=False)
+        instance.appointment_for = user
+        instance.save()
+        return instance

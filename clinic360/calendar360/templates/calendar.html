@@ -26,11 +26,7 @@
         <div class="user-card panel">
             <img src="{% static 'dummy-pfp.png' %}" alt="User Picture" id="user-picture">
             <span id="username">
-                {% if user.is_authenticated %}
-                    {{ user.first_name }} {{ user.last_name }}
-                {% else %}
-                    Not Logged In
-                {% endif %}
+                {{ user.first_name }} {{ user.last_name }}
             </span>
         </div>
     </div>
@@ -62,67 +58,21 @@
                         {{ form.appointment_title }}
                         {{ form.appointment_title.errors }}
                     </div>
-
+                    
                     <div class="spacer"></div>
-
-                    <div class="input-row">
-                        <div class="input-container" style="width: 8%;">
-                            {{ form.start_hour.label_tag }}
-                            {{ form.start_hour }}
-                            {{ form.start_hour.errors }}
-                        </div>
-
-                        <div class="input-container" style="align-self: flex-end; width: 8%;">
-                            {{ form.start_minute.label_tag }}
-                            {{ form.start_minute }}
-                            {{ form.start_minute.errors }}
-                        </div>
-
-                        <div class="input-container" style="width: 8%;">
-                            {{ form.am_pm1.label_tag }}
-                            {{ form.am_pm1 }}
-                            {{ form.am_pm1.errors }}
-                        </div>
-
-						<div class="input-container" style="width: 20%;">
-							{{ form.start_date.label_tag }}
-							{{ form.start_date }}
-							{{ form.start_date.errors }}
-						</div>
+                    
+                    <div class="input-container" style="width: 30%;">
+                        {{ form.time.label_tag }}
+                        {{ form.time }}
+                        {{ form.time.errors }}
                     </div>
-
-					<div class="input-row">
-						<div class="input-container" style="width: 8%;">
-							{{ form.end_hour.label_tag }}
-							{{ form.end_hour }}
-							{{ form.end_hour.errors }}
-						</div>
-
-                        <div class="input-container" style="align-self: flex-end; width: 8%;">
-                            {{ form.end_minute.label_tag }}
-                            {{ form.end_minute }}
-                            {{ form.end_minute.errors }}
-                        </div>
-
-						<div class="input-container" style="width: 8%;">
-							{{ form.am_pm2.label_tag }}
-							{{ form.am_pm2 }}
-							{{ form.am_pm2.errors }}
-						</div>
-
-						<div class="input-container" style="width: 20%;">
-							{{ form.end_date.label_tag }}
-							{{ form.end_date }}
-							{{ form.end_date.errors }}
-						</div>
-					</div>
-
+                    
                     <div class="spacer"></div>
 
                     <div class="input-container" style="width: 47.7%;">
                         {{ form.description.label_tag }}
                         {{ form.description }}
-                        {{ form.end_date.errors }}
+                        {{ form.description.errors }}
                     </div>
 
 					<!-- Submit Button -->
