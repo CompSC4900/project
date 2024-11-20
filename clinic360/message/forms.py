@@ -11,7 +11,7 @@ class MessageForm(forms.ModelForm):
             'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
         User = get_user_model()  # Dynamically fetch the user model
-        self.fields['receiver'].queryset = User.objects.all()  # Use the actual model to query users
+        self.fields['receiver'].queryset = User.objects.exclude(id=user.id)  # Use the actual model to query users

@@ -1,41 +1,45 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import JsonResponse
 from django.template import loader
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from .models import Message
 from .forms import MessageForm
 
-# Create your views here.
-def index(request):
-    template = loader.get_template("messages.html")
-    return HttpResponse(template.render())
-
 def messages(request):
-    if request.user.is_authenticated:
-        received_messages = Message.objects.filter(receiver=request.user)
-        sent_messages = Message.objects.filter(sender=request.user)
-        return render(request, "messages.html", {
-            "received_messages": received_messages,
-            "sent_messages": sent_messages,
-        })
-    else:
-        return render(request, "messages.html", {"error": "You must be logged in to view messages."})
+    if not request.user.is_authenticated:
+        return redirect("/login/")
 
-def messages(request):
     if request.method == 'POST':
-        form = MessageForm(request.POST)
+        form = MessageForm(request.user, request.POST)
         if form.is_valid():
             new_message = form.save(commit=False)
             new_message.sender = request.user
             new_message.save()
             return redirect('messages')  # Redirect to refresh the page
     else:
-        form = MessageForm()
+        form = MessageForm(request.user)
 
-    received_messages = Message.objects.filter(receiver=request.user)
+    unread_messages = Message.objects.filter(receiver=request.user, read=False)
+    read_messages = Message.objects.filter(receiver=request.user, read=True)
     sent_messages = Message.objects.filter(sender=request.user)
     return render(request, 'messages.html', {
         'form': form,
-        'received_messages': received_messages,
+        'unread_messages': unread_messages,
+        'read_messages': read_messages,
         'sent_messages': sent_messages,
     })
+
+@require_POST
+@login_required
+def read_message(request, message_id):
+    try:
+        message = Message.objects.get(id=message_id, receiver=request.user)
+        if not message.read:
+            message.read = True
+            message.save()
+    except Message.DoesNotExist:
+        pass # we return success even on failure to prevent leaking information
+    
+    return JsonResponse({"status": "success"})
+    

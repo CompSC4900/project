@@ -25,11 +25,7 @@
 		<div class="user-card panel">
             <img src="{% static 'dummy-pfp.png' %}" alt="User Picture" id="user-picture">
             <span id="username">
-                {% if user.is_authenticated %}
-                    {{ user.first_name }} {{ user.last_name }}
-                {% else %}
-                    Not Logged In
-                {% endif %}
+                {{ user.first_name }} {{ user.last_name }}
             </span>
         </div>
 	</div>
@@ -60,7 +56,7 @@
                 <h3>Sent Messages</h3>
                 <ul>
                     {% for message in sent_messages %}
-                        <li class="message-box" onclick="showMessage('{{ message.content|escapejs }}', '{{ message.id }}')">
+                        <li class="message-box" onclick="showMessage('{{ message.content|escapejs }}')">
                             <div>
                                 <strong>To {{ message.receiver }}</strong>
                                 <span class="status">{{ message.status }}</span>
@@ -81,8 +77,8 @@
             <div class="messages-display">
                 <h3>Received Messages</h3>
                 <ul id="unreadMessages">
-                    {% for message in received_messages %}
-                        <li class="message-box" onclick="markAsRead('{{ message.id }}', '{{ message.content|escapejs }}')">
+                    {% for message in unread_messages %}
+                        <li class="message-box" data-message-id="{{ message.id }}" data-message-content="{{ message.content }}">
                             <div>
                                 <strong>{{ message.sender }}</strong>
                             </div>
@@ -99,7 +95,15 @@
             <div class="past-messages">
                 <h3>Past Messages</h3>
                 <ul id="readMessages">
-                    <!-- Read messages will be dynamically moved here -->
+                    {% for message in read_messages %}
+                        <li class="message-box" data-message-content="{{ message.content }}">
+                            <div>
+                                <strong>{{ message.sender }}</strong>
+                            </div>
+                            <br>
+                            <span>{{ message.timestamp }}</span>
+                        </li>
+                    {% endfor %}
                 </ul>
             </div>
         </div>
