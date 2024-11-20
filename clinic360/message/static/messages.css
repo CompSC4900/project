@@ -3,7 +3,6 @@ body, html {
     padding: 0;
     font-family: Arial, sans-serif;
 }
-
 .header {
     width: 100%;
     height: 70px;
@@ -14,9 +13,7 @@ body, html {
     top: 0;
     padding: 0 20px;
     padding-right: 40px; /* Extra padding on the right to prevent cutoff */
-
-    z-index: 1000;
-    
+    z-index: 1000;   
 }
 
 /* Links Styling */
@@ -37,84 +34,11 @@ a:link, a:visited {
     cursor: pointer;
     margin-right: 10px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-
-}
-
-.container {
-    margin-top: 80px;
-    margin-left: 20%;
-    margin-right: 20%;
-    width: 60%;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    overflow: auto;
-}
-
-.appointment-button {
-    width: 50%;
-    margin-top: 25px;
-    margin-bottom: 25px;
-    padding: 10px;
-}
-
-.calendar {
-    width: 100%;
-}
-
-.spacer {
-    height: 10px;
-}
-
-.popup {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-    justify-content: center;
-    align-items: center;
-    z-index: 1;
-}
-
-.popup-content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    width: 850px;
-    height: 700px;
-    max-width: 90%;
-    max-height: 80%;
-    display: flex;
-    flex-direction: column;
-}
-
-.close {
-    position: absolute;
-    top: 10px;
-    right: 20px;
-    font-size: 24px;
-    cursor: pointer;
 }
 
 .logo {
     height: 50px;
     margin-right: 20px; /* Adds space between the logo and the Calendar link */
-}
-
-
-.dropdown {
-    margin: 10px 20px;
-    position: relative;
-}
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: white;
-    min-width:160px;
-    
 }
 
 .user-card {
@@ -140,50 +64,229 @@ a:link, a:visited {
     font-weight: bold;
     color: #333;
 }
+
 .panel {
     background-color: #f0f0f0;
     border-radius: 10px;
     box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
 }
 
-.dropbutton {
-    flex-grow: 0;
-    margin: 0;
-    padding: 0 20px;
-    height: 100%;
-}
-.dropdown-content a {
-    color: black;
-    text-decoration: none;
-    display: block;
-}
-.dropdown-content a:hover {
-    background-color: #08CEFF;
-}
-.dropdown:hover .dropdown-content {
-    background-color: white;
-    display: block;
+/* Main content styling STARTS BELOW */
+.container {
+    margin-top: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px;
+    position: relative;
 }
 
-/* Input fields  */ 
-input, select {
+/* Vertical Line Between Sections */
+.container::after {
+    content: "";
+    position: absolute;
+    width: 1px;
+    height: 100%;
+    background-color: #ddd;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Left Panel: Send Message Form and Sent Messages */
+.left-panel {
+    width: 45%; /* Takes 45% of the page width */
+    display: flex;
+    flex-direction: column; /* Stack the form and sent messages vertically */
+    gap: 20px; /* Adds spacing between the form and sent messages */
+}
+
+.right-panel {
+    width: 45%; /* Matches the left panel */
+    display: flex;
+    flex-direction: column; /* Stacks Received and Past Messages */
+    gap: 20px; /* Adds spacing between the sections */
+}
+
+/* Send Message Form */
+.message-form {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.message-form input, .message-form select, .message-form textarea {
     width: 100%;
     padding: 10px;
-    margin: 5px 0;
-    border: 1px solid  lightgray;
+    border: 1px solid #ddd;
     border-radius: 4px;
     box-sizing: border-box;
+    resize: none;
 }
 
-/* Aligns time-related fields in the appointment scheduling popup (copied from account creation css) */
-.input-row {
-    display: flex;
-    gap: 10px;
-    width: 100%;
+.message-form button {
+    background-color: #03045e;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
 }
 
-.input-container {
-    display: flex;
-    flex-direction: column;
+.message-form button:hover {
+    background-color: #023e8a;
+}
+
+/* Sent Messages Section */
+.sent-messages {
+    padding: 20px;
+    background-color: #f9f9fc;
+    border-radius: 10px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.sent-messages h3 {
+    margin-top: 0;
+    color: #03045e;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+/* Messages Section */
+.messages-display {
+   
+    padding: 20px;
+    background-color: #f9f9fc;
+    border-radius: 10px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.messages-display h3 {
+    margin-top: 0;
+    color: #03045e;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+/* Message Cards */
+.messages-display ul, .sent-messages ul {
+    list-style: none;
+    padding: 0;
+}
+
+.messages-display ul li, .sent-messages ul li {
+    padding: 10px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 15px; /* Increase spacing */
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.messages-display ul li strong, .sent-messages ul li strong {
+    display: block;
+    font-weight: bold;
+    color: #333;
+}
+
+.messages-display ul li span, .sent-messages ul li span {
+    font-size: 0.9em;
+    color: #666;
+}
+
+/* Messages List */
+.message-box {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s;
+    position: relative; /* Required for the status badge */
+}
+
+.message-box:hover {
+    background-color: #f1f1f1;
+}
+
+/* Read/Unread Status */
+.status {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #007bff; /* Blue for unread */
+    border-radius: 12px;
+    padding: 5px 10px;
+}
+
+.status.read {
+    background-color: #28a745; /* Green for read */
+}
+
+/* Past Messages Section */
+.past-messages {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f9f9fc;
+    border-radius: 10px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.past-messages h3 {
+    margin-top: 0;
+    color: #03045e;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.past-messages ul {
+    list-style: none;
+    padding: 0;
+}
+
+/* Popup Modal */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
     width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Dimmed background */
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Modal shadow */
+    text-align: center;
+    width: 50%;
+    position: relative;
+}
+
+.modal-content .close {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 1.5em;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#messageContent {
+    font-size: 1.1em;
+    color: #333;
+    text-align: left; /* Ensures the text is left-aligned */
+    line-height: 1.5; /* Optional: Improves readability */
+    margin: 0; /* Removes any unnecessary spacing */
 }

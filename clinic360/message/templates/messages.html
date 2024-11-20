@@ -5,18 +5,11 @@
 	<title>Clinic360 - Messages</title>
 	<link rel="icon" type="image/png" href="{% static 'logo.png' %}">
 	<link rel="stylesheet" href="{% static 'messages.css' %}">
+    <script src="{% static 'messages.js' %}"></script>
 </head>
 
-
 <body onload="loadMessagesPage()">
-	<div class="container">
-        <h2 style="color: #03045e; text-align: center; padding-top: 15px;">Messages</h2>
-        <div class="empty-box">
-            <!--content here-->
-        </div>
-	</div>
-
-	<div class="header">
+    <div class="header">
 		<a href="{% url 'home' %}"><img src="{% static 'logo.svg' %}" alt="Clinic360 Logo" class="logo"></a>
 
 
@@ -40,5 +33,90 @@
             </span>
         </div>
 	</div>
+
+    <!--HTML PAGE CONTENT STARTS HERE-->
+    <div class="container">
+        <!-- Left Panel: Send a Message Form and Sent Messages -->
+        <div class="left-panel">
+            <!-- Send a Message Form -->
+            <div class="message-form">
+                <h3>Send a Message</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    <div>
+                        <label for="receiver">Receiver:</label>
+                        {{ form.receiver }}
+                    </div>
+                    <div>
+                        <label for="content">Content:</label>
+                        {{ form.content }}
+                    </div>
+                    <button type="submit">Send Message</button>
+                </form>
+            </div>
+    
+            <!-- Sent Messages -->
+            <div class="sent-messages">
+                <h3>Sent Messages</h3>
+                <ul>
+                    {% for message in sent_messages %}
+                        <li class="message-box" onclick="showMessage('{{ message.content|escapejs }}', '{{ message.id }}')">
+                            <div>
+                                <strong>To {{ message.receiver }}</strong>
+                                <span class="status">{{ message.status }}</span>
+                            </div>
+                            <br>
+                            <span>{{ message.timestamp }}</span>
+                        </li>
+                    {% empty %}
+                        <li>No messages sent.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    
+        <!-- Right Panel: Received Messages and Past Messages -->
+        <div class="right-panel">
+            <!-- Received Messages -->
+            <div class="messages-display">
+                <h3>Received Messages</h3>
+                <ul id="unreadMessages">
+                    {% for message in received_messages %}
+                        <li class="message-box" onclick="markAsRead('{{ message.id }}', '{{ message.content|escapejs }}')">
+                            <div>
+                                <strong>{{ message.sender }}</strong>
+                            </div>
+                            <br>
+                            <span>{{ message.timestamp }}</span>
+                        </li>
+                    {% empty %}
+                        <li>No unread messages.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <!-- Past Messages Section -->
+            <div class="past-messages">
+                <h3>Past Messages</h3>
+                <ul id="readMessages">
+                    <!-- Read messages will be dynamically moved here -->
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Popup Modal -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeMessage()">&times;</span>
+            <p id="messageContent"></p>
+        </div>
+    </div>
+    
+    
+    
+    
+
+	
 </body>
 </html>
