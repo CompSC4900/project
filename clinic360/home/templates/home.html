@@ -6,9 +6,10 @@
     <link rel="icon" type="image/png" href="{% static 'logo.png' %}">
     <link rel="stylesheet" href="{% static 'home.css' %}">
     <script src="{% static 'home.js' %}"></script>
+    <script src="{% static 'messages.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 </head>
-<body onload="loadHomepage()">
+<body onload="loadMessagesPage()">
     <!-- Header section for logo -->
     <div class="header">
         <a href="{% url 'home' %}">
@@ -22,7 +23,7 @@
             <img src="{% static 'message.svg' %}" alt="Messages Icon" style="height: 24px; margin-right: 8px;">
             Messages
         </a>
-        <div class="user-card panel">
+        <div class="user-card">
             <img src="{% static 'dummy-pfp.png' %}" alt="User Picture" id="user-picture">
             <span id="username">
                 {% if user.is_authenticated %}
@@ -37,7 +38,7 @@
     <!-- Main content container -->
     <div class="container">
         <div class="calendar-container">
-            <div class="calendar panel" id="calendar">
+            <div class="panel" id="calendar">
             </div>
 
             <button id="appointment-button" class="appointment-button" onclick="redirectToSchedule()">Make an Appointment</button>
@@ -45,14 +46,32 @@
             
         </div>
 
-        <div class="right-container">
-            <div class="test-results panel">
-                <h2 style="color: #03045e; text-align: center; padding-top: 15px;">Test Results</h2>
+        <div class="message-container">
+            <div class="messages-display panel">
+                {% csrf_token %}
+                <h3>Unread Messages</h3>
+                <ul id="unreadMessages">
+                    {% for message in messages %}
+                        <li class="message-box" data-message-id="{{ message.id }}" data-message-content="{{ message.content }}">
+                            <div>
+                                <strong>{{ message.sender }}</strong>
+                            </div>
+                            <br>
+                            <span>{{ message.timestamp }}</span>
+                        </li>
+                    {% empty %}
+                        <li>No unread messages.</li>
+                    {% endfor %}
+                </ul>
             </div>
-
-            <div class="messages panel">
-                <h2 style="color: #03045e; text-align: center; padding-top: 15px;">Messages From Provider</h2>
-            </div>
+        </div>
+    </div>
+    
+    <!-- Popup Modal -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeMessage()">&times;</span>
+            <p id="messageContent"></p>
         </div>
     </div>
 

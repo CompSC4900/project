@@ -16,21 +16,25 @@ function loadMessagesPage() {
     const unreadMessages = document.querySelectorAll('#unreadMessages .message-box');
     const readMessages = document.querySelectorAll('#readMessages .message-box');
     
-    unreadMessages.forEach(message => message.addEventListener('click', function handler() {
-        // mark as read, show message
-        markAsRead(message, message.getAttribute('data-message-id'));
-        showMessage(message.getAttribute('data-message-content'));
-        // we've already marked as read, now all we need to do is show the message
-        message.removeEventListener('click', handler);
-        message.addEventListener('click', () => {
+    if (unreadMessages) {
+        unreadMessages.forEach(message => message.addEventListener('click', function handler() {
+            // mark as read, show message
+            markAsRead(message, message.getAttribute('data-message-id'));
             showMessage(message.getAttribute('data-message-content'));
-        });
-    }));
+            // we've already marked as read, now all we need to do is show the message
+            message.removeEventListener('click', handler);
+            message.addEventListener('click', () => {
+                showMessage(message.getAttribute('data-message-content'));
+            });
+        }));
+    }
     
-    // only need to show message for read messages
-    readMessages.forEach(message => message.addEventListener('click', () => {
-        showMessage(message.getAttribute('data-message-content'));
-    }));
+    if (readMessages) {
+        // only need to show message for read messages
+        readMessages.forEach(message => message.addEventListener('click', () => {
+            showMessage(message.getAttribute('data-message-content'));
+        }));
+    }
 }
 
 function markAsRead(message, messageId) {
@@ -38,7 +42,9 @@ function markAsRead(message, messageId) {
     const unreadMessageContainer = document.getElementById('unreadMessages');
     const readMessageContainer = document.getElementById('readMessages');
     unreadMessageContainer.removeChild(message);
-    readMessageContainer.prepend(message);
+    if (readMessageContainer) {
+        readMessageContainer.prepend(message);
+    }
 
     // Send request to the server to let it know we've read the message
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
