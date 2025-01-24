@@ -1,0 +1,19 @@
+#root {
+    height: 100vh;
+    width: 100vw;
+}
+
+.fc {
+    width: 100%;
+}
+
+.unread-notif {
+    background-color: var(--bs-primary);
+    width: 10px;
+    height: 10px;
+    border-radius: 100%;
+}
+
+.text-bg-primary .text-muted {
+    color: #fff !important;
+}
