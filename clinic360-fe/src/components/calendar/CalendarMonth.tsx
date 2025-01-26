@@ -1,7 +1,7 @@
 import { Event } from "./Calendar";
 import Rectangle from "../Rectangle";
 import { useState } from "react";
-import { WEEKDAYS } from "./names"
+import { WEEKDAYS } from "../../util/names"
 
 interface Props {
     year: number

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import TextInput from "./TextInput";
+import FormField from "./form/FormField";
 import { useAuth } from "./AuthContext";
 
 interface Props {
@@ -9,6 +9,7 @@ interface Props {
 export default function Login({createAccount}: Props) {
     const [formValues, setFormValues] = useState({email: "", password: ""});
     const [error, setError] = useState<string | null>(null);
+    const auth = useAuth();
 
     function formValuePropsFactory(name: "email" | "password") {
         return {
@@ -18,7 +19,6 @@ export default function Login({createAccount}: Props) {
     }
 
     async function handleLogin() {
-        const auth = useAuth();
         try {
             await auth.login(formValues.email, formValues.password);
         } catch (e) {
@@ -32,21 +32,25 @@ export default function Login({createAccount}: Props) {
 
     return (
         <>
-            <TextInput 
+            <FormField
+                className="mb-3"
+                type="text"
                 name="email" 
                 displayName="Email" 
                 error={error === null ? null : ""}
                 {...formValuePropsFactory("email")}
             />
-            <TextInput 
+            <FormField 
+                className="mb-3"
+                type="text"
                 name="password" 
                 displayName="Password" 
                 error={error} 
                 {...formValuePropsFactory("password")}
             />
             <div className="d-flex flex-row-reverse">
-                <button className="btn btn-primary ms-3" onClick={handleLogin}>Login</button>
-                <button className="btn btn-primary" onClick={createAccount}>CreateAccount</button>
+                <button className="btn btn-primary ms-2" onClick={handleLogin}>Login</button>
+                <button className="btn btn-secondary" onClick={createAccount}>Create Account</button>
             </div>
         </>
     );

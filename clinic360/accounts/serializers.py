@@ -21,11 +21,11 @@ class CreateAccountSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({"password": "Password fields don't match."})
+            raise serializers.ValidationError({"password2": "Password fields don't match."})
         return attrs
 
     def create(self, validated_data):
-        return User.objects.create_user(
+        return Clinic360User.objects.create_user(
             email=validated_data['email'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],

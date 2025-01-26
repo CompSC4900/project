@@ -1,6 +1,6 @@
 import { useState } from "react";
 import CalendarMonth from "./CalendarMonth";
-import { MONTHS } from "./names";
+import { MONTHS } from "../../util/names";
 
 export interface Event {
     time: Date

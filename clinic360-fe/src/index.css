@@ -17,3 +17,15 @@
 .text-bg-primary .text-muted {
     color: #fff !important;
 }
+
+.bg-clinic360 {
+    background-color: #00b4d8;
+}
+
+.w-33 {
+    width: 33.333%;
+}
+
+.w-67 {
+    width: 66.667%;
+}

@@ -1,6 +1,6 @@
 import TimeViewer from "../TimeViewer";
 import { Event } from "./Calendar";
-import { MONTHS, WEEKDAYS_LONG } from "./names";
+import { MONTHS, WEEKDAYS_LONG } from "../../util/names";
 
 interface Props {
     day: Date
