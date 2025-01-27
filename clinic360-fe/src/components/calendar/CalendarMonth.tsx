@@ -33,8 +33,8 @@ export default function CalendarMonth({year, month, events, onDaySelected}: Prop
             .sort((a, b) => a.title.localeCompare(b.title))
             .sort((a, b) => b.time.getTime() - a.time.getTime())
             .sort((a, b) => Number(b.allDay) - Number(a.allDay));
-        return eventsForDay.map((event) => (
-            <small className="d-block px-2 rounded-pill text-body" style={{backgroundColor: event.color}}>
+        return eventsForDay.map((event, i) => (
+            <small className="d-block px-2 rounded-pill text-body" style={{backgroundColor: event.color}} key={i}>
                 <b>{event.time.toLocaleTimeString(undefined, {hour: "numeric", minute: "numeric"})}</b> {event.title}
             </small>
         ))
@@ -53,6 +53,7 @@ export default function CalendarMonth({year, month, events, onDaySelected}: Prop
             <div 
                 className={`col p-1 border-end border-bottom ${dayIndex === selectedDayIndex ? "text-bg-primary" : ""}`}
                 onClick={() => handleDaySelected(dayIndex)}
+                key={day.toDateString()}
             >
                 <div
                     className={`w-100 text-end ${day.getMonth() === month ? "" : "text-muted"}`}
@@ -73,6 +74,7 @@ export default function CalendarMonth({year, month, events, onDaySelected}: Prop
                         <div
                             className={`col p-1 ${day === WEEKDAYS[WEEKDAYS.length - 1] ? "" : "border-end"}`}
                             style={{width: `${100 / 7}%`}}
+                            key={day}
                         >
                             {day}
                         </div>
@@ -81,7 +83,7 @@ export default function CalendarMonth({year, month, events, onDaySelected}: Prop
             </div>
             <div className="row g-0 flex-grow-1 border-start">
                 {[...Array(6).keys()].map(week => (
-                    <div className="row g-0" style={{height: `${100/6}%`}}>
+                    <div className="row g-0" style={{height: `${100/6}%`}} key={week}>
                         {[...Array(7).keys()].map(weekday => renderDay(week * 7 + weekday))}
                     </div>
                 ))}
