@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
 state_choices = [
     ('AL', 'Alabama'),
@@ -75,7 +75,7 @@ class Clinic360UserManager(BaseUserManager):
         return user
         
     def create_superuser(self, email, first_name, last_name, address, city, state, zip_code, birth_date, gender, phone_number, password):
-        email = self.normalize_email()
+        email = self.normalize_email(email)
         user = self.model(
             email=email,
             first_name=first_name,
@@ -94,7 +94,7 @@ class Clinic360UserManager(BaseUserManager):
         user.save()
         return user
 
-class Clinic360User(AbstractBaseUser):
+class Clinic360User(PermissionsMixin, AbstractBaseUser):
     email = models.CharField(max_length=254, unique=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -105,6 +105,7 @@ class Clinic360User(AbstractBaseUser):
     birth_date = models.DateField()
     gender = models.CharField(max_length=1, choices=[('M', 'Male'), ('F', 'Female')])
     phone_number = models.CharField(max_length=10)
+    is_staff = models.BooleanField(default=False)
     
     objects = Clinic360UserManager()
         

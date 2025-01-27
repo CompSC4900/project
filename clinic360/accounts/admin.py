@@ -1,3 +1,4 @@
 from django.contrib import admin
+from .models import Clinic360User
 
-# Register your models here.
+admin.site.register(Clinic360User)
