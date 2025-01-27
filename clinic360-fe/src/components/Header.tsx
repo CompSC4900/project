@@ -1,17 +1,40 @@
+import { useEffect, useState } from "react";
+import { useAuth } from "./AuthContext";
+
 interface Props {
-    // main header
     tabs: string[]
     activeTab: string
     setActiveTab(tab: string): void;
-    
-    // user card
-    username: string
-    userOptions: Record<string, VoidFunction>
 }
 
-export default function Header({tabs, activeTab, setActiveTab, username, userOptions}: Props) {
+interface UserOption {
+    label: string
+    callback: VoidFunction
+}
+
+export default function Header({tabs, activeTab, setActiveTab}: Props) {
+    const auth = useAuth();
+
+    const [username, setUsername] = useState("");
+
+    useEffect(() => {(async () => {
+        const response = await auth.fetchProtectedData("userinfo/");
+        if (response.hasError) {
+            console.error("Logging out user because an unexpected server error occured");
+            auth.logout();
+        }
+        setUsername(response.data.name);
+    })()}, []);
+
     const homeTab = tabs[0];
     const namedTabs = tabs.slice(1);
+
+    const userOptions: UserOption[] = [
+        {
+            label: "Logout",
+            callback: auth.logout,
+        },
+    ];
 
     function createNavItem(tab: string) {
         if (tab === activeTab) {
@@ -31,7 +54,7 @@ export default function Header({tabs, activeTab, setActiveTab, username, userOpt
         }
     }
 
-    function createUserOption([label, callback]: [string, VoidFunction]) {
+    function createUserOption({label, callback}: UserOption) {
         return (
             <li key={label}>
                 <button className="dropdown-item" onClick={callback}>{label}</button>
@@ -56,7 +79,7 @@ export default function Header({tabs, activeTab, setActiveTab, username, userOpt
                         <span className="me-2">{username}</span>
                     </button>
                     <ul className="dropdown-menu">
-                        {Object.entries(userOptions).map(createUserOption)}
+                        {userOptions.map(createUserOption)}
                     </ul>
                 </div>
             </div>

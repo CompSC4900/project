@@ -13,10 +13,6 @@ const TAB_COMPONENTS = {
     "Messages": Messages,
 } as const;
 
-const USER_OPTIONS = {
-    "Logout": () => {}
-} as const;
-
 export default function App() {
     const tabs = Object.keys(TAB_COMPONENTS);
     const [activeTab, setActiveTab] = useState(tabs[0]);
@@ -27,7 +23,7 @@ export default function App() {
         <AuthProvider>
             <ConfirmationProvider>
                 <div className="d-flex flex-column h-100">
-                    <Header tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} username="John Doe" userOptions={USER_OPTIONS} />
+                    <Header tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <div className="d-flex p-5 flex-grow-1 bg-body-tertiary" style={{minHeight: 0}}>
                         <TabComponent setActiveTab={setActiveTab}/>
                     </div>
