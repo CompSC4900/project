@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
+import { expectSuccess } from "../util/auth";
 
 interface Props {
     tabs: string[]
@@ -19,10 +20,7 @@ export default function Header({tabs, activeTab, setActiveTab}: Props) {
 
     useEffect(() => {(async () => {
         const response = await auth.fetchProtectedData("userinfo/");
-        if (response.hasError) {
-            console.error("Logging out user because an unexpected server error occured");
-            auth.logout();
-        }
+        expectSuccess(response, auth);
         setUsername(response.data.name);
     })()}, []);
 

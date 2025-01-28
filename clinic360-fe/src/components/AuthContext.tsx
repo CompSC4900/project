@@ -1,7 +1,8 @@
-import { createContext, ReactNode, useState, useContext } from "react";
+import { createContext, ReactNode, useState, useContext, useCallback, useMemo } from "react";
+import { FetchResult, apiBase } from "../util/auth";
 import Accounts from "./Accounts";
 
-interface AuthFunctions {
+export interface AuthFunctions {
     fetchProtectedData(endpoint: string, data?: any): Promise<FetchResult>
     logout(): void
     login(email: string, password: string): Promise<void>
@@ -19,57 +20,28 @@ interface Unauthorization extends AuthFunctions {
 
 type AuthContextType = Authorization | Unauthorization
 
-interface FetchResult {
-    hasError: boolean
-    data?: any
-    error?: any
-}
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-const apiBase = "http://localhost:8000/api/";
-
-
-export async function fetchUnprotectedData(endpoint: string, data?: any): Promise<FetchResult> {
-    const method = data ? "POST" : "GET";
-    const response = await fetch(apiBase + endpoint, {
-        method,
-        headers: data && {"Content-Type": "application/json"},
-        body: data && JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-        return {
-            hasError: true,
-            error: await response.json(),
-        };
-    }
-
-    return {
-        hasError: false,
-        data: await response.json(),
-    };
-}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const unauthorized: Unauthorization = {
-        authorized: false,
-        fetchProtectedData,
-        logout,
-        login,
-    };
+    const [tokens, setTokens] = useState(() => {
+        const accessToken = localStorage.getItem("access_token");
+        const refreshToken = localStorage.getItem("refresh_token");
+        return {
+            accessToken,
+            refreshToken,
+        };
+    });
 
-    const [authContext, setAuthContext] = useState<AuthContextType>(readTokensFromLocalStorage());
-
-    function logout() {
-        if (!authContext.authorized) {
+    const logout = useCallback(() => {
+        if (!tokens.accessToken) {
             throw new Error("Request to log out while not authenticated");
         }
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
-        setAuthContext(unauthorized);
-    }
+        setTokens({accessToken: null, refreshToken: null});
+    }, [tokens.accessToken]);
 
-    async function login(email: string, password: string) {
+    const login = useCallback(async (email: string, password: string) => {
         const response = await fetch(apiBase + "token/", {
             method: 'POST',
             headers: {
@@ -84,12 +56,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const data = await response.json();
             localStorage.setItem('access_token', data.access);
             localStorage.setItem('refresh_token', data.refresh);
-            setAuthContext({
-                authorized: true,
-                logout, 
-                login, 
-                fetchProtectedData, 
-                accessToken: data.access, 
+            setTokens({
+                accessToken: data.access,
                 refreshToken: data.refresh
             });
         } else {
@@ -99,28 +67,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             throw new Error("Login failed");
         }
-    }
+    }, []);
 
-    function readTokensFromLocalStorage(): AuthContextType {
-        const accessToken = localStorage.getItem("access_token");
-        const refreshToken = localStorage.getItem("refresh_token");
-        if (accessToken !== null && refreshToken !== null) {
-            return {
-                authorized: true,
-                accessToken,
-                refreshToken,
-                fetchProtectedData,
-                logout,
-                login,
-            };
-        } else {
-            return unauthorized;
-        }
-    }
-
-    async function refreshToken(): Promise<string | undefined> {
-        if (!authContext.authorized) {
-            return;
+    const refreshToken = useCallback(async () => {
+        if (!tokens.refreshToken) {
+            throw new Error("Tokens are in a broken state");
         }
         const response = await fetch(apiBase + "token/refresh/", {
             method: "POST",
@@ -128,23 +79,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                refresh: authContext.refreshToken,
+                refresh: tokens.refreshToken,
             }),
         });
         if (response.ok) {
             const data = await response.json();
             localStorage.setItem("access_token", data.access);
-            setAuthContext({...authContext!, accessToken: data.access});
-            return data.access;
+            setTokens({...tokens, accessToken: data.access});
+            return data.access as string;
         }
-    }
+    }, [tokens.refreshToken]);
 
-    async function fetchProtectedData(endpoint: string, data?: any, retryUsingToken?: string): Promise<FetchResult> {
-        if (!authContext.authorized) {
+    const fetchProtectedData = useCallback(async (endpoint: string, data?: any, retryUsingToken?: string) => {
+        if (!tokens.accessToken) {
             throw new Error("Request to access protected data while not authenticated");
         }
 
-        const token = retryUsingToken || authContext.accessToken;
+        const token = retryUsingToken || tokens.accessToken;
         const method = data ? "POST" : "GET";
         const headers: Record<string, string> = {
             "Authorization": `Bearer ${token}`,
@@ -176,11 +127,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             hasError: false,
             data: await response.json(),
         };
-    }
+    }, [tokens.accessToken, refreshToken]);
+
+    const contextValue = useMemo<AuthContextType>(() => {
+        if (tokens.accessToken && tokens.refreshToken) {
+            return {
+                authorized: true,
+                accessToken: tokens.accessToken,
+                refreshToken: tokens.refreshToken,
+                fetchProtectedData,
+                logout,
+                login,
+            };
+        } else {
+            return {
+                authorized: false,
+                fetchProtectedData,
+                logout,
+                login,
+            };
+        }
+    }, [tokens, fetchProtectedData, logout, login]);
 
     return (
-        <AuthContext.Provider value={authContext}>
-            {authContext.authorized ? children : <Accounts />}
+        <AuthContext.Provider value={contextValue}>
+            {contextValue.authorized ? children : <Accounts />}
         </AuthContext.Provider>
     );
 }

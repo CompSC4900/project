@@ -105,6 +105,9 @@ class Clinic360User(PermissionsMixin, AbstractBaseUser):
     birth_date = models.DateField()
     gender = models.CharField(max_length=1, choices=[('M', 'Male'), ('F', 'Female')])
     phone_number = models.CharField(max_length=10)
+
+    associated_users = models.ManyToManyField('self', blank=True, symmetrical=False)
+
     is_staff = models.BooleanField(default=False)
     
     objects = Clinic360UserManager()

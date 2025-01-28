@@ -1,20 +1,21 @@
 import Calendar from "../calendar/Calendar"
 import MessageList from "../MessageList"
-import Message from "../../util/Message"
-import { getSampleMessages } from "../../util/Message"
-import { useState } from "react"
+import { getInbox, InMessagePreview, MessagePreview } from "../../util/Message"
+import { useEffect, useState } from "react"
 import MessageDisplay from "../MessageDisplay"
 import Popup from "../Popup"
+import { useAuth } from "../AuthContext"
 
 interface Props {
     setActiveTab(tab: string): void
 }
 
 export default function Home({setActiveTab}: Props) {
-    const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
+    const auth = useAuth();
+    const [selectedMessage, setSelectedMessage] = useState<InMessagePreview | null>(null);
+    const [messages, setMessages] = useState<InMessagePreview[]>([]);
 
-    const messages = getSampleMessages(5);
-    const message = selectedMessageId ? messages.find(message => message.id === selectedMessageId) : undefined;
+    useEffect(() => {(async () => setMessages(await getInbox(auth, true)))()}, []);
 
     const event = {
         title: "test",
@@ -23,8 +24,11 @@ export default function Home({setActiveTab}: Props) {
         allDay: false,
     };
 
-    function handleMessageSelected(message: Message) {
-        setSelectedMessageId(message.id);
+    function handleMessageSelected(message: MessagePreview) {
+        if (!("sender" in message)) {
+            throw new Error("Sent messages should not appear on the homepage");
+        }
+        setSelectedMessage(message);
     }
 
     return (
@@ -44,8 +48,7 @@ export default function Home({setActiveTab}: Props) {
                 <h2 className="mb-3">Recent Messages</h2>
                 <MessageList
                     messages={messages}
-                    displayedUser="sender"
-                    selectedMessageId={selectedMessageId}
+                    selectedMessageId={selectedMessage && selectedMessage.id}
                     onMessageSelected={handleMessageSelected}
                 />
                 <button
@@ -56,10 +59,10 @@ export default function Home({setActiveTab}: Props) {
                 </button>
             </div>
             <Popup
-                shown={selectedMessageId !== null}
-                onDismiss={() => setSelectedMessageId(null)}
+                shown={selectedMessage !== null}
+                onDismiss={() => setSelectedMessage(null)}
             >
-                {selectedMessageId !== null && <MessageDisplay message={message!} selfRecipient={false} />}
+                {selectedMessage !== null && <MessageDisplay messagePreview={selectedMessage} />}
             </Popup>
         </>
     );

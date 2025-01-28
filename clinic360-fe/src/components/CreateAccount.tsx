@@ -6,7 +6,7 @@
 import { STATES } from "../util/names";
 import { useState } from "react";
 import FormField from "./form/FormField";
-import { fetchUnprotectedData } from "./AuthContext";
+import { fetchUnprotectedData } from "../util/auth";
 
 interface Props {
     login(): void

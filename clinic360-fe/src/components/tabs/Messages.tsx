@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Choices from "../Choices";
 import MessageList from "../MessageList";
-import { DraftMessage, Message, getSampleMessages } from "../../util/Message";
+import { Contact, DraftMessage, getContacts, getInbox, getSent, MessagePreview, sendMessage } from "../../util/Message";
 import MessageDisplay from "../MessageDisplay";
 import MessageEditor from "../MessageEditor";
 import { useConfirmation } from "../ConfirmationContext";
+import { useAuth } from "../AuthContext";
 
 interface InProgressMessage {
     composing: boolean
@@ -14,14 +15,35 @@ interface InProgressMessage {
 const INBOX_TYPES = ["Inbox", "Sent", "Drafts"] as const;
 
 export default function Messages() {
-    const [inboxType, setInboxType] = useState<typeof INBOX_TYPES[number]>("Inbox");
-    const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
-    const [inProgressMessage, setInProgressMessage] = useState<InProgressMessage>({composing: false, unsavedChanges: false});
+    const auth = useAuth();
     const showConfirmation = useConfirmation();
 
-    const messages = getSampleMessages(10);
+    const [inboxType, setInboxType] = useState<typeof INBOX_TYPES[number]>("Inbox");
+    const [selectedMessage, setSelectedMessage] = useState<MessagePreview | null>(null);
+    const [inProgressMessage, setInProgressMessage] = useState<InProgressMessage>({composing: false, unsavedChanges: false});
+    const [messages, setMessages] = useState<MessagePreview[]>([]);
+    const [contacts, setContacts] = useState<Contact[]>([]);
 
-    // returns true on action cancelation
+    useEffect(() => {(async () => setContacts(await getContacts(auth)))()}, []);
+    useEffect(() => {fetchMessages()}, [inboxType]);
+
+    async function fetchMessages() {
+        setMessages([]);
+        switch (inboxType) {
+            case "Inbox": {
+                setMessages(await getInbox(auth));
+                break;
+            }
+            case "Sent": {
+                setMessages(await getSent(auth));
+                break;
+            }
+            case "Drafts":
+                // TODO
+                break;
+        }
+    }
+
     async function maybeWarnUnsavedChanges() {
         if (inProgressMessage.unsavedChanges) {
             await showConfirmation("Your unsaved changes will be lost.");
@@ -29,27 +51,38 @@ export default function Messages() {
     }
 
     function handleInboxTypeChange(newInboxType: string) {
-        setSelectedMessageId(null);
+        setSelectedMessage(null);
         setInboxType(newInboxType as typeof inboxType);
     }
 
     function handleNewMessage() {
         maybeWarnUnsavedChanges().then(() => {
-            setSelectedMessageId(null);
+            setSelectedMessage(null);
             setInProgressMessage({composing: true, unsavedChanges: false});
         }).catch(() => {});
     }
 
-    function handleMessageSelected(message: Message) {
+    function handleMessageSelected(message: MessagePreview) {
         maybeWarnUnsavedChanges().then(() => {
-            setSelectedMessageId(message.id);
+            setSelectedMessage(message);
+            if (!message.read) {
+                setMessages(messages.map(oldMessage => {
+                    if (oldMessage.id === message.id) {
+                        return {...oldMessage, read: true};
+                    }
+                    return oldMessage;
+                }));
+            }
             setInProgressMessage({composing: false, unsavedChanges: false});
         }).catch(() => {});
     }
 
-    function send(message: DraftMessage) {
+    async function send(message: DraftMessage) {
         setInProgressMessage({composing: false, unsavedChanges: false});
-        // TODO
+        await sendMessage(message, auth);
+        if (inboxType === "Sent") {
+            fetchMessages();
+        }
     }
 
     function saveDraft(message: DraftMessage) {
@@ -58,16 +91,16 @@ export default function Messages() {
     }
 
     function maybeRenderMessage() {
-        if (selectedMessageId !== null) {
+        if (selectedMessage) {
             return (
                 <MessageDisplay
-                    message={messages.find(m => m.id === selectedMessageId)!}
-                    selfRecipient={inboxType === "Sent"}
+                    messagePreview={selectedMessage}
                 />
             );
         } else if (inProgressMessage.composing) {
             return (
                 <MessageEditor
+                    contacts={contacts}
                     notifyUnsavedChanges={() => setInProgressMessage({...inProgressMessage, unsavedChanges: true})}
                     send={send}
                     saveDraft={saveDraft}
@@ -78,7 +111,7 @@ export default function Messages() {
 
     return (
         <>
-            <div className="me-5 h-100 card" style={{width: "33%"}}>
+            <div className="me-5 h-100 w-33 card">
                 <div className="d-flex mx-3 my-2">
                     <Choices
                         choices={INBOX_TYPES} 
@@ -92,12 +125,11 @@ export default function Messages() {
                 </div>
                 <MessageList
                     messages={messages}
-                    displayedUser={inboxType === "Inbox" ? "sender" : "recipient"}
-                    selectedMessageId={selectedMessageId}
+                    selectedMessageId={selectedMessage && selectedMessage.id}
                     onMessageSelected={handleMessageSelected}
                 />
             </div>
-            <div className="h-100 card" style={{width: "67%"}}>
+            <div className="h-100 w-67 card">
                 {maybeRenderMessage()}
             </div>
         </>

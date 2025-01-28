@@ -1,13 +1,14 @@
-import Message from "../util/Message"
+import { MessagePreview } from "../util/Message"
 
 interface Props {
-    user: string
-    message: Message
-    active: boolean
+    message: MessagePreview
+    selected: boolean
     onSelected(): void
 }
 
-export default function MessagePreview({user, message, active, onSelected}: Props) {
+export default function MessagePreviewDisplay({message, selected, onSelected}: Props) {
+    const user = "recipient" in message ? message.recipient : message.sender;
+
     function maybeRenderUnreadNotif() {
         if (!message.read) {
             return (
@@ -17,7 +18,7 @@ export default function MessagePreview({user, message, active, onSelected}: Prop
     }
 
     return (
-        <li className={`list-group-item${active ? " active" : ""}`} onClick={onSelected}>
+        <li className={`list-group-item${selected ? " active" : ""}`} onClick={onSelected}>
             <div className="fw-bold">{user}</div>
             <div>{message.subject}</div>
             <small className="text-muted">{message.date.toLocaleString()}</small>

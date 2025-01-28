@@ -1,16 +1,18 @@
 import { useState, ChangeEvent } from "react"
-import { DraftMessage } from "../util/Message";
+import { Contact, DraftMessage } from "../util/Message";
 
 interface Props {
+    contacts: Contact[]
     notifyUnsavedChanges(): void
     saveDraft(message: DraftMessage): void
     send(message: DraftMessage): void
 }
 
-export default function MessageEditor({notifyUnsavedChanges, saveDraft, send}: Props) {
+export default function MessageEditor({contacts, notifyUnsavedChanges, saveDraft, send}: Props) {
     const [message, setMessage] = useState(DraftMessage());
     const [saved, setSaved] = useState(true);
     const [lastSaved, setLastSaved] = useState<Date | undefined>(undefined);
+    const [errorMessage, setErrorMessage] = useState("");
 
     function changeHandlerFactory(field: keyof DraftMessage) {
         return (
@@ -40,9 +42,27 @@ export default function MessageEditor({notifyUnsavedChanges, saveDraft, send}: P
 
     function handleSend() {
         if (!message.recipient) {
-            // TODO: error
+            setErrorMessage("Please select a recipient");
+        } else if (!message.subject) {
+            setErrorMessage("Subject must not be empty");
+        } else {
+            send(message);
         }
-        send(message);
+    }
+
+    function handleRecipientChange(newRecipientJson: string) {
+        if (newRecipientJson === "") {
+            setMessage({...message, recipient: "", recipient_id: null})
+            return;
+        }
+        const newRecipient = JSON.parse(newRecipientJson) as Contact;
+        setMessage({...message, recipient: newRecipient.name, recipient_id: newRecipient.id});
+    }
+
+    function maybeRenderError() {
+        if (errorMessage) {
+            return <div className="alert alert-danger py-2 m-3">{errorMessage}</div>;
+        }
     }
 
     return (
@@ -51,13 +71,14 @@ export default function MessageEditor({notifyUnsavedChanges, saveDraft, send}: P
                 <div className="flex-grow-1">
                     <div className="d-flex mx-3 my-2">
                         <label className="fw-bold me-1" id="recipient">To:</label>
-                        <input 
-                            className="form-control d-inline border-0 px-1 py-0" 
-                            type="text" 
-                            placeholder="Recipient" 
-                            aria-describedby="recipient" 
-                            onChange={changeHandlerFactory("recipient")}
-                        />
+                        <select
+                            onChange={e => handleRecipientChange(e.target.value)}
+                        >
+                            <option value="">—</option>
+                            {contacts.map(contact =>
+                                <option key={contact.id} value={JSON.stringify(contact)}>{contact.name}</option>
+                            )}
+                        </select>
                     </div>
                     <hr className="m-0"/>
                     <div className="d-flex mx-3 my-2">
@@ -89,6 +110,7 @@ export default function MessageEditor({notifyUnsavedChanges, saveDraft, send}: P
                 </div>
             </div>
             <hr className="m-0" />
+            {maybeRenderError()}
             <textarea
                 className="px-3 py-2 overflow-y-auto flex-grow-1 border-0"
                 onChange={changeHandlerFactory("content")}

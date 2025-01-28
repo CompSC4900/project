@@ -1,23 +1,21 @@
-import Message from "../util/Message"
-import MessagePreview from "./MessagePreview"
+import { MessagePreview } from "../util/Message"
+import MessagePreviewDisplay from "./MessagePreviewDisplay"
 
 interface Props {
-    messages: Message[]
-    displayedUser: "recipient" | "sender"
+    messages: MessagePreview[]
     selectedMessageId: number | null
-    onMessageSelected(message: Message): void
+    onMessageSelected(message: MessagePreview): void
 }
 
-export default function MessageList({messages, displayedUser, selectedMessageId, onMessageSelected}: Props) {
-    const sortedMessages = [...messages].sort()
+export default function MessageList({messages, selectedMessageId, onMessageSelected}: Props) {
+    const sortedMessages = [...messages].sort((a, b) => b.date.getTime() - a.date.getTime());
 
     return (
         <ul className="list-group w-100 overflow-y-auto">
             {sortedMessages.map((message) => (
-                <MessagePreview
-                    user={message[displayedUser]}
+                <MessagePreviewDisplay
                     message={message}
-                    active={selectedMessageId === message.id}
+                    selected={selectedMessageId === message.id}
                     onSelected={() => onMessageSelected(message)}
                     key={message.id}
                 />
