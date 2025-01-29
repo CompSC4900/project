@@ -1,26 +1,33 @@
 import { useEffect, useState } from "react";
 import Choices from "../Choices";
 import MessageList from "../MessageList";
-import { Contact, DraftMessage, getContacts, getInbox, getSent, MessagePreview, sendMessage } from "../../util/Message";
+import { Contact, DraftMessage, getContacts, getDrafts, getInbox, getOutMessageFrom, getSent, MessagePreview, OutMessagePreview, sendOrSaveMessage } from "../../util/Message";
 import MessageDisplay from "../MessageDisplay";
 import MessageEditor from "../MessageEditor";
 import { useConfirmation } from "../ConfirmationContext";
 import { useAuth } from "../AuthContext";
 
 interface InProgressMessage {
-    composing: boolean
+    message: DraftMessage
     unsavedChanges: boolean
+    lastSaved: Date | undefined
 }
 
 const INBOX_TYPES = ["Inbox", "Sent", "Drafts"] as const;
 
 export default function Messages() {
+    const newInProgressMessage: InProgressMessage = {
+        message: DraftMessage(),
+        unsavedChanges: false,
+        lastSaved: undefined,
+    };
+
     const auth = useAuth();
     const showConfirmation = useConfirmation();
 
     const [inboxType, setInboxType] = useState<typeof INBOX_TYPES[number]>("Inbox");
     const [selectedMessage, setSelectedMessage] = useState<MessagePreview | null>(null);
-    const [inProgressMessage, setInProgressMessage] = useState<InProgressMessage>({composing: false, unsavedChanges: false});
+    const [inProgressMessage, setInProgressMessage] = useState<InProgressMessage | null>(null);
     const [messages, setMessages] = useState<MessagePreview[]>([]);
     const [contacts, setContacts] = useState<Contact[]>([]);
 
@@ -39,71 +46,88 @@ export default function Messages() {
                 break;
             }
             case "Drafts":
-                // TODO
+                setMessages(await getDrafts(auth));
                 break;
         }
     }
 
+    async function loadDraft(message: OutMessagePreview) {
+        const draft = await getOutMessageFrom(message, auth);
+        setInProgressMessage({
+            ...newInProgressMessage,
+            message: draft,
+        });
+        setSelectedMessage(message);
+    }
+
     async function maybeWarnUnsavedChanges() {
-        if (inProgressMessage.unsavedChanges) {
+        if (inProgressMessage && inProgressMessage.unsavedChanges) {
             await showConfirmation("Your unsaved changes will be lost.");
         }
     }
 
     function handleInboxTypeChange(newInboxType: string) {
-        setSelectedMessage(null);
         setInboxType(newInboxType as typeof inboxType);
     }
 
     function handleNewMessage() {
         maybeWarnUnsavedChanges().then(() => {
             setSelectedMessage(null);
-            setInProgressMessage({composing: true, unsavedChanges: false});
+            setInProgressMessage(newInProgressMessage);
         }).catch(() => {});
     }
 
+    // TODO: make drafts editable upon selection and make drafts selected while editing them
     function handleMessageSelected(message: MessagePreview) {
         maybeWarnUnsavedChanges().then(() => {
-            setSelectedMessage(message);
-            if (!message.read) {
-                setMessages(messages.map(oldMessage => {
-                    if (oldMessage.id === message.id) {
-                        return {...oldMessage, read: true};
-                    }
-                    return oldMessage;
-                }));
+            if (inboxType === "Drafts") {
+                loadDraft(message as OutMessagePreview);
+            } else {
+                setSelectedMessage(message);
+                if (!message.read) {
+                    setMessages(messages.map(oldMessage => {
+                        if (oldMessage.id === message.id) {
+                            return {...oldMessage, read: true};
+                        }
+                        return oldMessage;
+                    }));
+                }
+                setInProgressMessage(null);
             }
-            setInProgressMessage({composing: false, unsavedChanges: false});
         }).catch(() => {});
     }
 
-    async function send(message: DraftMessage) {
-        setInProgressMessage({composing: false, unsavedChanges: false});
-        await sendMessage(message, auth);
-        if (inboxType === "Sent") {
+    async function send() {
+        await sendOrSaveMessage(inProgressMessage!.message, false, auth);
+        setInProgressMessage(null);
+        if (inboxType === "Sent" || (inboxType === "Drafts" && inProgressMessage!.message.id !== null)) {
             fetchMessages();
         }
     }
 
-    function saveDraft(message: DraftMessage) {
-        setInProgressMessage({...inProgressMessage, unsavedChanges: false});
-        // TODO
+    async function saveDraft() {
+        const newMessage = await sendOrSaveMessage(inProgressMessage!.message, true, auth);
+        setInProgressMessage({...inProgressMessage, message: newMessage, unsavedChanges: false, lastSaved: new Date()});
+        if (inboxType === "Drafts") {
+            fetchMessages();
+        }
     }
 
     function maybeRenderMessage() {
-        if (selectedMessage) {
+        if (inProgressMessage) {
+            return (
+                <MessageEditor
+                    messageMetadata={inProgressMessage as any}
+                    setMessageMetadata={setInProgressMessage}
+                    contacts={contacts}
+                    send={send}
+                    saveDraft={saveDraft}
+                />
+            );
+        } else if (selectedMessage) {
             return (
                 <MessageDisplay
                     messagePreview={selectedMessage}
-                />
-            );
-        } else if (inProgressMessage.composing) {
-            return (
-                <MessageEditor
-                    contacts={contacts}
-                    notifyUnsavedChanges={() => setInProgressMessage({...inProgressMessage, unsavedChanges: true})}
-                    send={send}
-                    saveDraft={saveDraft}
                 />
             );
         }

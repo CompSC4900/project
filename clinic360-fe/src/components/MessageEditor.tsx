@@ -1,62 +1,71 @@
-import { useState, ChangeEvent } from "react"
+import React, { useState, ChangeEvent } from "react"
 import { Contact, DraftMessage } from "../util/Message";
 
-interface Props {
-    contacts: Contact[]
-    notifyUnsavedChanges(): void
-    saveDraft(message: DraftMessage): void
-    send(message: DraftMessage): void
+interface MessageMetadata {
+    message: DraftMessage
+    unsavedChanges: boolean
+    lastSaved: Date | undefined
 }
 
-export default function MessageEditor({contacts, notifyUnsavedChanges, saveDraft, send}: Props) {
-    const [message, setMessage] = useState(DraftMessage());
-    const [saved, setSaved] = useState(true);
-    const [lastSaved, setLastSaved] = useState<Date | undefined>(undefined);
+interface Props {
+    messageMetadata: MessageMetadata
+    setMessageMetadata: React.Dispatch<React.SetStateAction<MessageMetadata | null>>
+    contacts: Contact[]
+    saveDraft(): void
+    send(): void
+}
+
+export default function MessageEditor({messageMetadata, setMessageMetadata, contacts, saveDraft, send}: Props) {
     const [errorMessage, setErrorMessage] = useState("");
 
-    function changeHandlerFactory(field: keyof DraftMessage) {
+    function handleChange(field: keyof DraftMessage, value: DraftMessage[typeof field]) {
+        setMessageMetadata((prev) => (prev && {
+            ...prev,
+            message: {...messageMetadata.message, [field]: value},
+            unsavedChanges: true,
+        }));
+    }
+
+    function changeHandlerFactory(field: "subject" | "content") {
         return (
-            (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-                setSaved(false);
-                setMessage({...message, [field]: event.target.value});
-                notifyUnsavedChanges();
-            }
+            (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => handleChange(field, event.target.value)
         );
     }
 
     function getLastSavedMessage() {
-        if (saved) {
+        if (!messageMetadata.unsavedChanges) {
             return "Saved";
-        } else if (lastSaved === undefined) {
+        } else if (messageMetadata.lastSaved === undefined) {
             return "Not Saved";
         } else {
-            return `Last Saved ${lastSaved.toLocaleTimeString(undefined, {hour: "numeric", minute: "numeric"})}`;
+            return `Last Saved ${messageMetadata.lastSaved.toLocaleTimeString(undefined, {hour: "numeric", minute: "numeric"})}`;
         }
-    }
-
-    function handleSaveDraft() {
-        setLastSaved(new Date());
-        setSaved(true);
-        saveDraft(message);
     }
 
     function handleSend() {
-        if (!message.recipient) {
+        if (!messageMetadata.message.recipient_id) {
             setErrorMessage("Please select a recipient");
-        } else if (!message.subject) {
+        } else if (!messageMetadata.message.subject) {
             setErrorMessage("Subject must not be empty");
+        } else if (!messageMetadata.message.content) {
+            setErrorMessage("Cannot send an empty message")
         } else {
-            send(message);
+            send();
         }
     }
 
-    function handleRecipientChange(newRecipientJson: string) {
-        if (newRecipientJson === "") {
-            setMessage({...message, recipient: "", recipient_id: null})
-            return;
+    function handleRecipientChange(newRecipient: string) {
+        let newRecipientName: string
+        let newRecipientId: number | null
+        if (newRecipient === "") {
+            newRecipientName = "";
+            newRecipientId = null;
+        } else {
+            newRecipientId = parseInt(newRecipient, 10);
+            newRecipientName = contacts.find(contact => contact.id === newRecipientId)!.name;
         }
-        const newRecipient = JSON.parse(newRecipientJson) as Contact;
-        setMessage({...message, recipient: newRecipient.name, recipient_id: newRecipient.id});
+        handleChange("recipient", newRecipientName);
+        handleChange("recipient_id", newRecipientId);
     }
 
     function maybeRenderError() {
@@ -73,10 +82,11 @@ export default function MessageEditor({contacts, notifyUnsavedChanges, saveDraft
                         <label className="fw-bold me-1" id="recipient">To:</label>
                         <select
                             onChange={e => handleRecipientChange(e.target.value)}
+                            value={messageMetadata.message.recipient_id === null ? "" : messageMetadata.message.recipient_id}
                         >
                             <option value="">—</option>
                             {contacts.map(contact =>
-                                <option key={contact.id} value={JSON.stringify(contact)}>{contact.name}</option>
+                                <option key={contact.id} value={contact.id}>{contact.name}</option>
                             )}
                         </select>
                     </div>
@@ -89,6 +99,7 @@ export default function MessageEditor({contacts, notifyUnsavedChanges, saveDraft
                             placeholder="Subject" 
                             aria-describedby="subject"
                             onChange={changeHandlerFactory("subject")}
+                            value={messageMetadata.message.subject}
                         />
                     </div>
                 </div>
@@ -97,7 +108,7 @@ export default function MessageEditor({contacts, notifyUnsavedChanges, saveDraft
                     <div className="d-flex">
                         <button
                             className="btn btn-primary me-2"
-                            onClick={handleSaveDraft}
+                            onClick={saveDraft}
                         >
                             Save Draft
                         </button>
@@ -114,6 +125,7 @@ export default function MessageEditor({contacts, notifyUnsavedChanges, saveDraft
             <textarea
                 className="px-3 py-2 overflow-y-auto flex-grow-1 border-0"
                 onChange={changeHandlerFactory("content")}
+                value={messageMetadata.message.content}
             />
         </>
     );

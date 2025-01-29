@@ -41,6 +41,8 @@ export interface DraftMessage extends BaseMessage {
     recipient_id: number | null
 }
 
+type OutMessage = DraftMessage & SentMessage;
+
 export interface Contact {
     name: string,
     id: number,
@@ -71,10 +73,7 @@ export function DraftMessage(): DraftMessage {
     };
 }
 
-export async function getMessageFrom<T extends MessagePreview>(
-    preview: T,
-    auth: AuthFunctions
-): Promise<T extends InMessagePreview ? InMessage : SentMessage> {
+export async function getInMessageFrom(preview: InMessagePreview, auth: AuthFunctions): Promise<InMessage> {
     const response = await auth.fetchProtectedData(`message/read/`, {id: preview.id});
     if (response.hasError) {
         throw new Error("Unable to read message");
@@ -83,7 +82,29 @@ export async function getMessageFrom<T extends MessagePreview>(
     return {
         ...preview,
         content,
-    } as any;
+    };
+}
+
+export async function getOutMessageFrom(preview: OutMessagePreview, auth: AuthFunctions): Promise<OutMessage> {
+    const response = await auth.fetchProtectedData(`message/read/`, {id: preview.id});
+    if (response.hasError) {
+        throw new Error("Unable to read message");
+    }
+    const content = response.data.content as string;
+    const recipient_id = response.data.recipient_id as number | null;
+    return {
+        ...preview,
+        recipient_id,
+        content,
+    };
+}
+
+export async function getMessageFrom(preview: MessagePreview, auth: AuthFunctions): Promise<Message> {
+    if ("recipient" in preview) {
+        return await getOutMessageFrom(preview, auth);
+    } else {
+        return await getInMessageFrom(preview, auth);
+    }
 }
 
 export async function getInbox(auth: AuthFunctions, recents = false): Promise<InMessagePreview[]> {
@@ -114,31 +135,46 @@ export async function getSent(auth: AuthFunctions): Promise<OutMessagePreview[]>
 }
 
 export async function getDrafts(auth: AuthFunctions): Promise<OutMessagePreview[]> {
-    // TODO
-    return [];
+    const response = await auth.fetchProtectedData("message/draft/");
+    if (response.hasError) {
+        console.error("Failed to fetch draft messages");
+        return [];
+    }
+    const messages = response.data.messages as OutApiMessage[];
+    return messages.map(message => ({
+        ...message,
+        read: true,
+        date: new Date(message.timestamp),
+    }));
 }
 
-export async function sendMessage(message: DraftMessage, auth: AuthFunctions) {
-    if (message.recipient_id === null) {
-        return;
-    }
-
+export async function sendOrSaveMessage(message: DraftMessage, saveDraft: boolean, auth: AuthFunctions): Promise<DraftMessage> {
     const payload = {
         recipient: message.recipient_id,
         subject: message.subject,
         content: message.content,
     }
-    const response = await auth.fetchProtectedData("message/create/", payload);
-    if (response.hasError) {
-        throw new Error("Failed to send message");
-    }
-
-    if (message.id !== null) {
-        const response = await auth.fetchProtectedData("message/draft/delete/", {id: message.id});
+    if (message.id === null) {
+        const response = saveDraft ?
+            await auth.fetchProtectedData("message/draft/create/", payload)
+        :
+            await auth.fetchProtectedData("message/create/", payload);
         if (response.hasError) {
-            console.error("Failed to delete draft of sent message");
+            throw new Error("Failed to send or save message");
+        }
+        if (saveDraft) {
+            return {...message, id: response.data.id};
+        }
+    } else {
+        const response = saveDraft ?
+            await auth.fetchProtectedData("message/draft/update/", {...payload, id: message.id})
+        :
+            await auth.fetchProtectedData("message/draft/send/", {...payload, id: message.id});
+        if (response.hasError) {
+            throw new Error("Failed to send or save message");
         }
     }
+    return message;
 }
 
 export async function getContacts(auth: AuthFunctions) {
