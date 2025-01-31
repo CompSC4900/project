@@ -29,6 +29,14 @@ export default function Home({setActiveTab}: Props) {
             throw new Error("Sent messages should not appear on the homepage");
         }
         setSelectedMessage(message);
+        if (!message.read) {
+            setMessages(messages.map(oldMessage => {
+                if (oldMessage.id === message.id) {
+                    return {...oldMessage, read: true};
+                }
+                return oldMessage;
+            }));
+        }
     }
 
     return (

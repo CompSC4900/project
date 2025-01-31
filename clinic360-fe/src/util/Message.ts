@@ -107,7 +107,9 @@ export async function getInMessageFrom(preview: InMessagePreview, auth: AuthFunc
         throw new Error("Unable to read message");
     }
     const content = response.data.content as string;
-    markMessageRead(preview, auth);
+    if (!preview.read) {
+        markMessageRead(preview, auth);
+    }
     return {
         ...preview,
         content,
