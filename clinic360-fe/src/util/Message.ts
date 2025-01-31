@@ -13,6 +13,7 @@ export interface InMessagePreview extends BaseMessagePreview {
 
 export interface OutMessagePreview extends BaseMessagePreview {
     recipient: string
+    recipientId: number
     read: true
 }
 
@@ -38,7 +39,7 @@ export type Message = InMessage | SentMessage;
 
 export interface DraftMessage extends BaseMessage {
     recipient: string
-    recipient_id: number | null
+    recipientId: number | null
 }
 
 type OutMessage = DraftMessage & SentMessage;
@@ -56,29 +57,57 @@ interface BaseApiMessage {
 
 interface InApiMessage extends BaseApiMessage {
     read: boolean
-    sender: string
+    sender: number
+    sender_name: string
 }
 
 interface OutApiMessage extends BaseApiMessage {
-    recipient: string
+    recipient: number
+    recipient_name: string
 }
 
 export function DraftMessage(): DraftMessage {
     return {
         recipient: "",
-        recipient_id: null,
+        recipientId: null,
         subject: "",
         content: "",
         id: null,
     };
 }
 
+function apiToInMessagePreview(apiMessage: InApiMessage): InMessagePreview {
+    return {
+        ...apiMessage,
+        sender: apiMessage.sender_name,
+        date: new Date(apiMessage.timestamp),
+    };
+}
+
+function apiToOutMessagePreview(apiMessage: OutApiMessage): OutMessagePreview {
+    return {
+        ...apiMessage,
+        read: true,
+        recipient: apiMessage.recipient_name,
+        recipientId: apiMessage.recipient,
+        date: new Date(apiMessage.timestamp),
+    };
+}
+
+async function markMessageRead(preview: InMessagePreview, auth: AuthFunctions) {
+    const response = await auth.fetchProtectedData(`message/${preview.id}/mark_read/`, "POST");
+    if (response.errorCode !== null) {
+        console.error("Failed to mark message as read");
+    }
+}
+
 export async function getInMessageFrom(preview: InMessagePreview, auth: AuthFunctions): Promise<InMessage> {
-    const response = await auth.fetchProtectedData(`message/read/`, {id: preview.id});
-    if (response.hasError) {
+    const response = await auth.fetchProtectedData(`message/${preview.id}/`, "GET");
+    if (response.errorCode !== null) {
         throw new Error("Unable to read message");
     }
     const content = response.data.content as string;
+    markMessageRead(preview, auth);
     return {
         ...preview,
         content,
@@ -86,15 +115,13 @@ export async function getInMessageFrom(preview: InMessagePreview, auth: AuthFunc
 }
 
 export async function getOutMessageFrom(preview: OutMessagePreview, auth: AuthFunctions): Promise<OutMessage> {
-    const response = await auth.fetchProtectedData(`message/read/`, {id: preview.id});
-    if (response.hasError) {
+    const response = await auth.fetchProtectedData(`message/${preview.id}/`, "GET");
+    if (response.errorCode !== null) {
         throw new Error("Unable to read message");
     }
     const content = response.data.content as string;
-    const recipient_id = response.data.recipient_id as number | null;
     return {
         ...preview,
-        recipient_id,
         content,
     };
 }
@@ -107,79 +134,66 @@ export async function getMessageFrom(preview: MessagePreview, auth: AuthFunction
     }
 }
 
+// TODO: recents
 export async function getInbox(auth: AuthFunctions, recents = false): Promise<InMessagePreview[]> {
-    const response = await auth.fetchProtectedData(recents ? "message/recent/" : "message/inbox/");
-    if (response.hasError) {
+    const response = await auth.fetchProtectedData("message/inbox/", "GET");
+    if (response.errorCode !== null) {
         console.error("Failed to fetch inbox");
         return [];
     }
     const messages = response.data.messages as InApiMessage[];
-    return messages.map(message => ({
-        ...message,
-        date: new Date(message.timestamp),
-    }));
+    if (recents) {
+        return messages.map(apiToInMessagePreview).filter(message => Date.now() - message.date.getTime() <= 604800000);
+    } else {
+        return messages.map(apiToInMessagePreview);
+    }
 }
 
 export async function getSent(auth: AuthFunctions): Promise<OutMessagePreview[]> {
-    const response = await auth.fetchProtectedData("message/sent/");
-    if (response.hasError) {
+    const response = await auth.fetchProtectedData("message/sent/", "GET");
+    if (response.errorCode !== null) {
         console.error("Failed to fetch sent messages");
         return [];
     }
     const messages = response.data.messages as OutApiMessage[];
-    return messages.map(message => ({
-        ...message,
-        read: true,
-        date: new Date(message.timestamp),
-    }));
+    return messages.map(apiToOutMessagePreview);
 }
 
 export async function getDrafts(auth: AuthFunctions): Promise<OutMessagePreview[]> {
-    const response = await auth.fetchProtectedData("message/draft/");
-    if (response.hasError) {
+    const response = await auth.fetchProtectedData("message/drafts/", "GET");
+    if (response.errorCode !== null) {
         console.error("Failed to fetch draft messages");
         return [];
     }
     const messages = response.data.messages as OutApiMessage[];
-    return messages.map(message => ({
-        ...message,
-        read: true,
-        date: new Date(message.timestamp),
-    }));
+    return messages.map(apiToOutMessagePreview);
 }
 
 export async function sendOrSaveMessage(message: DraftMessage, saveDraft: boolean, auth: AuthFunctions): Promise<DraftMessage> {
     const payload = {
-        recipient: message.recipient_id,
+        recipient: message.recipientId,
         subject: message.subject,
         content: message.content,
+        draft: saveDraft,
     }
     if (message.id === null) {
-        const response = saveDraft ?
-            await auth.fetchProtectedData("message/draft/create/", payload)
-        :
-            await auth.fetchProtectedData("message/create/", payload);
-        if (response.hasError) {
+        const response = await auth.fetchProtectedData("message/", "POST", payload);
+        if (response.errorCode !== null) {
             throw new Error("Failed to send or save message");
         }
-        if (saveDraft) {
-            return {...message, id: response.data.id};
-        }
+        return {...message, id: response.data.id};
     } else {
-        const response = saveDraft ?
-            await auth.fetchProtectedData("message/draft/update/", {...payload, id: message.id})
-        :
-            await auth.fetchProtectedData("message/draft/send/", {...payload, id: message.id});
-        if (response.hasError) {
+        const response = await auth.fetchProtectedData(`message/${message.id}/`, "PUT", payload);
+        if (response.errorCode !== null) {
             throw new Error("Failed to send or save message");
         }
+        return message;
     }
-    return message;
 }
 
 export async function getContacts(auth: AuthFunctions) {
-    const response = await auth.fetchProtectedData("message/contacts/");
-    if (response.hasError) {
+    const response = await auth.fetchProtectedData("message/contacts/", "GET");
+    if (response.errorCode !== null) {
         console.error("Failed to fetch contacts");
         return [];
     }

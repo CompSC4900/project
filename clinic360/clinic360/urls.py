@@ -25,5 +25,5 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/createaccount/', CreateAccountView.as_view(), name='create_account'),
     path('api/userinfo/', user_info, name='user_info'),
-    path('api/message/', include('message.urls')),
+    path('api/', include('message.urls')),
 ]

@@ -115,3 +115,6 @@ class Clinic360User(PermissionsMixin, AbstractBaseUser):
     USERNAME_FIELD = 'email'
     EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name', 'address', 'city', 'state', 'zip_code', 'birth_date', 'gender', 'phone_number']
+
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"

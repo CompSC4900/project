@@ -6,7 +6,7 @@
 import { STATES } from "../util/names";
 import { useState } from "react";
 import FormField from "./form/FormField";
-import { fetchUnprotectedData } from "../util/auth";
+import { fetchData } from "../util/auth";
 
 interface Props {
     login(): void
@@ -35,8 +35,8 @@ export default function CreateAccount({login}: Props) {
 
     async function handleCreateAccount() {
         try {
-            const fetchResult = await fetchUnprotectedData("createaccount/", preprocessFormValues());
-            if (fetchResult.hasError) {
+            const fetchResult = await fetchData("createaccount/", "POST", preprocessFormValues());
+            if (fetchResult.errorCode !== null) {
                 const errors = fetchResult.error as Record<string, Array<string>>;
                 setFormErrors(
                     Object.entries(errors).reduce((obj, error) => ({...obj, [error[0]]: error[1][0]}), {} as Record<string, string>)

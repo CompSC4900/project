@@ -19,7 +19,7 @@ export default function Header({tabs, activeTab, setActiveTab}: Props) {
     const [username, setUsername] = useState("");
 
     useEffect(() => {(async () => {
-        const response = await auth.fetchProtectedData("userinfo/");
+        const response = await auth.fetchProtectedData("userinfo/", "GET");
         expectSuccess(response, auth);
         setUsername(response.data.name);
     })()}, []);

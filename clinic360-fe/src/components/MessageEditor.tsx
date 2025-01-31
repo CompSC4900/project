@@ -43,7 +43,7 @@ export default function MessageEditor({messageMetadata, setMessageMetadata, cont
     }
 
     function handleSend() {
-        if (!messageMetadata.message.recipient_id) {
+        if (!messageMetadata.message.recipientId) {
             setErrorMessage("Please select a recipient");
         } else if (!messageMetadata.message.subject) {
             setErrorMessage("Subject must not be empty");
@@ -65,7 +65,7 @@ export default function MessageEditor({messageMetadata, setMessageMetadata, cont
             newRecipientName = contacts.find(contact => contact.id === newRecipientId)!.name;
         }
         handleChange("recipient", newRecipientName);
-        handleChange("recipient_id", newRecipientId);
+        handleChange("recipientId", newRecipientId);
     }
 
     function maybeRenderError() {
@@ -82,7 +82,7 @@ export default function MessageEditor({messageMetadata, setMessageMetadata, cont
                         <label className="fw-bold me-1" id="recipient">To:</label>
                         <select
                             onChange={e => handleRecipientChange(e.target.value)}
-                            value={messageMetadata.message.recipient_id === null ? "" : messageMetadata.message.recipient_id}
+                            value={messageMetadata.message.recipientId === null ? "" : messageMetadata.message.recipientId}
                         >
                             <option value="">—</option>
                             {contacts.map(contact =>

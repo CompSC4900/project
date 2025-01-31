@@ -1,9 +1,9 @@
 import { createContext, ReactNode, useState, useContext, useCallback, useMemo } from "react";
-import { FetchResult, apiBase } from "../util/auth";
+import { FetchResult, apiBase, fetchData } from "../util/auth";
 import Accounts from "./Accounts";
 
 export interface AuthFunctions {
-    fetchProtectedData(endpoint: string, data?: any): Promise<FetchResult>
+    fetchProtectedData(endpoint: string, method: string, data?: any): Promise<FetchResult>
     logout(): void
     login(email: string, password: string): Promise<void>
 }
@@ -90,43 +90,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }, [tokens.refreshToken]);
 
-    const fetchProtectedData = useCallback(async (endpoint: string, data?: any, retryUsingToken?: string) => {
+    const fetchProtectedData = useCallback(async (endpoint: string, method: string, data?: any, retryUsingToken?: string) => {
         if (!tokens.accessToken) {
             throw new Error("Request to access protected data while not authenticated");
         }
 
         const token = retryUsingToken || tokens.accessToken;
-        const method = data ? "POST" : "GET";
-        const headers: Record<string, string> = {
-            "Authorization": `Bearer ${token}`,
-        }
-        if (data) {
-            headers["Content-Type"] = "application/json";
-        }
-        const response = await fetch(apiBase + endpoint, {
-            method,
-            headers,
-            body: data && JSON.stringify(data),
-        });
+        const response = await fetchData(endpoint, method, data, {"Authorization": `Bearer ${token}`});
 
-        if (!response.ok) {
-            if (response.status === 401 && !retryUsingToken) {
-                const newAccessToken = await refreshToken();
-                if (newAccessToken) {
-                    return await fetchProtectedData(endpoint, data, newAccessToken);
-                }
+        if (response.errorCode === 401 && !retryUsingToken) {
+            const newAccessToken = await refreshToken();
+            if (newAccessToken) {
+                return await fetchProtectedData(endpoint, method, data, newAccessToken);
             }
-
-            return {
-                hasError: true,
-                error: await response.json(),
-            };
         }
-
-        return {
-            hasError: false,
-            data: await response.json(),
-        };
+        return response;
     }, [tokens.accessToken, refreshToken]);
 
     const contextValue = useMemo<AuthContextType>(() => {

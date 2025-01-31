@@ -1,34 +1,63 @@
 from rest_framework import serializers
 from .models import Message
 from rest_framework.exceptions import ValidationError
+from django.utils import timezone
+from accounts.models import Clinic360User
 
-def validate_ok_to_send(user, recipient, subject, content):
-        if recipient == None:
-            raise ValidationError({'recipient': 'This field may not be null.'})
-        elif not user.associated_users.contains(recipient):
-            raise ValidationError({"recipient": "Unable to send a message to user."})
-        if subject == '':
-            raise ValidationError({'subject': 'This field may not be blank.'})
-        if content == '':
-            raise ValidationError({'content': 'This field may not be blank.'})
-
-class MessageCreateSerializer(serializers.ModelSerializer):
+class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
-        fields = ('id', 'recipient', 'content', 'subject')
+        fields = ('id', 'recipient', 'content', 'subject', 'draft')
         read_only_fields = ('id',)
-    
-    def validate(self, attrs):
-        if not self.context['draft']:
-            validate_ok_to_send(
-                self.context['request'].user,
-                attrs['recipient'],
-                attrs['subject'],
-                attrs['content'],
-            )
-        return attrs
+
+    def validate(self, data):
+        user = self.context['request'].user
+        
+        # Get values from data or fall back to the existing instance
+        recipient = data.get('recipient')
+        subject = data.get('subject')
+        content = data.get('content')
+        draft = data.get('draft')
+
+        if not draft:
+            if recipient is None:
+                raise ValidationError({'recipient': 'This field may not be null.'})
+            if not user.associated_users.contains(recipient):
+                raise ValidationError({'recipient': 'Unable to send a message to user.'})
+            if not subject:
+                raise ValidationError({'subject': 'This field may not be blank.'})
+            if not content:
+                raise ValidationError({'content': 'This field may not be blank.'})
+
+        return data
 
     def create(self, validated_data):
         validated_data['sender'] = self.context['request'].user
-        validated_data['draft'] = self.context['draft']
         return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        validated_data['timestamp'] = timezone.now()
+        return super().update(instance, validated_data)
+
+class IncomingMessageSerializer(serializers.ModelSerializer):
+    sender_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Message
+        fields = ('id', 'sender', 'subject', 'timestamp', 'read', 'sender_name')
+    
+    def get_sender_name(self, obj):
+        return obj.sender.full_name()
+
+class OutgoingMessageSerializer(serializers.ModelSerializer):
+    recipient_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Message
+        fields = ('id', 'recipient', 'subject', 'timestamp', 'recipient_name')
+    
+    def get_recipient_name(self, obj):
+        if obj.recipient != None:
+            return obj.recipient.full_name()
+        else:
+            return "No Recipient"
