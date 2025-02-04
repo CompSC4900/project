@@ -18,3 +18,12 @@ def user_info(request):
     return Response({
         "name": full_name
     })
+
+# API endpoint to return if user is staff or not
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def is_staff(request):
+    is_staff = request.user.is_staff
+    return Response({
+        "staff": is_staff
+    })
