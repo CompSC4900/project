@@ -7,9 +7,7 @@ import pytz
 class AppointmentSettings(models.Model):
     appointment_types = models.ManyToManyField(AppointmentType)
     appointment_slot_duration = models.IntegerField(validators=[MinValueValidator(5), MaxValueValidator(180)]) # in minutes
-    weekly_schedule = models.JSONField(
-        validators=[JsonSchemaValidator(schema=WeeklySchedule.schema())]
-    )
+    weekly_schedule = models.JSONField()
     '''
         interface TimeRange {
             start: TimeString
@@ -18,9 +16,7 @@ class AppointmentSettings(models.Model):
         type Schedule = TimeRange[]
         weekly_schedule: Schedule[7]
     '''
-    day_overrides = models.JSONField(
-        validators=[JsonSchemaValidator(schema=DayOverrides.schema())]
-    )
+    day_overrides = models.JSONField()
     '''
         day_overrides: Record<DateString, Schedule>
     '''
@@ -57,6 +53,21 @@ class AppointmentDay(models.Model):
         on_delete=models.PROTECT,
     )
 
+    def get_available_slots(self):
+        settings = self.appointment_settings
+        slots = settings.get_slots_for_day(self.day)
+        slots = [slot for slot in slots if slot >= timezone.now()]
+
+        appointments = Appointment.objects.filter(day=self, status='PENDING')
+        for appointment in appointments:
+            time = settings.get_date_time(self.day, appointment.time)
+            filled_slots = []
+            for slot_count in range(appointment.appointment_type.duration):
+                filled_slots.append(time + timezone.timedelta(minutes=settings.appointment_slot_duration * slot_count))
+            slots = [slot for slot in slots if slot not in filled_slots]
+        
+        return slots
+
 class Appointment(models.Model):
     day = models.ForeignKey(
         AppointmentDay, 
@@ -64,8 +75,8 @@ class Appointment(models.Model):
         on_delete=models.CASCADE,
     )
     name = models.CharField(max_length=50)
-    description = models.TextField()
-    internal_notes = models.TextField()
+    description = models.TextField(blank=True)
+    internal_notes = models.TextField(blank=True)
     time = models.TimeField()
     appointment_type = models.ForeignKey(
         AppointmentType,
@@ -90,7 +101,7 @@ class Appointment(models.Model):
         on_delete=MODELS.CASCADE,
         null=True,
     )
-    status = models.CharField(choices={'PENDING': 'Pending', 'COMPLETE': 'Complete', 'NOSHOW': 'No Show', 'CANCELED': 'Canceled', 'RESCHEDULE': 'Rescheduled'}, default='P', max_length=10)
+    status = models.CharField(choices={'PENDING': 'Pending', 'COMPLETE': 'Complete', 'NOSHOW': 'No Show', 'CANCELED': 'Canceled', 'RESCHEDULE': 'Rescheduled'}, default='PENDING', max_length=10)
     rescheduled_to = models.ForeignKey(
         Appointment,
         related_name='rescheduled_from',

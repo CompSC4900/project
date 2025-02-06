@@ -1,5 +1,5 @@
 from .models import AppointmentSettings, AppointmentDay, Appointment
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework import serializers
 from datetime import datetime
 from django.utils import timezone
@@ -58,8 +58,7 @@ class AppointmentSettingsSerializer(serializers.ModelSerializer):
             validate_schedule(schedule, slot_duration, 'day_overrides')
         return value
 
-# appointment day serializer for patients
-class PatientAppointmentDaySerializer(serializers.ModelSerializer):
+class AppointmentDaySerializer(serializers.ModelSerializer):
     available_slots = serializers.SerializerMethodField()
     appointments = serializers.SerializerMethodField()
 
@@ -68,37 +67,104 @@ class PatientAppointmentDaySerializer(serializers.ModelSerializer):
         fields = ('available_slots', 'appointments')
     
     def get_available_slots(self, obj):
-        settings = obj.appointment_settings
-        slots = settings.get_slots_for_day(obj.day)
-        slots = [slot for slot in slots if slot >= timezone.now()]
-
-        appointments = Appointment.objects.filter(day=obj, status='PENDING')
-        for appointment in appointments:
-            time = settings.get_date_time(obj.day, appointment.time)
-            filled_slots = []
-            for slot_count in range(appointment.appointment_type.duration):
-                filled_slots.append(time + timezone.timedelta(minutes=settings.appointment_slot_duration * slot_count))
-            slots = [slot for slot in slots if slot not in filled_slots]
-        
-        return slots
+        return obj.get_available_slots()
     
     def get_appointments(self, obj):
         user = self.context['request'].user
-        queryset = Appointment.objects.filter(patient=user, day=obj, status__in=['PENDING', 'COMPLETE', 'NOSHOW'])
+        if self.context['staff_mode']:
+            queryset = Appointment.objects.filter(day=obj, status__in=['PENDING', 'COMPLETE', 'NOSHOW'])
+        else:
+            queryset = Appointment.objects.filter(patient=user, day=obj, status__in=['PENDING', 'COMPLETE', 'NOSHOW'])
         return AppointmentListSerializer(queryset, many=True).data
 
 class AppointmentListSerializer(serializers.ModelSerializer):
-    time = serializers.SerializerMethodField()
+    time = serializer.SerializerMethodField()
     duration = serializers.SerializerMethodField()
+    doctor = serializers.SerializerMethodField()
+    patient = serializers.SerializerMethodField()
 
     class Meta:
         model = Appointment
-        fields = ('id', 'name', 'time', 'duration')
-
+        fields = ('id', 'name', 'time', 'duration', 'doctor', 'patient')
+    
     def get_time(self, obj) -> datetime:
         settings = obj.day.appointment_settings
         return settings.get_date_time(obj.day.day, obj.time)
     
     def get_duration(self, obj) -> int:
         settings = obj.day.appointment_settings
-        return obj.duration * settings.appointment_slot_duration
+        return obj.appointment_type.duration * settings.appointment_slot_duration
+
+    def get_doctor(self, obj) -> str:
+        if doctor == None:
+            return ''
+        else:
+            obj.doctor.get_full_name()
+    
+    def get_patient(self, obj) -> str:
+        if patient == None:
+            return ''
+        else:
+            return obj.patient.get_full_name()
+
+# Gets the details of an appointment, assuming the client already knows the information from an AppointmentListSerializer
+class PatientAppointmentDetailsSerializer(models.ModelSerializer):
+    class Meta:
+        model = Appointment
+        fields = ('description', 'status', 'appointment_type')
+
+class StaffAppointmentDetailsSerializer(models.ModelSerializer):
+    added_by = serializer.SerializerMethodField()
+    added_by_role = serializer.SerializerMethodField()
+
+    class Meta:
+        model = Appointment
+        fields = (
+            'description',
+            'status',
+            'internal_notes',
+            'appointment_type',
+            'added_by',
+            'added_by_role',
+        )
+    
+    def get_added_by(self, obj):
+        return obj.added_by.get_full_name()
+    
+    def get_added_by_role(self, obj):
+        if obj.added_by == obj.patient:
+            return 'patient'
+        else:
+            return 'staff'
+
+class BaseAppointmentSerializer(models.ModelSerializer):
+    def validate(self, data):
+        try:
+            data['day'] = AppointmentDay.objects.get(day=data['data'])
+        except AppointmentDay.DoesNotExist:
+            raise PermissionDenied("You are not allowed to schedule an appointment on this date.")
+
+        available_slots = data['day'].get_available_slots()
+        duration = appointment_type.duration
+        for i in range(0, duration, data['day'].settings.slot_duration):
+            if time + datetime.timedelta(minutes=i) not in available_slots:
+                raise ValidationError({'time': 'Slot not available.'})
+        return data
+
+class PatientAppointmentSerializer(BaseAppointmentSerializer):
+    class Meta:
+        model = Appointment
+        fields = (day, time, appointment_type, doctor)
+
+    def create(self, validated_data):
+        validated_data['name'] = appointment_type.name
+        validated_data['added_by'] = self.request['user']
+        validated_data['patient'] = self.request['user']
+        validated_data['status'] = 'PENDING'
+        return super().create(validated_data)
+
+
+class StaffAppointmentSerializer(BaseAppointmentSerializer):
+    class Meta:
+        model = Appointment
+        fields = (day, time, appointment_type, name, description, internal_notes, doctor, patient)
