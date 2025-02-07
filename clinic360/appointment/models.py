@@ -23,6 +23,12 @@ class AppointmentSettings(models.Model):
     schedulable_duration = models.IntegerField(validators=[MinValueValidator(0)])
     schedulable_cutoff_override = models.DateField(blank=True, null=True)
     timezone = models.CharField(max_length=50, default='UTC')
+    active = models.BooleanField(default=True)
+    doctor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='doctor_appointment_settings',
+        on_delete=MODELS.CASCADE,
+    )
 
     # Safely combines a date and time and returns it in a timezone-aware format
     def combine_date_time(self, date, time):
@@ -30,8 +36,8 @@ class AppointmentSettings(models.Model):
         tz = pytz.timezone(self.timezone)
         return tz.localize(native_datetime)
 
-    def get_slots_for_day(day):
-        schedule = day_overrides.get(day.strftime('%Y-%m-%d'), None)
+    def get_slots_for_day(self, day):
+        schedule = self.day_overrides.get(day.strftime('%Y-%m-%d'), None)
         if schedule == None:
             weekday = (day.weekday() + 1) % 7 # Convert to Sunday-based week
             schedule = weekly_schedule[weekday]
@@ -41,8 +47,8 @@ class AppointmentSettings(models.Model):
             slot = datetime.strptime(time_range['start'], '%H:%M').time()
             end = datetime.strptime(time_range['end'], '%H:%M').time()
             while slot < end:
-                slots.append(combine_date_time(day, slot))
-                slots += datetime.timedelta(minutes=appointment_slot_duration)
+                slots.append(self.combine_date_time(day, slot))
+                slot += datetime.timedelta(minutes=self.appointment_slot_duration)
         return slots
 
 class AppointmentDay(models.Model):
@@ -53,6 +59,9 @@ class AppointmentDay(models.Model):
         on_delete=models.PROTECT,
     )
 
+    class Meta:
+        unique_together = ('day', 'appointment_settings')
+
     def get_available_slots(self):
         settings = self.appointment_settings
         slots = settings.get_slots_for_day(self.day)
@@ -60,7 +69,7 @@ class AppointmentDay(models.Model):
 
         appointments = Appointment.objects.filter(day=self, status='PENDING')
         for appointment in appointments:
-            time = settings.get_date_time(self.day, appointment.time)
+            time = settings.combine_date_time(self.day, appointment.time)
             filled_slots = []
             for slot_count in range(appointment.appointment_type.duration):
                 filled_slots.append(time + timezone.timedelta(minutes=settings.appointment_slot_duration * slot_count))

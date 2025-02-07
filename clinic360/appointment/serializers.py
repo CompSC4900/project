@@ -36,7 +36,7 @@ def validate_schedule(candidate, slot_duration, field):
 class AppointmentSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AppointmentSettings
-        fields = ('appointment_types', 'appointment_slot_duration', 'weekly_schedule', 'day_overrides', 'schedulable_duration', 'schedulable_cutoff_override')
+        fields = ('appointment_types', 'appointment_slot_duration', 'weekly_schedule', 'day_overrides', 'schedulable_duration', 'schedulable_cutoff_override', 'doctor')
 
     def validate_weekly_schedule(self, value):
         slot_duration = self.initial_data.get('appointment_slot_duration')
@@ -57,6 +57,12 @@ class AppointmentSettingsSerializer(serializers.ModelSerializer):
                 raise ValidationError({'day_overrides': 'Invalid date format.'})
             validate_schedule(schedule, slot_duration, 'day_overrides')
         return value
+    
+    def create(self, validated_data):
+        existing_settings = AppointmentSettings.objects.filter(doctor=validated_data['doctor'])
+        existing_settings.update(active=False)
+        return super().create(validated_data)
+
 
 class AppointmentDaySerializer(serializers.ModelSerializer):
     available_slots = serializers.SerializerMethodField()
@@ -78,7 +84,7 @@ class AppointmentDaySerializer(serializers.ModelSerializer):
         return AppointmentListSerializer(queryset, many=True).data
 
 class AppointmentListSerializer(serializers.ModelSerializer):
-    time = serializer.SerializerMethodField()
+    time = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()
     doctor = serializers.SerializerMethodField()
     patient = serializers.SerializerMethodField()
@@ -96,7 +102,7 @@ class AppointmentListSerializer(serializers.ModelSerializer):
         return obj.appointment_type.duration * settings.appointment_slot_duration
 
     def get_doctor(self, obj) -> str:
-        if doctor == None:
+        if obj.doctor == None:
             return ''
         else:
             obj.doctor.get_full_name()
@@ -108,14 +114,14 @@ class AppointmentListSerializer(serializers.ModelSerializer):
             return obj.patient.get_full_name()
 
 # Gets the details of an appointment, assuming the client already knows the information from an AppointmentListSerializer
-class PatientAppointmentDetailsSerializer(models.ModelSerializer):
+class PatientAppointmentDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
         fields = ('description', 'status', 'appointment_type')
 
-class StaffAppointmentDetailsSerializer(models.ModelSerializer):
-    added_by = serializer.SerializerMethodField()
-    added_by_role = serializer.SerializerMethodField()
+class StaffAppointmentDetailsSerializer(serializers.ModelSerializer):
+    added_by = serializers.SerializerMethodField()
+    added_by_role = serializers.SerializerMethodField()
 
     class Meta:
         model = Appointment
@@ -137,34 +143,34 @@ class StaffAppointmentDetailsSerializer(models.ModelSerializer):
         else:
             return 'staff'
 
-class BaseAppointmentSerializer(models.ModelSerializer):
+class BaseAppointmentSerializer(serializers.ModelSerializer):
     def validate(self, data):
-        try:
-            data['day'] = AppointmentDay.objects.get(day=data['data'])
-        except AppointmentDay.DoesNotExist:
-            raise PermissionDenied("You are not allowed to schedule an appointment on this date.")
+        with transaction.atomic():
+            try:
+                data['day'] = AppointmentDay.objects.select_for_update().get(day=data['day'])
+            except AppointmentDay.DoesNotExist:
+                raise PermissionDenied("You are not allowed to schedule an appointment on this date.")
 
-        available_slots = data['day'].get_available_slots()
-        duration = appointment_type.duration
-        for i in range(0, duration, data['day'].settings.slot_duration):
-            if time + datetime.timedelta(minutes=i) not in available_slots:
-                raise ValidationError({'time': 'Slot not available.'})
-        return data
+            available_slots = data['day'].get_available_slots()
+            duration = data['appointment_type'].duration
+            for i in range(0, duration, data['day'].settings.slot_duration):
+                if data['time'] + datetime.timedelta(minutes=i) not in available_slots:
+                    raise ValidationError({'time': 'Slot not available.'})
+            return data
 
 class PatientAppointmentSerializer(BaseAppointmentSerializer):
     class Meta:
         model = Appointment
-        fields = (day, time, appointment_type, doctor)
+        fields = ('day', 'time', 'appointment_type', 'doctor')
 
     def create(self, validated_data):
-        validated_data['name'] = appointment_type.name
+        validated_data['name'] = validated_data['appointment_type'].name
         validated_data['added_by'] = self.request['user']
         validated_data['patient'] = self.request['user']
         validated_data['status'] = 'PENDING'
         return super().create(validated_data)
 
-
 class StaffAppointmentSerializer(BaseAppointmentSerializer):
     class Meta:
         model = Appointment
-        fields = (day, time, appointment_type, name, description, internal_notes, doctor, patient)
+        fields = ('day', 'time', 'appointment_type', 'name', 'description', 'internal_notes', 'doctor', 'patient')
