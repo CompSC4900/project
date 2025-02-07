@@ -23,7 +23,11 @@ type DateFieldProps = BaseProps & {
     type: "date"
 }
 
-type Props = TextFieldProps | ChoiceFieldProps | DateFieldProps
+type DayFieldProps = BaseProps & {
+    type: "time"
+}
+
+type Props = TextFieldProps | ChoiceFieldProps | DateFieldProps | DayFieldProps
 
 export default function FormField(props: Props) {
     const {type, name, displayName, error, value, className, onChange} = props;
@@ -31,8 +35,12 @@ export default function FormField(props: Props) {
     let inputElement: ReactNode;
 
     function getHtmlType() {
-        if (type === "date") {
-            return "date";
+        switch (type) {
+            case "date":
+            case "time":
+                return type;
+            default:
+                break;
         }
 
         switch (name) {
@@ -49,6 +57,7 @@ export default function FormField(props: Props) {
     switch (type) {
         case "text":
         case "date":
+        case "time":
             inputElement = (
                 <input 
                     type={getHtmlType()}
