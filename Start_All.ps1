@@ -8,5 +8,5 @@ python manage.py migrate
 Start-Process "powershell" -ArgumentList "python manage.py runserver"
 
 # Switch to front-end folder and run dev
-cd ..\Clinic360-fe
+cd ..\clinic360-fe
 npm run dev
