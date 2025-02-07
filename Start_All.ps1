@@ -1,3 +1,4 @@
+venv\Scripts\activate
 cd .\Clinic360
 python manage.py makemigrations accounts
 python manage.py makemigrations messages
