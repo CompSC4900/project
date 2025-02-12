@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import Home from "./components/tabs/Home";
 import Scheduling from "./components/tabs/Scheduling"
 import Messages from "./components/tabs/Messages"
+import Availability from "./components/tabs/Availability"
 import { ConfirmationProvider } from './components/ConfirmationContext';
 import { AuthProvider } from './components/AuthContext';
 
@@ -11,6 +12,7 @@ const TAB_COMPONENTS = {
     "Home": Home,
     "Scheduling": Scheduling,
     "Messages": Messages,
+    "Availability": Availability,
 } as const;
 
 export default function App() {
