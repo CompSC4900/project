@@ -3,6 +3,13 @@ from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 import datetime
 import pytz
+from django.utils import timezone
+
+class AppointmentType(models.Model):
+    name = models.CharField(max_length=50)
+    duration = models.IntegerField(validators=[MinValueValidator(1)]) # in number of slots
+    patient_facing = models.BooleanField() # if true, appointments require a patient and a doctor
+    bookable_by = models.ManyToManyField(models.Group)
 
 class AppointmentSettings(models.Model):
     appointment_types = models.ManyToManyField(AppointmentType)
@@ -27,7 +34,7 @@ class AppointmentSettings(models.Model):
     doctor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name='doctor_appointment_settings',
-        on_delete=MODELS.CASCADE,
+        on_delete=models.CASCADE,
     )
 
     # Safely combines a date and time and returns it in a timezone-aware format
@@ -40,7 +47,7 @@ class AppointmentSettings(models.Model):
         schedule = self.day_overrides.get(day.strftime('%Y-%m-%d'), None)
         if schedule == None:
             weekday = (day.weekday() + 1) % 7 # Convert to Sunday-based week
-            schedule = weekly_schedule[weekday]
+            schedule = self.weekly_schedule[weekday]
         
         slots = []
         for time_range in schedule:
@@ -95,32 +102,26 @@ class Appointment(models.Model):
     added_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name='appointments_created',
-        on_delete=MODELS.SET_NULL,
+        on_delete=models.SET_NULL,
         null=True,
     )
     doctor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name='appointments_as_doctor',
-        on_delete=MODELS.CASCADE,
+        on_delete=models.CASCADE,
         null=True,
     )
     patient = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name='appointments_as_patient',
-        on_delete=MODELS.CASCADE,
+        on_delete=models.CASCADE,
         null=True,
     )
     status = models.CharField(choices={'PENDING': 'Pending', 'COMPLETE': 'Complete', 'NOSHOW': 'No Show', 'CANCELED': 'Canceled', 'RESCHEDULE': 'Rescheduled'}, default='PENDING', max_length=10)
     rescheduled_to = models.ForeignKey(
-        Appointment,
+        'self',
         related_name='rescheduled_from',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )
-
-class AppointmentType(models.Model):
-    name = models.CharField(max_length=50)
-    duration = models.IntegerField(validators=[MinValueValidator(1)]) # in number of slots
-    patient_facing = models.BooleanField() # if true, appointments require a patient and a doctor
-    bookable_by = models.ManyToManyField(models.Group)

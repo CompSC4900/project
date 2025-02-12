@@ -2,7 +2,7 @@ from .models import AppointmentSettings, AppointmentDay, Appointment
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework import serializers
 from datetime import datetime
-from django.utils import timezone
+from django.db import transaction
 
 def raise_json_error(field):
     raise ValidationError({field: 'Invalid JSON schema.'})
@@ -108,7 +108,7 @@ class AppointmentListSerializer(serializers.ModelSerializer):
             obj.doctor.get_full_name()
     
     def get_patient(self, obj) -> str:
-        if patient == None:
+        if obj.patient == None:
             return ''
         else:
             return obj.patient.get_full_name()
@@ -145,18 +145,17 @@ class StaffAppointmentDetailsSerializer(serializers.ModelSerializer):
 
 class BaseAppointmentSerializer(serializers.ModelSerializer):
     def validate(self, data):
-        with transaction.atomic():
-            try:
-                data['day'] = AppointmentDay.objects.select_for_update().get(day=data['day'])
-            except AppointmentDay.DoesNotExist:
-                raise PermissionDenied("You are not allowed to schedule an appointment on this date.")
+        try:
+            data['day'] = AppointmentDay.objects.select_for_update().get(day=data['day'])
+        except AppointmentDay.DoesNotExist:
+            raise PermissionDenied("You are not allowed to schedule an appointment on this date.")
 
-            available_slots = data['day'].get_available_slots()
-            duration = data['appointment_type'].duration
-            for i in range(0, duration, data['day'].settings.slot_duration):
-                if data['time'] + datetime.timedelta(minutes=i) not in available_slots:
-                    raise ValidationError({'time': 'Slot not available.'})
-            return data
+        available_slots = data['day'].get_available_slots()
+        duration = data['appointment_type'].duration
+        for i in range(0, duration, data['day'].settings.slot_duration):
+            if data['time'] + datetime.timedelta(minutes=i) not in available_slots:
+                raise ValidationError({'time': 'Slot not available.'})
+        return data
 
 class PatientAppointmentSerializer(BaseAppointmentSerializer):
     class Meta:
