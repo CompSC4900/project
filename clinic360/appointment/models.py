@@ -9,7 +9,7 @@ class AppointmentType(models.Model):
     name = models.CharField(max_length=50)
     duration = models.IntegerField(validators=[MinValueValidator(1)]) # in number of slots
     patient_facing = models.BooleanField() # if true, appointments require a patient and a doctor
-    bookable_by = models.ManyToManyField(models.Group)
+    # bookable_by = models.ManyToManyField(models.Group) # TODO: maybe think about this later
 
 class AppointmentSettings(models.Model):
     appointment_types = models.ManyToManyField(AppointmentType)
@@ -30,6 +30,7 @@ class AppointmentSettings(models.Model):
     schedulable_duration = models.IntegerField(validators=[MinValueValidator(0)])
     schedulable_cutoff_override = models.DateField(blank=True, null=True)
     timezone = models.CharField(max_length=50, default='UTC')
+    reschedule_window = models.IntegerField(validators=[MinValueValidator(0)])
     active = models.BooleanField(default=True)
     doctor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -74,6 +75,7 @@ class AppointmentDay(models.Model):
         slots = settings.get_slots_for_day(self.day)
         slots = [slot for slot in slots if slot >= timezone.now()]
 
+        # Note: This query should be used within a transaction with select_for_update()
         appointments = Appointment.objects.filter(day=self, status='PENDING')
         for appointment in appointments:
             time = settings.combine_date_time(self.day, appointment.time)

@@ -27,4 +27,5 @@ urlpatterns = [
     path('api/userinfo/', user_info, name='user_info'),
     path('api/is_staff/', is_staff, name='is_staff'), 
     path('api/', include('message.urls')),
+    path('api/appointment/', include('appointment.urls')),
 ]

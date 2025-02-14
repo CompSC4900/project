@@ -1,8 +1,13 @@
-from .models import AppointmentSettings, AppointmentDay, Appointment
+from .models import AppointmentSettings, AppointmentDay, Appointment, AppointmentType
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework import serializers
 from datetime import datetime
-from django.db import transaction
+
+class AppointmentTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AppointmentType
+        fields = ('id', 'name', 'duration', 'patient_facing')
+        read_only_fields = ('id',)
 
 def raise_json_error(field):
     raise ValidationError({field: 'Invalid JSON schema.'})
@@ -36,7 +41,8 @@ def validate_schedule(candidate, slot_duration, field):
 class AppointmentSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AppointmentSettings
-        fields = ('appointment_types', 'appointment_slot_duration', 'weekly_schedule', 'day_overrides', 'schedulable_duration', 'schedulable_cutoff_override', 'doctor')
+        fields = ('id', 'appointment_types', 'appointment_slot_duration', 'weekly_schedule', 'day_overrides', 'reschedule_window', 'schedulable_duration', 'schedulable_cutoff_override', 'doctor')
+        read_only_fields = ('id',)
 
     def validate_weekly_schedule(self, value):
         slot_duration = self.initial_data.get('appointment_slot_duration')
@@ -70,7 +76,8 @@ class AppointmentDaySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AppointmentDay
-        fields = ('available_slots', 'appointments')
+        fields = ('id', 'available_slots', 'appointments')
+        read_only_fields = ('id',)
     
     def get_available_slots(self, obj):
         return obj.get_available_slots()
@@ -105,7 +112,7 @@ class AppointmentListSerializer(serializers.ModelSerializer):
         if obj.doctor == None:
             return ''
         else:
-            obj.doctor.get_full_name()
+            return obj.doctor.get_full_name()
     
     def get_patient(self, obj) -> str:
         if obj.patient == None:
@@ -145,31 +152,51 @@ class StaffAppointmentDetailsSerializer(serializers.ModelSerializer):
 
 class BaseAppointmentSerializer(serializers.ModelSerializer):
     def validate(self, data):
-        try:
-            data['day'] = AppointmentDay.objects.select_for_update().get(day=data['day'])
-        except AppointmentDay.DoesNotExist:
-            raise PermissionDenied("You are not allowed to schedule an appointment on this date.")
-
-        available_slots = data['day'].get_available_slots()
+        # Get appointment day with a lock
+        appointment_day = (
+            AppointmentDay.objects
+            .select_for_update()
+            .get(id=data['day'].id)
+        )
+        
+        available_slots = appointment_day.get_available_slots()
         duration = data['appointment_type'].duration
-        for i in range(0, duration, data['day'].settings.slot_duration):
-            if data['time'] + datetime.timedelta(minutes=i) not in available_slots:
+        date_time = appointment_day.appointment_settings.combine_date_time(
+            appointment_day.day, 
+            data['time']
+        )
+        
+        for i in range(
+            0,
+            duration * appointment_day.appointment_settings.appointment_slot_duration,
+            appointment_day.appointment_settings.appointment_slot_duration
+        ):
+            if date_time + datetime.timedelta(minutes=i) not in available_slots:
                 raise ValidationError({'time': 'Slot not available.'})
         return data
 
 class PatientAppointmentSerializer(BaseAppointmentSerializer):
     class Meta:
         model = Appointment
-        fields = ('day', 'time', 'appointment_type', 'doctor')
+        fields = ('id', 'day', 'time', 'appointment_type', 'doctor')
+        read_only_fields = ('id',)
+
+    def validate(self, data):
+        if data['day'].appointment_settings.doctor != data['doctor']:
+            raise ValidationError({'doctor': 'Mismatch between doctor and appointment day.'})
+        if not self.context['request'].user.associated_users.filter(id=data['doctor'].id).exists():
+            raise PermissionDenied()
+        return super().validate(data)
 
     def create(self, validated_data):
         validated_data['name'] = validated_data['appointment_type'].name
-        validated_data['added_by'] = self.request['user']
-        validated_data['patient'] = self.request['user']
+        validated_data['added_by'] = self.context['request'].user
+        validated_data['patient'] = self.context['request'].user
         validated_data['status'] = 'PENDING'
         return super().create(validated_data)
 
 class StaffAppointmentSerializer(BaseAppointmentSerializer):
     class Meta:
         model = Appointment
-        fields = ('day', 'time', 'appointment_type', 'name', 'description', 'internal_notes', 'doctor', 'patient')
+        fields = ('id', 'day', 'time', 'appointment_type', 'name', 'description', 'internal_notes', 'doctor', 'patient')
+        read_only_fields = ('id',)
