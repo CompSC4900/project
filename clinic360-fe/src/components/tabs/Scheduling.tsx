@@ -2,6 +2,8 @@ import Calendar from "../calendar/Calendar";
 import DayView from "../calendar/DayView";
 import { useState } from "react";
 import Popup from "../Popup";
+import AppointmentScheduler from "../AppointmentScheduler";
+
 
 export default function Scheduling() {
     let [selectedDay, setSelectedDay] = useState<Date | null>(null);
@@ -46,6 +48,9 @@ export default function Scheduling() {
             >
                 <div className="p-3">Scheduling Appointment</div>
             </Popup>
+
+            {/* Floating Button for Scheduling Appointments */}
+            <AppointmentScheduler />  
         </>
     );
 }
