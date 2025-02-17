@@ -34,7 +34,14 @@ export default function CalendarMonth({year, month, events, onDaySelected}: Prop
             .sort((a, b) => b.time.getTime() - a.time.getTime())
             .sort((a, b) => Number(b.allDay) - Number(a.allDay));
         return eventsForDay.map((event, i) => (
-            <small className="d-block px-2 rounded-pill text-body" style={{backgroundColor: event.color}} key={i}>
+            <small className="d-block px-2 rounded-pill text-body" style={{
+                backgroundColor: event.color,
+                fontSize: "clamp(0.7rem, 1.2vw, 1rem)",
+                overflow: "hidden",
+                overflowWrap: "break-word",
+                whiteSpace: "nowrap",
+                display: "block",
+                }} key={i}>
                 <b>{event.time.toLocaleTimeString(undefined, {hour: "numeric", minute: "numeric"})}</b> {event.title}
             </small>
         ))
@@ -57,6 +64,13 @@ export default function CalendarMonth({year, month, events, onDaySelected}: Prop
             >
                 <div
                     className={`w-100 text-end ${day.getMonth() === month ? "" : "text-muted"}`}
+                    style={{
+                        fontSize: "clamp(0.8rem, 1.2vw, 1rem)",
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
+                        display: "block",
+                        textAlign:"right"
+                    }}
                 >
                     {day.getDate()}
                 </div>
