@@ -1,7 +1,7 @@
 from .models import AppointmentSettings, AppointmentDay, Appointment, AppointmentType
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework import serializers
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class AppointmentTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -45,7 +45,7 @@ class AppointmentSettingsSerializer(serializers.ModelSerializer):
         read_only_fields = ('id',)
 
     def validate_weekly_schedule(self, value):
-        slot_duration = self.initial_data.get('appointment_slot_duration')
+        slot_duration = int(self.initial_data.get('appointment_slot_duration'))
         if not isinstance(value, list) or len(value) != 7:
             raise_json_error('weekly_schedule')
         for daily_schedule in value:
@@ -102,7 +102,7 @@ class AppointmentListSerializer(serializers.ModelSerializer):
     
     def get_time(self, obj) -> datetime:
         settings = obj.day.appointment_settings
-        return settings.get_date_time(obj.day.day, obj.time)
+        return settings.combine_date_time(obj.day.day, obj.time)
     
     def get_duration(self, obj) -> int:
         settings = obj.day.appointment_settings
@@ -171,7 +171,7 @@ class BaseAppointmentSerializer(serializers.ModelSerializer):
             duration * appointment_day.appointment_settings.appointment_slot_duration,
             appointment_day.appointment_settings.appointment_slot_duration
         ):
-            if date_time + datetime.timedelta(minutes=i) not in available_slots:
+            if date_time + timedelta(minutes=i) not in available_slots:
                 raise ValidationError({'time': 'Slot not available.'})
         return data
 

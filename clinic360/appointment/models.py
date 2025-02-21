@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
-import datetime
+from datetime import datetime, timedelta
 import pytz
 from django.utils import timezone
 
@@ -40,7 +40,7 @@ class AppointmentSettings(models.Model):
 
     # Safely combines a date and time and returns it in a timezone-aware format
     def combine_date_time(self, date, time):
-        native_datetime = datetime.datetime.combine(date, time)
+        native_datetime = datetime.combine(date, time)
         tz = pytz.timezone(self.timezone)
         return tz.localize(native_datetime)
 
@@ -52,11 +52,11 @@ class AppointmentSettings(models.Model):
         
         slots = []
         for time_range in schedule:
-            slot = datetime.strptime(time_range['start'], '%H:%M').time()
-            end = datetime.strptime(time_range['end'], '%H:%M').time()
+            slot = self.combine_date_time(day, datetime.strptime(time_range['start'], '%H:%M').time())
+            end = self.combine_date_time(day, datetime.strptime(time_range['end'], '%H:%M').time())
             while slot < end:
-                slots.append(self.combine_date_time(day, slot))
-                slot += datetime.timedelta(minutes=self.appointment_slot_duration)
+                slots.append(slot)
+                slot += timedelta(minutes=self.appointment_slot_duration)
         return slots
 
 class AppointmentDay(models.Model):
@@ -119,7 +119,13 @@ class Appointment(models.Model):
         on_delete=models.CASCADE,
         null=True,
     )
-    status = models.CharField(choices={'PENDING': 'Pending', 'COMPLETE': 'Complete', 'NOSHOW': 'No Show', 'CANCELED': 'Canceled', 'RESCHEDULE': 'Rescheduled'}, default='PENDING', max_length=10)
+    status = models.CharField(choices=[
+        ('PENDING', 'Pending'),
+        ('COMPLETE', 'Complete'),
+        ('NOSHOW', 'No Show'),
+        ('CANCELED', 'Canceled'),
+        ('RESCHEDULE', 'Rescheduled')
+    ], default='PENDING', max_length=10)
     rescheduled_to = models.ForeignKey(
         'self',
         related_name='rescheduled_from',

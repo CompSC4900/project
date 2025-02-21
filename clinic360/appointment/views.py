@@ -134,7 +134,7 @@ class RescheduleAppointmentView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        Appointment.objects.filter(id=serializer.data['id']).update(status='RESCHEDULE')
+        Appointment.objects.filter(id=serializer.data['id']).update(status='RESCHEDULE', rescheduled_to=serializer.data['id'])
         return Response(serializer.data)
 
 class CancelAppointmentView(generics.DestroyAPIView):
