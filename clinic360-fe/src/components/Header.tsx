@@ -17,20 +17,19 @@ export default function Header({tabs, activeTab, setActiveTab}: Props) {
     const auth = useAuth();
 
     const [username, setUsername] = useState("");
+    const [isStaff, setStaff] = useState(false);
 
     useEffect(() => {(async () => {
         const response = await auth.fetchProtectedData("userinfo/", "GET");
         expectSuccess(response, auth);
         setUsername(response.data.name);
-    })()}, []);
 
-    const [isStaff, setStaff] = useState(false);
-
-    useEffect(() => {(async () => {
         const response2 = await auth.fetchProtectedData("is_staff/", "GET");
         expectSuccess(response2, auth);
         setStaff(response2.data.staff);
-    })()}, [])
+
+        setActiveTab(tabs[0]);
+    })()}, []);
 
     const homeTab = tabs[0];
     const namedTabs = tabs.slice(1);
