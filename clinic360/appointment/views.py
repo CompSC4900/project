@@ -20,11 +20,19 @@ from django.db import transaction
 from datetime import datetime, timedelta
 
 class StaffAppointmentTypeViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows administrators (staff) to manage appointment types.
+    This includes listing, creating, updating, and deleting appointment types.
+    """
     queryset = AppointmentType.objects.all()
     permission_classes = (IsAdminUser,)
     serializer_class = AppointmentTypeSerializer
 
 class PatientAppointmentTypeView(generics.ListAPIView):
+    """
+    API endpoint that allows authenticated patients to retrieve **patient-facing appointment types**.
+    The request must include a `doctor` query parameter to filter the available types.
+    """
     permission_classes = (IsAuthenticated,)
     serializer_class = AppointmentTypeSerializer
 
@@ -41,11 +49,19 @@ class PatientAppointmentTypeView(generics.ListAPIView):
         )
 
 class AppointmentSettingsView(generics.CreateAPIView):
+    """
+    API endpoint for **staff members only** to create appointment settings.
+    Appointment settings include scheduling rules, slot durations, and provider availability.
+    """
     queryset = AppointmentSettings.objects.all()
     permission_classes = (IsAdminUser,)
     serializer_class = AppointmentSettingsSerializer
 
 class AppointmentDaysView(generics.ListAPIView):
+    """
+    API endpoint that retrieves **available appointment days** for a given month and year.
+    Patients can only view appointment days for doctors they are associated with.
+    """
     permission_classes = (IsAuthenticated,)
     serializer_class = AppointmentDaySerializer
 
@@ -69,11 +85,18 @@ class AppointmentDaysView(generics.ListAPIView):
         return context
 
 class StaffAppointmentDetailsView(generics.RetrieveAPIView):
+    """
+    API endpoint that allows staff to **retrieve appointment details**.
+    """
     queryset = Appointment.objects.all()
     permission_classes = (IsAdminUser,)
     serializer_class = StaffAppointmentDetailsSerializer
 
 class PatientAppointmentDetailsView(generics.RetrieveAPIView):
+    """
+    API endpoint that allows **authenticated patients** to retrieve their own appointment details.
+    Patients can only access their own **PENDING, COMPLETED, or NO-SHOW** appointments.
+    """
     permission_classes = (IsAuthenticated,)
     serializer_class = PatientAppointmentDetailsSerializer
 
@@ -85,6 +108,10 @@ class PatientAppointmentDetailsView(generics.RetrieveAPIView):
         )
 
 class PatientAppointmentView(generics.CreateAPIView):
+    """
+    API endpoint for **patients** to book new appointments.
+    Appointments created here are initially marked as **PENDING**.
+    """
     permission_classes = (IsAuthenticated,)
     serializer_class = PatientAppointmentSerializer
 
@@ -96,6 +123,11 @@ class PatientAppointmentView(generics.CreateAPIView):
         return super().create(request)
 
 class StaffAppointmentView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.UpdateModelMixin):
+    """
+    API endpoint for **staff members** to manage appointments.
+    - Staff can create new appointments.
+    - Staff can update existing appointments.
+    """
     queryset = Appointment.objects.all()
     permission_classes = (IsAdminUser,)
     serializer_class = StaffAppointmentSerializer
@@ -109,6 +141,10 @@ class StaffAppointmentView(generics.GenericAPIView, mixins.CreateModelMixin, mix
         return super().update(request, pk)
 
 def get_reschedulable_appointments(user):
+    """
+    Helper function to retrieve **reschedulable** appointments for a patient.
+    An appointment can be rescheduled **if the reschedule window has not yet expired**.
+    """
     appointments = Appointment.objects.filter(
         patient=user, 
         status='PENDING'
@@ -123,6 +159,10 @@ def get_reschedulable_appointments(user):
     ]
 
 class RescheduleAppointmentView(generics.CreateAPIView):
+    """
+    API endpoint that allows **patients** to reschedule appointments.
+    - The new appointment is created, and the old one is marked as **RESCHEDULED**.
+    """
     permission_classes = (IsAuthenticated,)
     serializer_class = PatientAppointmentSerializer
 
@@ -138,6 +178,10 @@ class RescheduleAppointmentView(generics.CreateAPIView):
         return Response(serializer.data)
 
 class CancelAppointmentView(generics.DestroyAPIView):
+    """
+    API endpoint that allows **patients** to cancel their appointments.
+    Canceled appointments are marked as **CANCELED** instead of being deleted.
+    """
     permission_classes = (IsAuthenticated,)
     serializer_class = PatientAppointmentSerializer
 

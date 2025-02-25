@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Button, Form } from "react-bootstrap";
+import { Modal, Button, Form, Alert, Spinner } from "react-bootstrap";
 
 /**
  * AppointmentScheduler Component
@@ -10,9 +10,6 @@ import { Modal, Button, Form } from "react-bootstrap";
  * - Date Range, Time Range, Location, Appointment Type, Insurance, Provider Name.
  * - View a list of available appointments (using dummy data for now).
  * - Select an appointment and confirm before adding it to the calendar.
- *
- * Notes:
- * - Currently uses static data but will later connect to provider availability.
  */
 
 const AppointmentScheduler: React.FC = () => {
@@ -21,14 +18,16 @@ const AppointmentScheduler: React.FC = () => {
     const [showResultsModal, setShowResultsModal] = useState<boolean>(false); // Controls the results modal
     const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false); // Controls the confirmation modal
     const [selectedAppointment, setSelectedAppointment] = useState<any>(null); // Stores the selected appointment
+    const [appointments, setAppointments] = useState<any[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    
     const [filters, setFilters] = useState({
         dateStart: "",
         dateEnd: "",
         timeStart: "",
         timeEnd: "",
-        location: "",
         type: "",
-        insurance: "",
         provider: "",
     });
 
@@ -38,50 +37,10 @@ const AppointmentScheduler: React.FC = () => {
             dateEnd: "",
             timeStart: "",
             timeEnd: "",
-            location: "",
             type: "",
-            insurance: "",
             provider: "",
         });
     };
-    
-    /**
-     * Dummy Data: Example appointment slots.
-     * - This will later be replaced with actual provider availability.
-     */
-    const dummyAppointments = [
-        { 
-            id: 1, 
-            provider: "Dr. Smith", 
-            location: "Knoxville Dental", 
-            type: "Dental Checkup", 
-            date: "2025-02-15", 
-            time: "3:00 PM", 
-            duration: "30 min", 
-            insurance: "BlueCross BlueShield"
-        },
-        { 
-            id: 2, 
-            provider: "Dr. Johnson", 
-            location: "East TN Healthcare", 
-            type: "General Consultation", 
-            date: "2025-03-10", 
-            time: "9:30 AM", 
-            duration: "45 min", 
-            insurance: "UnitedHealthcare"
-        },
-        { 
-            id: 3, 
-            provider: "Dr. Patel", 
-            location: "Knoxville Clinic", 
-            type: "Eye Exam", 
-            date: "2025-04-05", 
-            time: "1:00 PM", 
-            duration: "20 min", 
-            insurance: "Aetna"
-        }
-    ];
-    
 
     /**
      * Handles user input in the filtering form.
@@ -91,76 +50,50 @@ const AppointmentScheduler: React.FC = () => {
         setFilters({ ...filters, [e.target.name]: e.target.value });
     };
 
-    /**
-     * Handles the search function when the "Search" button is clicked.
-     * In the future, this will fetch real data from the database.
-     */
-    const handleSearch = () => {
-        setShowFilterModal(false); // Close the filter modal
-        setShowResultsModal(true); // Show results modal
+    //Fetches appointments from the backend
+    const fetchAppointments = async () => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            const queryParams = new URLSearchParams();
+
+            if (filters.dateStart) queryParams.append("dateStart", filters.dateStart);
+            if (filters.dateEnd) queryParams.append("dateEnd", filters.dateEnd);
+            if (filters.timeStart) queryParams.append("timeStart", filters.timeStart);
+            if (filters.timeEnd) queryParams.append("timeEnd", filters.timeEnd);
+            if (filters.type) queryParams.append("type", filters.type);
+            if (filters.provider) queryParams.append("provider", filters.provider);
+
+            const response = await fetch(`/api/appointment/days/?${queryParams.toString()}`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`, // Assuming authentication token is stored
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch appointment availability.");
+            }
+
+            const data = await response.json();
+            setAppointments(data);
+        } catch (err) {
+            setError("Error retrieving available appointments. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     /**
-     * Converts time stored as a string into 24-hour format. Used by filteredAppointments
-     * to compare filter user sets to value stored in dummy data. May not need this when
-     * we convert to an actual database and do not store time as strings
-     * 
+     * Handles the search function when the "Search" button is clicked.
      */
-    function convertTo24HourFormat(timeStr: string): string {
-        const [time, modifier] = timeStr.split(" ");
-        let [hours, minutes] = time.split(":").map(Number);
-    
-        if (modifier === "PM" && hours !== 12) hours += 12;
-        if (modifier === "AM" && hours === 12) hours = 0;
-    
-        return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-    }
-    
-    /**
-     * Filters appointments based on user input.
-     */
-    const filteredAppointments = (() => {
-        // Step 1: If all filters are empty, return all appointments immediately
-        if (!filters.dateStart && !filters.dateEnd && !filters.timeStart && !filters.timeEnd &&
-            !filters.location && !filters.insurance && !filters.provider && !filters.type) {
-            return dummyAppointments;
-        }
-    
-        return dummyAppointments.filter((appt) => {
-            // Convert appointment time string into a comparable Date object
-            const apptTime = new Date(`1970-01-01T${convertTo24HourFormat(appt.time)}`);
-    
-            // Convert filter times to Date objects (if provided)
-            const filterTimeStart = filters.timeStart ? new Date(`1970-01-01T${filters.timeStart}`) : null;
-            const filterTimeEnd = filters.timeEnd ? new Date(`1970-01-01T${filters.timeEnd}`) : null;
-    
-            // Date Range Filter
-            const matchesDate =
-                (!filters.dateStart || new Date(appt.date) >= new Date(filters.dateStart)) &&
-                (!filters.dateEnd || new Date(appt.date) <= new Date(filters.dateEnd));
-    
-            // Time Range Filter (properly compares time as Date object)
-            const matchesTime =
-                (!filterTimeStart || apptTime >= filterTimeStart) &&
-                (!filterTimeEnd || apptTime <= filterTimeEnd);
-    
-            // Location Filter
-            const matchesLocation = !filters.location || appt.location.toLowerCase().includes(filters.location.toLowerCase());
-    
-            // Insurance Filter
-            const matchesInsurance = !filters.insurance || appt.insurance.toLowerCase().includes(filters.insurance.toLowerCase());
-    
-            // Provider Filter
-            const matchesProvider = !filters.provider || appt.provider.toLowerCase().includes(filters.provider.toLowerCase());
-    
-            // Appointment Type Filter
-            const matchesType = !filters.type || appt.type === filters.type;
-    
-            return matchesDate && matchesTime && matchesLocation && matchesInsurance && matchesProvider && matchesType;
-        });
-    })();
-    
-
+    const handleSearch = async () => {
+        setShowFilterModal(false); // Close the filter modal
+        setShowResultsModal(true); // Show results modal
+        await fetchAppointments();
+    };
 
     /**
      * Handles selecting an appointment.
@@ -220,18 +153,6 @@ const AppointmentScheduler: React.FC = () => {
                             </div>
                         </Form.Group>
 
-                        {/* Location */}
-                        <Form.Group className="mt-2">
-                            <Form.Label>Location</Form.Label>
-                            <Form.Control type="text" name="location" onChange={handleFilterChange} />
-                        </Form.Group>
-
-                        {/* Insurance */}
-                        <Form.Group className="mt-2">
-                            <Form.Label>Insurance Accepted</Form.Label>
-                            <Form.Control type="text" name="insurance" onChange={handleFilterChange} />
-                        </Form.Group>
-
                         {/* Provider */}
                         <Form.Group className="mt-2">
                             <Form.Label>Provider Name</Form.Label>
@@ -244,7 +165,7 @@ const AppointmentScheduler: React.FC = () => {
                             <Form.Control as="select" name="type" onChange={handleFilterChange}>
                                 <option value="">Select</option>
                                 <option value="Dental Checkup">Dental Checkup</option>
-                                <option value="General Consultation">General Consultation</option>
+                                <option value="General Checkup">General Checkup</option>
                                 <option value="Eye Exam">Eye Exam</option>
                             </Form.Control>
                         </Form.Group>
@@ -262,12 +183,16 @@ const AppointmentScheduler: React.FC = () => {
                     <Modal.Title>Available Appointments</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {filteredAppointments.length > 0 ? (
-                        filteredAppointments.map((appt) => (
+                    {loading ? (
+                        <Spinner animation="border" />
+                    ) : error ? (
+                        <Alert variant="danger">{error}</Alert>
+                    ) : appointments.length > 0 ? (
+                        appointments.map((appt) => (
                             <div key={appt.id} className="border p-2 mb-2">
-                                <strong>{appt.type}</strong> with <strong>{appt.provider}</strong> at <strong>{appt.location}</strong>
+                                <strong>{appt.type}</strong> with <strong>{appt.provider}</strong>
                                 <br />
-                                <span>{appt.date} at {appt.time} ({appt.duration})</span>
+                                <span>{appt.date} at {appt.time}</span>
                                 <Button className="mt-2" variant="success" size="sm" onClick={() => handleSelectAppointment(appt)}>
                                     Select
                                 </Button>
@@ -296,7 +221,6 @@ const AppointmentScheduler: React.FC = () => {
                     {selectedAppointment && (
                         <>
                             <p><strong>Provider:</strong> {selectedAppointment.provider}</p>
-                            <p><strong>Location:</strong> {selectedAppointment.location}</p>
                             <p><strong>Type:</strong> {selectedAppointment.type}</p>
                             <p><strong>Date:</strong> {selectedAppointment.date}</p>
                             <p><strong>Time:</strong> {selectedAppointment.time}</p>
