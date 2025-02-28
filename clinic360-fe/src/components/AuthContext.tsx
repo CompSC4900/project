@@ -42,6 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [tokens.accessToken]);
 
     const login = useCallback(async (email: string, password: string) => {
+        email = email.toLowerCase();
         const response = await fetch(apiBase + "token/", {
             method: 'POST',
             headers: {

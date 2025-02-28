@@ -60,6 +60,7 @@ state_choices = [
 class Clinic360UserManager(BaseUserManager):
     def create_user(self, email, first_name, last_name, address, city, state, zip_code, birth_date, gender, phone_number, password):
         email = self.normalize_email(email)
+        email = email.lower()
         user = self.model(
             email=email,
             first_name=first_name,
@@ -78,6 +79,7 @@ class Clinic360UserManager(BaseUserManager):
         
     def create_superuser(self, email, first_name, last_name, address, city, state, zip_code, birth_date, gender, phone_number, password):
         email = self.normalize_email(email)
+        email = email.lower()
         user = self.model(
             email=email,
             first_name=first_name,
