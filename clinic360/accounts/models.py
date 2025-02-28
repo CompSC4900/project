@@ -1,7 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+#Import many classes from the Django framework.
 
 state_choices = [
+#Here are all the states that can be used for creating an account
     ('AL', 'Alabama'),
     ('AK', 'Alaska'),
     ('AZ', 'Arizona'),
@@ -95,6 +97,7 @@ class Clinic360UserManager(BaseUserManager):
         return user
 
 class Clinic360User(PermissionsMixin, AbstractBaseUser):
+    #Class using the models from Django to define the specifics of Clinic360 accounts and personal information.
     email = models.CharField(max_length=254, unique=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -115,6 +118,7 @@ class Clinic360User(PermissionsMixin, AbstractBaseUser):
     USERNAME_FIELD = 'email'
     EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name', 'address', 'city', 'state', 'zip_code', 'birth_date', 'gender', 'phone_number']
+    #Ensures that the aforementioned information is required for data function
 
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
