@@ -6,7 +6,8 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'clinic360.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'clinic360.settings') 
+    # Sets the default settings module for the Django project to 'clinic360.settings'.
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -16,6 +17,7 @@ def main():
             "forget to activate a virtual environment?"
         ) from exc
     execute_from_command_line(sys.argv)
+    # This module contains all configuration settings for the Django project.
 
 
 if __name__ == '__main__':
