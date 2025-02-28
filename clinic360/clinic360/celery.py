@@ -14,7 +14,7 @@ app.conf.broker = 'django://'
 app.conf.beat_schedule = {
     'create_appointment_days': {
         'task': 'appointment.tasks.create_appointment_days',
-        'schedule': crontab(minute=0, hour='*'),
+        'schedule': crontab(minute=0, hour='*'), 
+        #Configure the time the tasks create an appointment by the minute and hour.
     },
-    #Configure the time the tasks create an appointment by the minute and hour.
 }
