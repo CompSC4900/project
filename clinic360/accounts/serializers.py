@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Clinic360User
 from django.core.validators import RegexValidator
 from django.contrib.auth.password_validation import validate_password
+#Importing the Clinic360User model and regex validators from Django.
 
 class CreateAccountSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
@@ -9,19 +10,23 @@ class CreateAccountSerializer(serializers.ModelSerializer):
     zip_code = serializers.CharField(required=True, validators=[RegexValidator(
         regex=r'^\d{5}$',
         message='Zip code must be 5 digits',
+        #Regex validator and message for if the number of digits is outside the accepted bound.
     )])
     phone_number = serializers.CharField(required=True, validators=[RegexValidator(
         regex=r'^\d{10}$', # Formatting is handled on the front end
         message='Phone number must be 10 digits',
+        #Regex validator and message for the phone number needing 10 digits.
     )])
 
     class Meta:
         model = Clinic360User
         fields = ('email', 'password', 'password2', 'first_name', 'last_name', 'address', 'city', 'state', 'zip_code', 'birth_date', 'gender', 'phone_number')
+        #Serialization model and the necessary fields
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password2": "Password fields don't match."})
+            #Serializer to ensure in validation that the passwords match and an error message if not.
         return attrs
 
     def create(self, validated_data):
@@ -37,4 +42,5 @@ class CreateAccountSerializer(serializers.ModelSerializer):
             gender=validated_data['gender'],
             phone_number=validated_data['phone_number'],
             password=validated_data['password'],
+            #Validated date for a specific Clinic360 user
         )
