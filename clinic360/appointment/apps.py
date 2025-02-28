@@ -1,9 +1,11 @@
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
+#Import migrate signal and Django application for AppConfig.
 
 class AppointmentConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'appointment'
+    #Class that uses a Django model and defines the name to appointment to configure appointments.
 
     def ready(self):
         def _post_migrate_handler(sender, **kwargs):
