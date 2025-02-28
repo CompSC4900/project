@@ -39,7 +39,7 @@ export default function CalendarMonth({year, month, events, onDaySelected}: Prop
                 fontSize: "clamp(0.7rem, 1.2vw, 1rem)",
                 overflow: "hidden",
                 overflowWrap: "break-word",
-                whiteSpace: "nowrap",
+                whiteSpace: "normal",
                 display: "block",
                 }} key={i}>
                 <b>{event.time.toLocaleTimeString(undefined, {hour: "numeric", minute: "numeric"})}</b> {event.title}
@@ -61,6 +61,7 @@ export default function CalendarMonth({year, month, events, onDaySelected}: Prop
                 className={`col p-1 border-end border-bottom ${dayIndex === selectedDayIndex ? "text-bg-primary" : ""}`}
                 onClick={() => handleDaySelected(dayIndex)}
                 key={day.toDateString()}
+                style={{ overflowY: "auto", minHeight: "4rem", }}
             >
                 <div
                     className={`w-100 text-end ${day.getMonth() === month ? "" : "text-muted"}`}
