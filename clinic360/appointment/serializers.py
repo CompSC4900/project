@@ -70,6 +70,18 @@ class AppointmentSettingsSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
+class AppointmentSettingsListSerializer(serializers.ModelSerializer):
+    appointment_types = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AppointmentSettings
+        fields = ('id', 'appointment_types', 'appointment_slot_duration')
+        read_only_fields = ('id',)
+
+    def get_appointment_types(self, obj):
+        types = obj.appointment_types.filter(patient_facing=True)
+        return AppointmentTypeSerializer(types, many=True).data
+
 class AppointmentDaySerializer(serializers.ModelSerializer):
     available_slots = serializers.SerializerMethodField()
     appointments = serializers.SerializerMethodField()

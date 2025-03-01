@@ -8,6 +8,7 @@ from .serializers import (
     PatientAppointmentSerializer,
     StaffAppointmentSerializer,
     AppointmentTypeSerializer,
+    AppointmentSettingsListSerializer,
 )
 from .models import AppointmentSettings, AppointmentDay, Appointment, AppointmentType
 from rest_framework.exceptions import ValidationError, PermissionDenied
@@ -28,13 +29,14 @@ class StaffAppointmentTypeViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminUser,)
     serializer_class = AppointmentTypeSerializer
 
-class PatientAppointmentTypeView(generics.ListAPIView):
-    """
-    API endpoint that allows authenticated patients to retrieve **patient-facing appointment types**.
-    The request must include a `doctor` query parameter to filter the available types.
-    """
+class AppointmentSettingsView(generics.ListCreateAPIView):
+    queryset = AppointmentSettings.objects.filter(active=True)
+    permission_classes = (IsAdminUser,)
+    serializer_class = AppointmentSettingsSerializer
+
+class PatientAppointmentSettingsListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = AppointmentTypeSerializer
+    serializer_class = AppointmentSettingsListSerializer
 
     def get_queryset(self):
         doctor = self.request.query_params.get('doctor')
@@ -42,20 +44,10 @@ class PatientAppointmentTypeView(generics.ListAPIView):
             raise ValidationError({'doctor': 'Doctor is required.'})
         if not self.request.user.associated_users.filter(id=doctor).exists():
             raise PermissionDenied()
-        return AppointmentType.objects.filter(
-            patient_facing=True,
-            appointmentsettings__doctor=doctor,
-            appointmentsettings__active=True
-        )
-
-class AppointmentSettingsView(generics.CreateAPIView):
-    """
-    API endpoint for **staff members only** to create appointment settings.
-    Appointment settings include scheduling rules, slot durations, and provider availability.
-    """
-    queryset = AppointmentSettings.objects.all()
-    permission_classes = (IsAdminUser,)
-    serializer_class = AppointmentSettingsSerializer
+        settings = AppointmentSettings.objects.filter(active=True, doctor=doctor)
+        if settings.count() > 1:
+            raise ValidationError({'doctor': 'Multiple active settings found for doctor.'}, code='internal_error')
+        return settings
 
 class AppointmentDaysView(generics.ListAPIView):
     """
