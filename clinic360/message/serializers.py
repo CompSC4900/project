@@ -28,6 +28,7 @@ class MessageSerializer(serializers.ModelSerializer):
                 raise ValidationError({'subject': 'This field may not be blank.'})
             if not content:
                 raise ValidationError({'content': 'This field may not be blank.'})
+            #Error messages if there are blank fields or missing data
 
         return data
 
@@ -41,9 +42,11 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class IncomingMessageSerializer(serializers.ModelSerializer):
     sender_name = serializers.SerializerMethodField()
+    #Class to indicate and serialize the sender's name.
     
     class Meta:
         model = Message
+        #Serializer based on the message model for the sender
         fields = ('id', 'sender', 'subject', 'timestamp', 'read', 'sender_name')
     
     def get_sender_name(self, obj):
@@ -51,13 +54,17 @@ class IncomingMessageSerializer(serializers.ModelSerializer):
 
 class OutgoingMessageSerializer(serializers.ModelSerializer):
     recipient_name = serializers.SerializerMethodField()
+    #Request for recipient
     
     class Meta:
         model = Message
+        #Serializer based on the message model for the recipient
         fields = ('id', 'recipient', 'subject', 'timestamp', 'recipient_name')
     
     def get_recipient_name(self, obj):
         if obj.recipient != None:
             return obj.recipient.full_name()
+            #If there is a recipient, return the full name.
         else:
             return "No Recipient"
+            #Message if there is no recipient.
