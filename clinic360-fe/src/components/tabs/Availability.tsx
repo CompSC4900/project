@@ -1,77 +1,94 @@
 import Calendar from "../calendar/Calendar";
 import DayView from "../calendar/DayView";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Popup from "../Popup";
 
 export default function Scheduling() {
-  // Array of half hour blocks (minus 12 for lunch)
   const times = [
     "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM",
     "11:00 AM", "11:30 AM", "12:30 PM",
-    "1:00 PM",  "1:30 PM",  "2:00 PM",  "2:30 PM",
-    "3:00 PM",  "3:30 PM",  "4:00 PM",  "4:30 PM",
+    "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM",
+    "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM",
     "5:00 PM"
   ];
 
-  //availability grid for two weeks (current Mon-Fri and next Mon-Fri)
+  // Get current Monday and week key
   const today = new Date();
-  const dayOfWeek = today.getDay(); // 0=Sun..6=Sat
-  const shiftToMonday = (dayOfWeek + 6) % 7;
-  const thisMonday = new Date(today);
-  thisMonday.setDate(thisMonday.getDate() - shiftToMonday);
+  const shiftToMonday = (today.getDay() + 6) % 7;
+  const initialMonday = new Date(today);
+  initialMonday.setDate(initialMonday.getDate() - shiftToMonday);
+  const initialWeekKey = initialMonday.toISOString().split("T")[0];
 
-  // Current week (Mon-Fri)
-  const availabilityDays = [];
-  for (let i = 0; i < 5; i++) {
-    const d = new Date(thisMonday);
-    d.setDate(thisMonday.getDate() + i);
-    availabilityDays.push(d);
-  }
-  // Next week (Mon-Fri)
-  const nextMonday = new Date(thisMonday);
-  nextMonday.setDate(nextMonday.getDate() + 7);
-  for (let i = 0; i < 5; i++) {
-    const d = new Date(nextMonday);
-    d.setDate(nextMonday.getDate() + i);
-    availabilityDays.push(d);
-  }
+  const formatDate = (date) =>
+    date.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit" });
+  const getWeekKey = (monday) => monday.toISOString().split("T")[0];
 
-  // Format current date as MM/DD
-  function formatDate(date) {
-    return date.toLocaleDateString("en-US", {
-      month: "2-digit",
-      day: "2-digit"
+  // Initialize blocked state with the current week grid pre-filled
+  const [blocked, setBlocked] = useState(() => {
+    const saved = localStorage.getItem("blockedWeeks");
+    let weeks = saved ? JSON.parse(saved) : {};
+    if (!weeks[initialWeekKey]) {
+      weeks[initialWeekKey] = Array.from({ length: 5 }, () =>
+        Array(times.length).fill(false)
+      );
+    }
+    return weeks;
+  });
+
+  const [currentMonday, setCurrentMonday] = useState(initialMonday);
+  const currentWeekKey = getWeekKey(currentMonday);
+
+  // Ensure grid exists for the current week when week changes
+  useEffect(() => {
+    setBlocked(prev => {
+      if (!prev[currentWeekKey]) {
+        return {
+          ...prev,
+          [currentWeekKey]: Array.from({ length: 5 }, () =>
+            Array(times.length).fill(false)
+          ),
+        };
+      }
+      return prev;
     });
-  }
+  }, [currentWeekKey, times.length]);
 
-  // Availability state grid
-  // false means the time is available (unblocked)
-  const initialBlocked = Array.from({ length: 10 }, () =>
-    Array(times.length).fill(false)
-  );
-  const [blocked, setBlocked] = useState(initialBlocked);
+  useEffect(() => {
+    localStorage.setItem("blockedWeeks", JSON.stringify(blocked));
+  }, [blocked]);
 
-  function toggleBlock(dayIndex, timeIndex) {
-    const copy = [...blocked];
-    copy[dayIndex] = [...copy[dayIndex]];
-    copy[dayIndex][timeIndex] = !copy[dayIndex][timeIndex];
-    setBlocked(copy);
-  }
+  const toggleBlock = (dayIndex, timeIndex) => {
+    setBlocked(prev => {
+      const grid = prev[currentWeekKey] ?? Array.from({ length: 5 }, () =>
+        Array(times.length).fill(false)
+      );
+      const weekGrid = grid.map((row, dIndex) =>
+        dIndex === dayIndex
+          ? row.map((cell, tIndex) => (tIndex === timeIndex ? !cell : cell))
+          : row
+      );
+      return { ...prev, [currentWeekKey]: weekGrid };
+    });
+  };
 
-  //  When a day is selected in the Calendar, we want to use the unblocked times
+  // Get the days (Mon-Fri) for the current week
+  const weekDays = Array.from({ length: 5 }, (_, i) => {
+    const d = new Date(currentMonday);
+    d.setDate(currentMonday.getDate() + i);
+    return d;
+  });
+
+  // Selected day for scheduling
+  const [selectedDay, setSelectedDay] = useState(null);
+
   let availableTimes = [];
-  // selectedDay comes from the Calendar below.
-  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
-
   if (selectedDay) {
-    // Find the index of the selected day in the availabilityDays array by comparing date strings.
-    const index = availabilityDays.findIndex(
-      day => day.toDateString() === selectedDay.toDateString()
+    const dayIndex = weekDays.findIndex(
+      (d) => d.toDateString() === selectedDay.toDateString()
     );
-    if (index !== -1) {
+    if (dayIndex !== -1) {
       availableTimes = times
-        .map((timeStr, tIndex) => {
-          // Parse time DONT TOUCH
+        .map((timeStr) => {
           let [time, modifier] = timeStr.split(" ");
           let [hours, minutes] = time.split(":").map(Number);
           if (modifier === "PM" && hours !== 12) hours += 12;
@@ -80,106 +97,115 @@ export default function Scheduling() {
           dateWithTime.setHours(hours, minutes, 0, 0);
           return dateWithTime;
         })
-        // Only include unblocked (available) times.
-        .filter((_, tIndex) => !blocked[index][tIndex]);
+        .filter((_, tIndex) => !blocked[currentWeekKey]?.[dayIndex]?.[tIndex]);
     }
   }
 
-  // 5. Other scheduling state
-  const [appointmentTime, setAppointmentTime] = useState<Date | null>(null);
-  const event = {
-    title: "test",
-    time: new Date(),
-    color: "#fc7e80",
-    allDay: false,
-  };
+  const [appointmentTime, setAppointmentTime] = useState(null);
+  const event = { title: "test", time: new Date(), color: "#fc7e80", allDay: false };
   const events = [event];
 
-  function handleAppointmentScheduled(time: Date) {
-    setAppointmentTime(time);
-  }
+  const handleAppointmentScheduled = (time) => setAppointmentTime(time);
+
+  const prevWeek = () => {
+    const prevMonday = new Date(currentMonday);
+    prevMonday.setDate(prevMonday.getDate() - 7);
+    setCurrentMonday(prevMonday);
+    setSelectedDay(null);
+  };
+  const nextWeek = () => {
+    const nextMonday = new Date(currentMonday);
+    nextMonday.setDate(nextMonday.getDate() + 7);
+    setCurrentMonday(nextMonday);
+    setSelectedDay(null);
+  };
+
+  const weekRange = `${formatDate(weekDays[0])} - ${formatDate(weekDays[4])}`;
 
   return (
-    <>
-      <div className="card w-50 p-3 me-5">
-        <Calendar events={events} onDaySelected={setSelectedDay} />
+    <div style={{ display: "flex", padding: 20 }}>
+      {/* Left Column: Bigger Calendar */}
+      <div style={{ width: "50%", marginRight: 20 }}>
+        <Calendar onDaySelected={setSelectedDay} events={events} />
       </div>
-      <div className="card w-50 p-3">
-        {selectedDay === null ? (
-          <h4>No day selected</h4>
-        ) : (
-          <DayView
-            day={selectedDay}
-            events={events}
-            availableTimes={availableTimes}
-            onAppointmentScheduled={handleAppointmentScheduled}
-          />
-        )}
-      </div>
-      <Popup
-        shown={appointmentTime !== null}
-        onDismiss={() => setAppointmentTime(null)}
-      >
-        <div className="p-3">Scheduling Appointment</div>
-      </Popup>
 
-      {/* Optional: Show the availability grid for setting your availability */}
-      <div style={{ marginTop: 20 }}>
-        <h3 style={{ textAlign: "center" }}>Set Your Availability</h3>
-        <div
-          style={{
+      {/* Right Column: Scheduling interface */}
+      <div style={{ width: "50%" }}>
+        {/* Week Navigation */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <button onClick={prevWeek}>Previous Week</button>
+          <div>{weekRange}</div>
+          <button onClick={nextWeek}>Next Week</button>
+        </div>
+
+        {/* Availability Grid */}
+        <div>
+          <h3 style={{ textAlign: "center" }}>Set Your Availability</h3>
+          <div style={{
             display: "grid",
-            gridTemplateColumns: "repeat(10, 1fr)",
+            gridTemplateColumns: "repeat(5, 1fr)",
             gap: 20,
-            width: "100%",
-            boxSizing: "border-box",
             padding: "0 20px",
-          }}
-        >
-          {availabilityDays.map((dateObj, dayIndex) => {
-            const dayBackground = dayIndex % 2 === 0 ? "#f8f8f8" : "#e0e0e0";
-            return (
-              <div
-                key={dayIndex}
-                style={{
-                  backgroundColor: dayBackground,
+            boxSizing: "border-box",
+          }}>
+            {weekDays.map((dateObj, dayIndex) => {
+              const dayBg = dayIndex % 2 === 0 ? "#f8f8f8" : "#e0e0e0";
+              return (
+                <div key={dayIndex} style={{
+                  backgroundColor: dayBg,
                   border: "1px solid #ccc",
                   borderRadius: 6,
                   padding: 10,
                   textAlign: "center",
-                }}
-              >
-                <div style={{ fontWeight: "bold", marginBottom: 10 }}>
-                  {dateObj.toLocaleString("en-US", { weekday: "short" })} ({formatDate(dateObj)})
+                }}>
+                  <div
+                    style={{ fontWeight: "bold", marginBottom: 10, cursor: "pointer" }}
+                    onClick={() => setSelectedDay(dateObj)}
+                  >
+                    {dateObj.toLocaleString("en-US", { weekday: "short" })} ({formatDate(dateObj)})
+                  </div>
+                  {times.map((time, tIndex) => {
+                    const isBlocked = blocked[currentWeekKey]?.[dayIndex]?.[tIndex] ?? false;
+                    return (
+                      <div key={tIndex}
+                        onClick={() => toggleBlock(dayIndex, tIndex)}
+                        style={{
+                          backgroundColor: isBlocked ? "#ffcccc" : "#fff",
+                          borderRadius: 4,
+                          margin: "5px 0",
+                          padding: 5,
+                          cursor: "pointer",
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}>
+                        <span>{time}</span>
+                        {isBlocked && <span style={{ color: "red", fontWeight: "bold" }}>X</span>}
+                      </div>
+                    );
+                  })}
                 </div>
-                {times.map((time, tIndex) => {
-                  const isBlocked = blocked[dayIndex][tIndex];
-                  return (
-                    <div
-                      key={tIndex}
-                      onClick={() => toggleBlock(dayIndex, tIndex)}
-                      style={{
-                        backgroundColor: isBlocked ? "#ffcccc" : "#fff",
-                        borderRadius: 4,
-                        margin: "5px 0",
-                        padding: 5,
-                        cursor: "pointer",
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <span>{time}</span>
-                      {isBlocked && (
-                        <span style={{ color: "red", fontWeight: "bold" }}>X</span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
+
+        {/* DayView for the selected day */}
+        {selectedDay && (
+          <div style={{ marginTop: 20 }}>
+            <h4>Available Times for {selectedDay.toLocaleDateString("en-US")}</h4>
+            <DayView
+              day={selectedDay}
+              events={events}
+              availableTimes={availableTimes}
+              onAppointmentScheduled={handleAppointmentScheduled}
+            />
+          </div>
+        )}
+
+        <Popup shown={appointmentTime !== null} onDismiss={() => setAppointmentTime(null)}>
+          <div className="p-3">Scheduling Appointment</div>
+        </Popup>
       </div>
-    </>
+    </div>
   );
 }
