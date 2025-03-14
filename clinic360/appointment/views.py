@@ -18,7 +18,10 @@ from django.utils import timezone
 from django.db.models import Q
 import pytz
 from django.db import transaction
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime, timedelta
+import json
 
 class StaffAppointmentTypeViewSet(viewsets.ModelViewSet):
     """
@@ -185,3 +188,21 @@ class CancelAppointmentView(generics.DestroyAPIView):
         appointment.status = 'CANCELED'
         appointment.save()
         return Response()
+
+# function to save scheduling availability set in the availability tab.
+@csrf_exempt  # <-- Just in case: if this is ever deployed to production status, this should be changed in favor of proper CSRF protection
+def save_schedule(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            blocked = data.get("blocked", {})
+
+            # TODO: save the schedule via Django model, 
+            # we might have to do some serious processing of the 'blocked' variable because it's in a form I'm not sure has been accounted for
+            # Example: Schedule.objects.create(user=request.user, blocked_data=blocked)
+
+            return JsonResponse({"message": "Schedule saved successfully"}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    return JsonResponse({"error": "Invalid request"}, status=405)

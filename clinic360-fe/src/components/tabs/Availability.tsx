@@ -55,6 +55,7 @@ export default function Scheduling() {
 
   useEffect(() => {
     localStorage.setItem("blockedWeeks", JSON.stringify(blocked));
+    saveBlocked(); // Send data to backend when availability grid changes, if load on the server ever becomes a problem we'll want to make a dedicated save button to do this instead.
   }, [blocked]);
 
   const toggleBlock = (dayIndex, timeIndex) => {
@@ -121,6 +122,27 @@ export default function Scheduling() {
   };
 
   const weekRange = `${formatDate(weekDays[0])} - ${formatDate(weekDays[4])}`;
+
+  // saving the "blocked" object to backend
+  const saveBlocked = async () => {
+    try {
+      const response = await fetch("https://your-backend.com/api/schedule", {
+        method: "POST", // Use PUT if updating an existing entry
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ blocked }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to save blocked schedule");
+      }
+  
+      console.log("Blocked schedule saved successfully");
+    } catch (error) {
+      console.error("Error saving blocked schedule:", error);
+    }
+  };
 
   return (
     <div style={{ display: "flex", padding: 20 }}>

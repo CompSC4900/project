@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from accounts.views import CreateAccountView, user_info, is_staff
+from appointment.views import save_schedule
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,4 +29,5 @@ urlpatterns = [
     path('api/is_staff/', is_staff, name='is_staff'), 
     path('api/', include('message.urls')),
     path('api/appointment/', include('appointment.urls')),
+    path("api/schedule", save_schedule, name="save_schedule"),
 ]
