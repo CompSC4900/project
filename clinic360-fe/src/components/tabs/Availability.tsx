@@ -126,7 +126,7 @@ export default function Scheduling() {
   // saving the "blocked" object to backend
   const saveBlocked = async () => {
     try {
-      const response = await fetch("https://your-backend.com/api/schedule", {
+      const response = await fetch("http://127.0.0.1:8000/api/schedule", {
         method: "POST", // Use PUT if updating an existing entry
         headers: {
           "Content-Type": "application/json",
