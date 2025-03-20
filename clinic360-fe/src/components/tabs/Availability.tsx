@@ -172,9 +172,9 @@ export default function Scheduling() {
   // function to create alerts verifying if provided availability is acceptable or not
   function validateBlocked(blocked: Record<string, boolean[][]>): void {
     if (isContinuous(blocked) === false) {
-      alert("BAD")
+      alert("Make sure the unblocked time slots in your schedule are continuous.")
     } else {
-      alert("GOOD")
+      saveBlocked()
     }
   }
 
@@ -247,7 +247,7 @@ export default function Scheduling() {
               );
             })}
           </div>
-          <button onClick={handleCheckAvailability} style={{ marginTop: 20, padding: 10, background: "blue", color: "white" }}>
+          <button onClick={handleCheckAvailability} style={{ marginTop: 20, padding: 10, background: "#0D6EFD", color: "white", borderRadius: 10, border: 0 }}>
             Save Schedule
           </button>
         </div>
