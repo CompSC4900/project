@@ -36,6 +36,10 @@ export default function Header({tabs, activeTab, setActiveTab}: Props) {
 
     const userOptions: UserOption[] = [
         {
+            label: "Edit Profile",
+            callback: () => setActiveTab("Edit Profile"),
+        },
+        {
             label: "Logout",
             callback: auth.logout,
         },
@@ -100,4 +104,5 @@ export default function Header({tabs, activeTab, setActiveTab}: Props) {
             </div>
         </nav>
     );
+    
 }
