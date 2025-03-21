@@ -60,7 +60,7 @@ class AppointmentSettings(models.Model):
         return slots
 
 class AppointmentDay(models.Model):
-    day = models.DateField(unique=True)
+    day = models.DateField()
     appointment_settings = models.ForeignKey(
         AppointmentSettings,
         related_name='appointment_days',
