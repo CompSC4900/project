@@ -133,6 +133,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+MEDIA_PATH = BASE_DIR / 'media'
+
 # Configuration for CORS and rest
 
 CORS_ALLOW_ALL_ORIGINS = True # WARNING: not for production use
