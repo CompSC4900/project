@@ -55,7 +55,6 @@ export default function Scheduling() {
 
   useEffect(() => {
     localStorage.setItem("blockedWeeks", JSON.stringify(blocked));
-    saveBlocked(); // Send data to backend when availability grid changes, if load on the server ever becomes a problem we'll want to make a dedicated save button to do this instead.
   }, [blocked]);
 
   const toggleBlock = (dayIndex, timeIndex) => {
@@ -139,9 +138,48 @@ export default function Scheduling() {
       }
   
       console.log("Blocked schedule saved successfully");
+      alert("Schedule saved!");
     } catch (error) {
       console.error("Error saving blocked schedule:", error);
+      alert("Failed to save schedule. Please try again.");
     }
+  };
+
+  // function to determine if unblocked time slots in availability grid are continuous for each day or not
+  function isContinuous(blocked: Record<string, boolean[][]>): boolean {
+    for (const [_, days] of Object.entries(blocked)) { // iterate over each week in 'blocked'
+      for (const day of days) { // iterate over each day of the current week
+        let falseSeriesCount = 0;
+
+        if (day[0] === false) {
+          falseSeriesCount = 1;
+        }
+
+        for (let i = 1; i < day.length; i++) { // use index to iterate over each time slot of the day
+          if (day[i] === false && day[i-1] === true) {
+            falseSeriesCount += 1;
+          }
+        }
+        if (falseSeriesCount > 1) {
+          return false;
+        }
+      }
+    }
+  
+    return true;
+  }
+  
+  // function to create alerts verifying if provided availability is acceptable or not
+  function validateBlocked(blocked: Record<string, boolean[][]>): void {
+    if (isContinuous(blocked) === false) {
+      alert("Make sure the unblocked time slots in your schedule are continuous.")
+    } else {
+      saveBlocked()
+    }
+  }
+
+  const handleCheckAvailability = () => {
+    validateBlocked(blocked)
   };
 
   return (
@@ -209,6 +247,9 @@ export default function Scheduling() {
               );
             })}
           </div>
+          <button onClick={handleCheckAvailability} style={{ marginTop: 20, padding: 10, background: "#0D6EFD", color: "white", borderRadius: 10, border: 0 }}>
+            Save Schedule
+          </button>
         </div>
 
         {/* DayView for the selected day */}
