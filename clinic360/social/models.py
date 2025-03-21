@@ -12,5 +12,10 @@ class SocialInfo(models.Model):
     about_me = models.TextField(blank=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
     friends = models.ManyToManyField('self', blank=True)
-    friend_requests_sent = models.ManyToManyField('self', blank=True)
-    friend_requests_received = models.ManyToManyField('self', blank=True)
+
+class FriendRequest(models.Model):
+    sender = models.ForeignKey(Clinic360User, on_delete=models.CASCADE, related_name='friend_requests_sent')
+    receiver = models.ForeignKey(Clinic360User, on_delete=models.CASCADE, related_name='friend_requests_received')
+    
+    class Meta:
+        unique_together = ('sender', 'receiver')

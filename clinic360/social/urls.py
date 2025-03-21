@@ -1,12 +1,16 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from . import views
+from views import ConditionViewSet, PatientSocialInfoViewSet, StaffSocialInfoViewSet, IncomingFriendRequestView, OutgoingFriendRequestView, accept_friend_request, get_friends
 
 router = DefaultRouter()
-router.register('conditions', views.ConditionViewSet)
-router.register('patient', views.PatientSocialInfoViewSet)
-router.register('staff', views.StaffSocialInfoViewSet)
+router.register('conditions', ConditionViewSet)
+router.register('patient', PatientSocialInfoViewSet)
+router.register('staff', StaffSocialInfoViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('friends/incoming/', IncomingFriendRequestView.as_view(), name='incoming-friend-requests'),
+    path('friends/outgoing/', OutgoingFriendRequestView.as_view(), name='outgoing-friend-requests'),
+    path('friends/accept/<int:pk>/', accept_friend_request, name='accept-friend-request'),
+    path('friends/', get_friends, name='get-friends'),
 ]
