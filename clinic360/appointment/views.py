@@ -195,7 +195,8 @@ def save_schedule(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            blocked = data.get("blocked", {})
+            print("Received data:", data)
+            # overrides = data.get("overrides", {})
 
             # TODO: save the schedule via Django model, 
             # we might have to do some serious processing of the 'blocked' variable because it's in a form I'm not sure has been accounted for

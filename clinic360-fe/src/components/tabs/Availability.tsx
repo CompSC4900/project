@@ -122,64 +122,90 @@ export default function Scheduling() {
 
   const weekRange = `${formatDate(weekDays[0])} - ${formatDate(weekDays[4])}`;
 
+  type AvailabilitySlot = { start: string; end: string };
+
+  // IN PROGRESS: function to use "blocked" to populate the initialized object 'overrides' in a way that is compatible with the backend
+  // still very buggy:
+  // - detecting series' of open timeslots mostly works, but detecting ones that go to the end of the day doesn't work (just need to check the final case after the loop)
+  // - saving the dates for each day with blocked slots is not accurate at all (probably need to do something relating to how 'monday', 'date', and 'dayKey' are handled)
+  function makeOverrides1(blocked: Record<string, boolean[][]>, times: string[]): Record<string, AvailabilitySlot[]> {
+    let monday = new Date(); // turn the monday of the week in 'blocked' into a date object
+
+    const result: Record<string, AvailabilitySlot[]> = {};
+
+    for (const [weekKey, week] of Object.entries(blocked)) { // iterate through each week in 'blocked'
+      monday = new Date(weekKey); // turn the monday of the week in 'blocked' into a date object
+
+      for (let i = 0; i < week.length; i++) { // iterate through each day of the current week by index
+        if (hasBlocked(week[i])) { // if the current day has any blocked time slots
+          const date = monday;
+          date.setDate(monday.getDate() + i);
+          const dayKey = date.toISOString().split("T")[0]; // get current day's date in format: YYYY-MM-DD
+
+          const slots: AvailabilitySlot[] = [];
+          let startTime: string | null = null;
+
+          if (week[i][0] === false) { // if first time slot in the current day isn't blocked, then set startTime to the first value in 'times'
+            startTime = times[0];
+          }
+
+          for (let j = 1; j < week[i].length; j++) { // iterate through each time slot of the current day by index
+            if (week[i][j] === false && week[i][j-1] === true) { // if current time slot is unblocked and previous time slot was blocked, set this as the startTime
+              startTime = times[j];
+            }
+            if (week[i][j] === true && week[i][j-1] === false && startTime != null) { // if current time slot is blocked and previous time slot was unblocked, append a new AvailabilitySlot to 'slots'
+              slots.push({ start: startTime, end: times[j]})
+            }
+
+            if (slots.length > 0) {
+              result[dayKey] = slots
+            }
+            
+          }
+        }
+      }
+    }
+
+    return result
+  }
+
+  // helper function to determine if there are any blocked time slots for a given day
+  function hasBlocked(day: boolean[]): boolean {
+    let blockedCount = 0;
+    for (const slot of day) {
+      if (slot === true) {
+        blockedCount += 1;
+      }
+    }
+
+    if (blockedCount > 0) {
+      return true;
+    }
+    return false;
+  }
+
   // saving the "blocked" object to backend
-  const saveBlocked = async () => {
+  const saveOverrides = async () => {
+    let overrides = makeOverrides1(blocked, times);
     try {
       const response = await fetch("http://127.0.0.1:8000/api/schedule", {
         method: "POST", // Use PUT if updating an existing entry
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ blocked }),
+        body: JSON.stringify({ overrides }),
       });
   
       if (!response.ok) {
         throw new Error("Failed to save blocked schedule");
       }
   
-      console.log("Blocked schedule saved successfully");
+      console.log("Schedule saved successfully");
       alert("Schedule saved!");
     } catch (error) {
-      console.error("Error saving blocked schedule:", error);
+      console.error("Error saving schedule:", error);
       alert("Failed to save schedule. Please try again.");
     }
-  };
-
-  // function to determine if unblocked time slots in availability grid are continuous for each day or not
-  function isContinuous(blocked: Record<string, boolean[][]>): boolean {
-    for (const [_, days] of Object.entries(blocked)) { // iterate over each week in 'blocked'
-      for (const day of days) { // iterate over each day of the current week
-        let falseSeriesCount = 0;
-
-        if (day[0] === false) {
-          falseSeriesCount = 1;
-        }
-
-        for (let i = 1; i < day.length; i++) { // use index to iterate over each time slot of the day
-          if (day[i] === false && day[i-1] === true) {
-            falseSeriesCount += 1;
-          }
-        }
-        if (falseSeriesCount > 1) {
-          return false;
-        }
-      }
-    }
-  
-    return true;
-  }
-  
-  // function to create alerts verifying if provided availability is acceptable or not
-  function validateBlocked(blocked: Record<string, boolean[][]>): void {
-    if (isContinuous(blocked) === false) {
-      alert("Make sure the unblocked time slots in your schedule are continuous.")
-    } else {
-      saveBlocked()
-    }
-  }
-
-  const handleCheckAvailability = () => {
-    validateBlocked(blocked)
   };
 
   return (
@@ -247,7 +273,7 @@ export default function Scheduling() {
               );
             })}
           </div>
-          <button onClick={handleCheckAvailability} style={{ marginTop: 20, padding: 10, background: "#0D6EFD", color: "white", borderRadius: 10, border: 0 }}>
+          <button onClick={saveOverrides} style={{ marginTop: 20, padding: 10, background: "#0D6EFD", color: "white", borderRadius: 10, border: 0 }}>
             Save Schedule
           </button>
         </div>
