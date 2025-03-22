@@ -9,11 +9,13 @@ export interface Condition {
 export interface SocialInfo {
     id: number;
     user: number;
-    aboutMe: string;
-    profilePicture: string;
+    first_name: string;
+    last_name: string;
+    about_me: string;
+    profile_picture: string | null;
     public: boolean;
     conditions: Condition[];
-    friendRequestId?: number;
+    friend_request_id?: number;
 }
 
 export interface FriendRequest {

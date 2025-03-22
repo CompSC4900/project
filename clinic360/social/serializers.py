@@ -9,10 +9,12 @@ class ConditionSerializer(serializers.ModelSerializer):
 
 class PatientSocialInfoSerializer(serializers.ModelSerializer):
     conditions = ConditionSerializer(many=True)
+    first_name = serializers.CharField(source='user.first_name')
+    last_name = serializers.CharField(source='user.last_name')
     class Meta:
         model = SocialInfo
-        fields = ('id', 'user', 'about_me', 'profile_picture', 'public', 'conditions')
-        read_only_fields = ('id', 'user', 'conditions') # Only staff can modify conditions
+        fields = ('id', 'first_name', 'last_name', 'about_me', 'profile_picture', 'public', 'conditions')
+        read_only_fields = ('id', 'user', 'first_name', 'last_name', 'conditions') # Only staff can modify conditions
     
     def create(self, validated_data):
         user = self.context['request'].user

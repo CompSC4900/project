@@ -26,10 +26,10 @@ export default function Community({ setActiveTab }: Props) {
         friendStatuses.set(friend.id, { status: "friend" });
     });
     outgoingRequests.forEach((request) => {
-        friendStatuses.set(request.id, { status: "requested", friendRequestId: request.friendRequestId });
+        friendStatuses.set(request.id, { status: "requested", friendRequestId: request.friend_request_id });
     });
     incomingRequests.forEach((request) => {
-        friendStatuses.set(request.id, { status: "pending", friendRequestId: request.friendRequestId });
+        friendStatuses.set(request.id, { status: "pending", friendRequestId: request.friend_request_id });
     });
 
     useEffect(() => {
@@ -77,7 +77,7 @@ export default function Community({ setActiveTab }: Props) {
                 }
                 return {
                     ...info,
-                    friendRequestId: request.id,
+                    friend_request_id: request.id,
                 };
             }).filter((info) => info !== undefined));
         }
@@ -90,7 +90,7 @@ export default function Community({ setActiveTab }: Props) {
                 }
                 return {
                     ...info,
-                    friendRequestId: request.id,
+                    friend_request_id: request.id,
                 };
             }).filter((info) => info !== undefined));
         }
