@@ -14,8 +14,8 @@ class SocialInfo(models.Model):
     friends = models.ManyToManyField('self', blank=True)
 
 class FriendRequest(models.Model):
-    sender = models.ForeignKey(Clinic360User, on_delete=models.CASCADE, related_name='friend_requests_sent')
-    receiver = models.ForeignKey(Clinic360User, on_delete=models.CASCADE, related_name='friend_requests_received')
+    sender = models.ForeignKey(SocialInfo, on_delete=models.CASCADE, related_name='friend_requests_sent')
+    receiver = models.ForeignKey(SocialInfo, on_delete=models.CASCADE, related_name='friend_requests_received')
     
     class Meta:
         unique_together = ('sender', 'receiver')

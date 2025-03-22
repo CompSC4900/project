@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import SocialInfo, Condition, FriendRequest
 
-# Register your models here.
+admin.site.register(SocialInfo)
+admin.site.register(Condition)
+admin.site.register(FriendRequest)
