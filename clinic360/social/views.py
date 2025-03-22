@@ -97,3 +97,14 @@ def get_friends(request):
     except SocialInfo.DoesNotExist:
         # If the user does not have social info set up, return an empty list
         return Response([])
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def remove_friend(request, pk):
+    try:
+        user_social_info = SocialInfo.objects.get(user=request.user)
+        friend_social_info = SocialInfo.objects.get(id=pk)
+        user_social_info.friends.remove(friend_social_info)
+        return Response({"message": "Friend removed"})
+    except SocialInfo.DoesNotExist:
+        return Response({"error": "Social info not found"}, status=404)
