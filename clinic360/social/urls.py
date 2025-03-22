@@ -1,11 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from views import ConditionViewSet, PatientSocialInfoViewSet, StaffSocialInfoViewSet, IncomingFriendRequestView, OutgoingFriendRequestView, accept_friend_request, get_friends
+from .views import ConditionViewSet, PatientSocialInfoViewSet, StaffSocialInfoViewSet, IncomingFriendRequestView, OutgoingFriendRequestView, accept_friend_request, get_friends
 
 router = DefaultRouter()
-router.register('conditions', ConditionViewSet)
-router.register('patient', PatientSocialInfoViewSet)
-router.register('staff', StaffSocialInfoViewSet)
+router.register('conditions', ConditionViewSet, basename='conditions')
+router.register('patient', PatientSocialInfoViewSet, basename='patient-social-info')
+router.register('staff', StaffSocialInfoViewSet, basename='staff-social-info')
 
 urlpatterns = [
     path('', include(router.urls)),

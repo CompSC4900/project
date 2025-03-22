@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from .models import SocialInfo, Condition, FriendRequest
 from .serializers import PatientSocialInfoSerializer, StaffSocialInfoSerializer, ConditionSerializer, FriendRequestSerializer
-from rest_framework.permissions import IsAuthenticated, IsStaff
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import ListModelMixin, DestroyModelMixin, CreateModelMixin
 from rest_framework.response import Response
@@ -10,7 +10,7 @@ from rest_framework.decorators import api_view, permission_classes
 class ConditionViewSet(viewsets.ModelViewSet):
     queryset = Condition.objects.all()
     serializer_class = ConditionSerializer
-    permission_classes = [IsStaff]
+    permission_classes = [IsAdminUser]
 
 class PatientSocialInfoViewSet(viewsets.ModelViewSet):
     queryset = SocialInfo.objects.filter(public=True, banned=False)
@@ -20,7 +20,7 @@ class PatientSocialInfoViewSet(viewsets.ModelViewSet):
 class StaffSocialInfoViewSet(viewsets.ModelViewSet):
     queryset = SocialInfo.objects.all()
     serializer_class = StaffSocialInfoSerializer
-    permission_classes = [IsStaff]
+    permission_classes = [IsAdminUser]
 
 class IncomingFriendRequestView(GenericAPIView, ListModelMixin, DestroyModelMixin):
     serializer_class = FriendRequestSerializer
