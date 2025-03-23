@@ -27,6 +27,7 @@ export interface AppointmentDay {
     id: number;
     available_slots: Date[];
     appointments: AppointmentPreview[];
+    doctor: number;
 }
 
 export interface AppointmentSettings {
@@ -42,16 +43,29 @@ export interface AppointmentCreationInfo {
     doctorId: number;
 }
 
+export interface Provider {
+    id: number;
+    first_name: string;
+    last_name: string;
+}
+
 export async function getAppointmentDays(auth: AuthFunctions, month: number, year: number): Promise<AppointmentDay[]> {
     const response = await auth.fetchProtectedData(`appointment/days/?month=${month}&year=${year}`, "GET");
     expectSuccess(response, auth);
-    return {
-        ...response.data,
-        available_slots: response.data.available_slots.map((slot: string) => new Date(slot)),
-    };
+
+    // ✅ Ensure response has 'data' and is an array
+    if (!response.data || !Array.isArray(response.data)) {
+        console.error("Invalid response received in getAppointmentDays:", response);
+        return [];
+    }
+
+    return response.data.map((day: any) => ({
+        ...day,
+        available_slots: day.available_slots.map((slot: string) => new Date(slot)), // Convert slots to Date
+    }));
 }
 
-export async function getAppointmentFromPrieview(auth: AuthFunctions, preview: AppointmentPreview): Promise<Appointment> {
+export async function getAppointmentFromPreview(auth: AuthFunctions, preview: AppointmentPreview): Promise<Appointment> {
     const response = await auth.fetchProtectedData(`appointment/patient/details/${preview.id}/`, "GET");
     expectSuccess(response, auth);
     return {...preview, ...response.data};
@@ -88,4 +102,10 @@ export async function rescheduleAppointment(auth: AuthFunctions, oldAppointment:
 export async function cancelAppointment(auth: AuthFunctions, appointment: AppointmentPreview): Promise<void> {
     const response = await auth.fetchProtectedData(`appointment/patient/cancel/${appointment.id}/`, "DELETE");
     expectSuccess(response, auth);
+}
+
+export async function getProviders(auth: AuthFunctions): Promise<Provider[]> {
+    const response = await auth.fetchProtectedData("appointment/providers/", "GET");
+    expectSuccess(response, auth);
+    return response.data;
 }

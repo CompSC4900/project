@@ -10,6 +10,7 @@ from .views import (
     CancelAppointmentView,
     StaffAppointmentTypeViewSet,
     PatientAppointmentSettingsListView,
+    AvailableProvidersView
 )
 from rest_framework.routers import DefaultRouter
 
@@ -28,4 +29,5 @@ urlpatterns = [
     path('staff/appointment/<int:pk>/', StaffAppointmentView.as_view(), name='staff-appointment-update'),
     path('reschedule/', RescheduleAppointmentView.as_view(), name='reschedule'),
     path('cancel/<int:pk>/', CancelAppointmentView.as_view(), name='cancel'),
-]
+    path('providers/', AvailableProvidersView.as_view(), name='available-providers')
+] 

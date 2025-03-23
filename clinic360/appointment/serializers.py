@@ -85,10 +85,11 @@ class AppointmentSettingsListSerializer(serializers.ModelSerializer):
 class AppointmentDaySerializer(serializers.ModelSerializer):
     available_slots = serializers.SerializerMethodField()
     appointments = serializers.SerializerMethodField()
+    doctor = serializers.SerializerMethodField()
 
     class Meta:
         model = AppointmentDay
-        fields = ('id', 'available_slots', 'appointments')
+        fields = ('id', 'available_slots', 'appointments', 'doctor')
         read_only_fields = ('id',)
     
     def get_available_slots(self, obj):
@@ -101,6 +102,8 @@ class AppointmentDaySerializer(serializers.ModelSerializer):
         else:
             queryset = Appointment.objects.filter(patient=user, day=obj, status__in=['PENDING', 'COMPLETE', 'NOSHOW'])
         return AppointmentListSerializer(queryset, many=True).data
+    def get_doctor(self, obj):
+        return obj.appointment_settings.doctor.id 
 
 class AppointmentListSerializer(serializers.ModelSerializer):
     time = serializers.SerializerMethodField()

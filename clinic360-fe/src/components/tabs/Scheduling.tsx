@@ -32,7 +32,7 @@ export default function Scheduling() {
             <div className="card w-50 p-3">
                 {
                     selectedDay === null ?
-                        <h4>Nope</h4>
+                        <h4>No Day Selected . . .</h4>
                     :
                         <DayView
                             day={selectedDay} 
