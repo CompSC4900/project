@@ -3,12 +3,14 @@ import DayView from "../calendar/DayView";
 import { useState } from "react";
 import Popup from "../Popup";
 import AppointmentScheduler from "../AppointmentScheduler";
+//Import components to help create an appointment using calendar and time information.
 
-
+//Main export for the schedule component.
 export default function Scheduling() {
     let [selectedDay, setSelectedDay] = useState<Date | null>(null);
     let [appointmentTime, setAppointmentTime] = useState<Date | null>(null);
 
+    //Details for a test event with a specified date and color.
     const event = {
         title: "test",
         time: new Date(),
@@ -17,6 +19,7 @@ export default function Scheduling() {
     };
     const events = [event];
 
+    //Function for the appointment time.
     function handleAppointmentScheduled(time: Date) {
         setAppointmentTime(time);
     }
@@ -41,6 +44,8 @@ export default function Scheduling() {
                             onAppointmentScheduled={handleAppointmentScheduled}
                         />
                 }
+                //Calendar information for selecting dates, viewing the calendar on a timeline, and finding the available times.
+                
             </div>
             <Popup
                 shown={appointmentTime !== null}
