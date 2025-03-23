@@ -1,235 +1,245 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Button, Form, Alert, Spinner } from "react-bootstrap";
-
-/**
- * AppointmentScheduler Component
- *
- * This component allows patients to:
- * - Click a floating "Schedule an Appointment" button.
- * - Open a filtering modal to search for appointments based on:
- * - Date Range, Time Range, Location, Appointment Type, Insurance, Provider Name.
- * - View a list of available appointments (using dummy data for now).
- * - Select an appointment and confirm before adding it to the calendar.
- */
+import { useAuth } from "../components/AuthContext";
+import { getAppointmentDays, scheduleAppointment, getProviders, getAppointmentSettings } from "../util/Appointment";
 
 const AppointmentScheduler: React.FC = () => {
-    // State variables
-    const [showFilterModal, setShowFilterModal] = useState<boolean>(false); // Controls the filtering modal
-    const [showResultsModal, setShowResultsModal] = useState<boolean>(false); // Controls the results modal
-    const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false); // Controls the confirmation modal
-    const [selectedAppointment, setSelectedAppointment] = useState<any>(null); // Stores the selected appointment
-    const [appointments, setAppointments] = useState<any[]>([]);
+    const auth = useAuth();
+    
+    const [step, setStep] = useState<number>(0); // Tracks which step the user is on
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     
-    const [filters, setFilters] = useState({
-        dateStart: "",
-        dateEnd: "",
-        timeStart: "",
-        timeEnd: "",
-        type: "",
-        provider: "",
-    });
+    const [providers, setProviders] = useState<any[]>([]);
+    const [selectedProvider, setSelectedProvider] = useState<number | null>(null);
+    const [appointmentTypes, setAppointmentTypes] = useState<any[]>([]);
+    const [selectedAppointmentType, setSelectedAppointmentType] = useState<number | null>(null);
 
-    const resetFilters = () => {
-        setFilters({
-            dateStart: "",
-            dateEnd: "",
-            timeStart: "",
-            timeEnd: "",
-            type: "",
-            provider: "",
-        });
-    };
+    const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+    const [availableDays, setAvailableDays] = useState<number[]>([]);
+    const [selectedDay, setSelectedDay] = useState<number | null>(null);
+    const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
+    const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
 
-    /**
-     * Handles user input in the filtering form.
-     * @param {React.ChangeEvent<any>} e - Input event
-     */
-    const handleFilterChange = (e: React.ChangeEvent<any>) => {
-        setFilters({ ...filters, [e.target.name]: e.target.value });
-    };
+    useEffect(() => {
+        fetchProviders();
+    }, []);
 
-    //Fetches appointments from the backend
-    const fetchAppointments = async () => {
-        setLoading(true);
-        setError(null);
+    useEffect(() => {
+        if (selectedProvider) fetchAppointmentTypes();
+    }, [selectedProvider]);
 
+    useEffect(() => {
+        if (selectedMonth !== null) fetchAvailableDays();
+    }, [selectedMonth]);
+
+    useEffect(() => {
+        if (selectedDay !== null) fetchAvailableTimeSlots();
+    }, [selectedDay]);
+
+    const fetchProviders = async () => {
         try {
-            const queryParams = new URLSearchParams();
-
-            if (filters.dateStart) queryParams.append("dateStart", filters.dateStart);
-            if (filters.dateEnd) queryParams.append("dateEnd", filters.dateEnd);
-            if (filters.timeStart) queryParams.append("timeStart", filters.timeStart);
-            if (filters.timeEnd) queryParams.append("timeEnd", filters.timeEnd);
-            if (filters.type) queryParams.append("type", filters.type);
-            if (filters.provider) queryParams.append("provider", filters.provider);
-
-            const response = await fetch(`/api/appointment/days/?${queryParams.toString()}`, {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("token")}`, // Assuming authentication token is stored
-                    "Content-Type": "application/json",
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to fetch appointment availability.");
-            }
-
-            const data = await response.json();
-            setAppointments(data);
-        } catch (err) {
-            setError("Error retrieving available appointments. Please try again.");
+            setLoading(true);
+            const response = await getProviders(auth);
+            setProviders(response);
+            setError(null);
+        } catch (error) {
+            console.error("Error fetching providers:", error);
+            setError("Failed to fetch providers.");
         } finally {
             setLoading(false);
         }
     };
 
-    /**
-     * Handles the search function when the "Search" button is clicked.
-     */
-    const handleSearch = async () => {
-        setShowFilterModal(false); // Close the filter modal
-        setShowResultsModal(true); // Show results modal
-        await fetchAppointments();
+    const fetchAppointmentTypes = async () => {
+        try {
+            setLoading(true);
+            const settings = await getAppointmentSettings(auth, selectedProvider!);
+            setAppointmentTypes(settings.appointment_types);
+            setError(null);
+        } catch (error) {
+            console.error("Error fetching appointment types:", error);
+            setError("Failed to fetch appointment types.");
+        } finally {
+            setLoading(false);
+        }
     };
 
-    /**
-     * Handles selecting an appointment.
-     */
-    const handleSelectAppointment = (appointment: any) => {
-        setSelectedAppointment(appointment);
-        setShowResultsModal(false);
-        setShowConfirmModal(true);
+    const fetchAvailableDays = async () => {
+        try {
+            setLoading(true);
+            const data = await getAppointmentDays(auth, parseInt(selectedMonth!, 10), new Date().getFullYear());
+    
+            // ✅ Ensure data is an array before calling map()
+            if (!Array.isArray(data)) {
+                console.error("Error: Expected an array but received:", data);
+                setError("Unexpected response format.");
+                return;
+            }
+    
+            const daysWithAvailability = data.filter(
+                day =>
+                    day.doctor === selectedProvider &&
+                    Array.isArray(day.available_slots) &&
+                    day.available_slots.length > 0
+            );
+            setAvailableDays(daysWithAvailability.map(day => day.id));
+    
+            setError(null);
+        } catch (error) {
+            console.error("Error fetching available days:", error);
+            setError("Failed to fetch available days.");
+        } finally {
+            setLoading(false);
+        }
     };
 
+    const fetchAvailableTimeSlots = async () => {
+        try {
+            setLoading(true);
+            const data = await getAppointmentDays(auth, parseInt(selectedMonth!, 10), new Date().getFullYear());
+            const dayData = data.find(day => day.id === selectedDay);
+            
+            // Convert Date objects to ISO string format
+            setAvailableTimeSlots(dayData ? dayData.available_slots.map(slot => slot.toISOString()) : []);
+            
+            setError(null);
+        } catch (error) {
+            console.error("Error fetching available time slots:", error);
+            setError("Failed to fetch available time slots.");
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    const handleScheduleAppointment = async () => {
+        try {
+            setLoading(true);
+    
+            if (!selectedTimeSlot) {
+                throw new Error("Please select a valid time slot.");
+            }
+    
+            await scheduleAppointment(auth, {
+                dayId: selectedDay!,
+                time: new Date(selectedTimeSlot), // Ensure selectedTimeSlot is a valid string
+                appointmentTypeId: selectedAppointmentType!,
+                doctorId: selectedProvider!,
+            });
+    
+            alert("Appointment successfully scheduled!");
+            resetForm();
+        } catch (error) {
+            console.error("Error scheduling appointment:", error);
+            setError("Failed to schedule appointment.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const resetForm = () => {
+        setStep(0);
+        setSelectedProvider(null);
+        setSelectedAppointmentType(null);
+        setSelectedMonth(null);
+        setAvailableDays([]);
+        setSelectedDay(null);
+        setAvailableTimeSlots([]);
+        setSelectedTimeSlot(null);
+        setError(null);
+    };
+    
     return (
         <>
             {/* Floating "Schedule an Appointment" Button */}
             <Button
                 variant="primary"
-                style={{
-                    position: "fixed",
-                    bottom: "20px",
-                    right: "20px",
-                    borderRadius: "50%",
-                    width: "60px",
-                    height: "60px",
-                    fontSize: "24px",
-                }}
-                onClick={() => {
-                    resetFilters();
-                    setShowFilterModal(true);
-                }}
+                style={{ position: "fixed", bottom: "20px", right: "20px", borderRadius: "50%", width: "60px", height: "60px", fontSize: "24px" }}
+                onClick={() => setStep(1)}
             >
                 +
             </Button>
 
-             {/* Filtering Modal */}
-             <Modal show={showFilterModal} onHide={() => setShowFilterModal(false)}>
+            {/* Multi-Step Scheduling Modal */}
+            <Modal show={step > 0} onHide={resetForm}>
                 <Modal.Header closeButton>
                     <Modal.Title>Schedule an Appointment</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form>
-                        {/* Date Range */}
-                        <Form.Group>
-                            <Form.Label>Date Range</Form.Label>
-                            <div className="d-flex">
-                                <Form.Control type="date" name="dateStart" onChange={handleFilterChange} />
-                                <span className="mx-2">to</span>
-                                <Form.Control type="date" name="dateEnd" onChange={handleFilterChange} />
-                            </div>
-                        </Form.Group>
+                    {loading && <Spinner animation="border" />}
+                    {error && <Alert variant="danger">{error}</Alert>}
 
-                        {/* Time Range */}
-                        <Form.Group className="mt-2">
-                            <Form.Label>Time Range</Form.Label>
-                            <div className="d-flex">
-                                <Form.Control type="time" name="timeStart" onChange={handleFilterChange} />
-                                <span className="mx-2">to</span>
-                                <Form.Control type="time" name="timeEnd" onChange={handleFilterChange} />
-                            </div>
-                        </Form.Group>
-
-                        {/* Provider */}
-                        <Form.Group className="mt-2">
-                            <Form.Label>Provider Name</Form.Label>
-                            <Form.Control type="text" name="provider" onChange={handleFilterChange} />
-                        </Form.Group>
-
-                        {/* Appointment Type */}
-                        <Form.Group className="mt-2">
-                            <Form.Label>Appointment Type</Form.Label>
-                            <Form.Control as="select" name="type" onChange={handleFilterChange}>
-                                <option value="">Select</option>
-                                <option value="Dental Checkup">Dental Checkup</option>
-                                <option value="General Checkup">General Checkup</option>
-                                <option value="Eye Exam">Eye Exam</option>
-                            </Form.Control>
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowFilterModal(false)}>Close</Button>
-                    <Button variant="primary" onClick={handleSearch}>Search</Button>
-                </Modal.Footer>
-            </Modal>
-
-            {/* Results Modal */}
-            <Modal show={showResultsModal} onHide={() => setShowResultsModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Available Appointments</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    {loading ? (
-                        <Spinner animation="border" />
-                    ) : error ? (
-                        <Alert variant="danger">{error}</Alert>
-                    ) : appointments.length > 0 ? (
-                        appointments.map((appt) => (
-                            <div key={appt.id} className="border p-2 mb-2">
-                                <strong>{appt.type}</strong> with <strong>{appt.provider}</strong>
-                                <br />
-                                <span>{appt.date} at {appt.time}</span>
-                                <Button className="mt-2" variant="success" size="sm" onClick={() => handleSelectAppointment(appt)}>
-                                    Select
-                                </Button>
-                            </div>
-                        ))
-                    ) : (
-                        <p>No available appointments match your filters.</p>
-                    )}
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => {
-                            resetFilters();
-                            setShowResultsModal(false);
-                            setShowFilterModal(true);
-                        }}>Back to Filters
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            {/* Confirmation Modal */}
-            <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Confirm Appointment</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    {selectedAppointment && (
+                    {step === 1 && (
                         <>
-                            <p><strong>Provider:</strong> {selectedAppointment.provider}</p>
-                            <p><strong>Type:</strong> {selectedAppointment.type}</p>
-                            <p><strong>Date:</strong> {selectedAppointment.date}</p>
-                            <p><strong>Time:</strong> {selectedAppointment.time}</p>
+                            <Form.Label>Select a Provider</Form.Label>
+                            <Form.Control as="select" onChange={e => setSelectedProvider(parseInt(e.target.value))}>
+                                <option value="">-- Select --</option>
+                                {providers.map(provider => (
+                                    <option key={provider.id} value={provider.id}>
+                                        {provider.first_name} {provider.last_name}
+                                    </option>
+                                ))}
+                            </Form.Control>
+                            <Button className="mt-3" onClick={() => setStep(2)} disabled={!selectedProvider}>Next</Button>
+                        </>
+                    )}
+
+                    {step === 2 && (
+                        <>
+                            <Form.Label>Select an Appointment Type</Form.Label>
+                            <Form.Control as="select" onChange={e => setSelectedAppointmentType(parseInt(e.target.value))}>
+                                <option value="">-- Select --</option>
+                                {appointmentTypes.map(type => (
+                                    <option key={type.id} value={type.id}>{type.name}</option>
+                                ))}
+                            </Form.Control>
+                            <Button className="mt-3" onClick={() => setStep(3)} disabled={!selectedAppointmentType}>Next</Button>
+                        </>
+                    )}
+
+                    {step === 3 && (
+                        <>
+                            <Form.Label>Select a Month</Form.Label>
+                            <Form.Control as="select" onChange={e => setSelectedMonth(e.target.value)}>
+                                <option value="">-- Select --</option>
+                                {[...Array(12)].map((_, i) => (
+                                    <option key={i} value={i + 1}>{new Date(0, i).toLocaleString("default", { month: "long" })}</option>
+                                ))}
+                            </Form.Control>
+                            <Button className="mt-3" onClick={() => setStep(4)} disabled={selectedMonth === null}>Next</Button>
+                        </>
+                    )}
+
+                    {step === 4 && (
+                        <>
+                            <Form.Label>Select a Day</Form.Label>
+                            <Form.Control as="select" onChange={e => setSelectedDay(parseInt(e.target.value))}>
+                                <option value="">-- Select --</option>
+                                {availableDays.map(day => (
+                                    <option key={day} value={day}>{day}</option>
+                                ))}
+                            </Form.Control>
+                            <Button className="mt-3" onClick={() => setStep(5)} disabled={selectedDay === null}>Next</Button>
+                        </>
+                    )}
+
+                    {step === 5 && (
+                        <>
+                            <Form.Label>Select a Time Slot</Form.Label>
+                            <Form.Control as="select" onChange={e => setSelectedTimeSlot(e.target.value)}>
+                                <option value="">-- Select --</option>
+                                {availableTimeSlots.map(slot => (
+                                    <option key={slot} value={slot}>
+                                        {new Date(slot).toLocaleTimeString()}
+                                    </option>
+                                ))}
+                            </Form.Control>
+                            <Button className="mt-3" onClick={handleScheduleAppointment} disabled={!selectedTimeSlot}>
+                                Confirm Appointment
+                            </Button>
                         </>
                     )}
                 </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>Cancel</Button>
-                </Modal.Footer>
             </Modal>
         </>
     );

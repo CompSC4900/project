@@ -30,4 +30,5 @@ urlpatterns = [
     path('api/', include('message.urls')),
     path('api/appointment/', include('appointment.urls')),
     path("api/schedule", save_schedule, name="save_schedule"),
+    path('api/social/', include('social.urls')),
 ]

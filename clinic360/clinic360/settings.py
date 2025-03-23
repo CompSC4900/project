@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'accounts',
     'message',
     'appointment',
+    'social',
 ]
 
 MIDDLEWARE = [
@@ -132,6 +133,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MEDIA_PATH = BASE_DIR / 'media'
 
 # Configuration for CORS and rest
 

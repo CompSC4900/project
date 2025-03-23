@@ -1,4 +1,4 @@
-from rest_framework import generics, viewsets
+from rest_framework import generics, viewsets, mixins
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .serializers import (
     AppointmentSettingsSerializer,
@@ -12,8 +12,8 @@ from .serializers import (
 )
 from .models import AppointmentSettings, AppointmentDay, Appointment, AppointmentType
 from rest_framework.exceptions import ValidationError, PermissionDenied
-from rest_framework import mixins
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from django.utils import timezone
 from django.db.models import Q
 import pytz
@@ -22,6 +22,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime, timedelta
 import json
+from django.contrib.auth import get_user_model
 
 class StaffAppointmentTypeViewSet(viewsets.ModelViewSet):
     """
@@ -45,8 +46,10 @@ class PatientAppointmentSettingsListView(generics.ListAPIView):
         doctor = self.request.query_params.get('doctor')
         if not doctor:
             raise ValidationError({'doctor': 'Doctor is required.'})
+        """
         if not self.request.user.associated_users.filter(id=doctor).exists():
             raise PermissionDenied()
+        """
         settings = AppointmentSettings.objects.filter(active=True, doctor=doctor)
         if settings.count() > 1:
             raise ValidationError({'doctor': 'Multiple active settings found for doctor.'}, code='internal_error')
@@ -70,8 +73,8 @@ class AppointmentDaysView(generics.ListAPIView):
             raise ValidationError({'year': 'Year is required.'})
         
         query = Q(day__month=month, day__year=year)
-        if not self.request.user.is_staff:
-            query &= Q(appointment_settings__doctor__in=self.request.user.associated_users.all())
+        #if not self.request.user.is_staff:
+            #query &= Q(appointment_settings__doctor__in=self.request.user.associated_users.all())
         return AppointmentDay.objects.filter(query)
 
     def get_serializer_context(self):
@@ -207,3 +210,26 @@ def save_schedule(request):
             return JsonResponse({"error": str(e)}, status=400)
 
     return JsonResponse({"error": "Invalid request"}, status=405)
+User = get_user_model()
+
+class AvailableProvidersView(APIView):
+    """
+    Returns a list of providers (doctors) with active appointment settings.
+    Includes doctor ID, first name, and last name.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Get all doctors (is_staff=True) who have active appointment settings
+        doctors = User.objects.filter(
+            is_staff=True,
+            doctor_appointment_settings__active=True
+        ).distinct()
+
+        # Format the response with ID, first name, and last name
+        provider_list = [
+            {"id": doctor.id, "first_name": doctor.first_name, "last_name": doctor.last_name}
+            for doctor in doctors
+        ]
+
+        return Response(provider_list)

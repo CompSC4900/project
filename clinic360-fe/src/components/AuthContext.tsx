@@ -93,20 +93,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const fetchProtectedData = useCallback(async (endpoint: string, method: string, data?: any, retryUsingToken?: string) => {
         if (!tokens.accessToken) {
+            console.error("❌ ERROR: Request to access protected data while not authenticated.");
             throw new Error("Request to access protected data while not authenticated");
         }
-
+    
+        console.log(`🔍 Fetching data from: ${endpoint}, Method: ${method}`);
+    
         const token = retryUsingToken || tokens.accessToken;
         const response = await fetchData(endpoint, method, data, {"Authorization": `Bearer ${token}`});
-
+    
         if (response.errorCode === 401 && !retryUsingToken) {
+            console.warn("⚠️ Token expired. Attempting refresh...");
             const newAccessToken = await refreshToken();
             if (newAccessToken) {
+                console.log("✅ Token refreshed. Retrying request...");
                 return await fetchProtectedData(endpoint, method, data, newAccessToken);
             }
         }
+    
+        console.log("✅ Response received:", response);
         return response;
     }, [tokens.accessToken, refreshToken]);
+    
 
     const contextValue = useMemo<AuthContextType>(() => {
         if (tokens.accessToken && tokens.refreshToken) {
