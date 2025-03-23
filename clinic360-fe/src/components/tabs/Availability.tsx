@@ -122,71 +122,60 @@ export default function Scheduling() {
 
   const weekRange = `${formatDate(weekDays[0])} - ${formatDate(weekDays[4])}`;
 
+  // custom object to store start and end times for day overrides
   type AvailabilitySlot = { start: string; end: string };
 
-  // IN PROGRESS: function to use "blocked" to populate the initialized object 'overrides' in a way that is compatible with the backend
-  // still very buggy:
-  // - detecting series' of open timeslots mostly works, but detecting ones that go to the end of the day doesn't work (just need to check the final case after the loop)
-  // - saving the dates for each day with blocked slots is not accurate at all (probably need to do something relating to how 'monday', 'date', and 'dayKey' are handled)
-  function makeOverrides1(blocked: Record<string, boolean[][]>, times: string[]): Record<string, AvailabilitySlot[]> {
-    let monday = new Date(); // turn the monday of the week in 'blocked' into a date object
-
+  // makes a dictionary of availability slots to store the daily overrides set by the staff user in the Availability tab
+  function getOverrides(blocked: Record<string, boolean[][]>, times: string[]): Record<string, AvailabilitySlot[]> {
     const result: Record<string, AvailabilitySlot[]> = {};
 
-    for (const [weekKey, week] of Object.entries(blocked)) { // iterate through each week in 'blocked'
-      monday = new Date(weekKey); // turn the monday of the week in 'blocked' into a date object
+    for (const date in blocked) {
+      const weekData = blocked[date]; // Get the week's data (5 days)
 
-      for (let i = 0; i < week.length; i++) { // iterate through each day of the current week by index
-        if (hasBlocked(week[i])) { // if the current day has any blocked time slots
-          const date = monday;
-          date.setDate(monday.getDate() + i);
-          const dayKey = date.toISOString().split("T")[0]; // get current day's date in format: YYYY-MM-DD
+      // Get each day's corresponding date
+      const weekStart = new Date(date);
+      for (let i = 0; i < weekData.length; i++) {
+        // getting current date
+        const currentDate = new Date(weekStart);
+        currentDate.setDate(weekStart.getDate() + i);
+        const formattedDate = currentDate.toISOString().split("T")[0];
+
+        // Check if not all values are false for the given day
+        if (!(weekData[i].every((value) => value === false))) {
 
           const slots: AvailabilitySlot[] = [];
           let startTime: string | null = null;
 
-          if (week[i][0] === false) { // if first time slot in the current day isn't blocked, then set startTime to the first value in 'times'
+          if (weekData[i][0] === false) { // if first time slot in the current day isn't blocked, then set startTime to the first value in 'times'
             startTime = times[0];
           }
 
-          for (let j = 1; j < week[i].length; j++) { // iterate through each time slot of the current day by index
-            if (week[i][j] === false && week[i][j-1] === true) { // if current time slot is unblocked and previous time slot was blocked, set this as the startTime
+          for (let j = 0; j < weekData[i].length; j++) {
+            if (weekData[i][j] === false && weekData[i][j-1] === true) { // if current time slot is unblocked and previous time slot was blocked, set this as the startTime
               startTime = times[j];
             }
-            if (week[i][j] === true && week[i][j-1] === false && startTime != null) { // if current time slot is blocked and previous time slot was unblocked, append a new AvailabilitySlot to 'slots'
+            if (weekData[i][j] === true && weekData[i][j-1] === false && startTime != null) { // if current time slot is blocked and previous time slot was unblocked, append a new AvailabilitySlot to 'slots'
               slots.push({ start: startTime, end: times[j]})
             }
 
-            if (slots.length > 0) {
-              result[dayKey] = slots
-            }
-            
           }
+
+          if (weekData[i][weekData[i].length-1] === false && startTime != null) { // handle end case, where last time slot is not blocked
+            slots.push({ start: startTime, end: "5:30"});
+          }
+
+          result[formattedDate] = slots;
+
         }
       }
     }
 
-    return result
-  }
-
-  // helper function to determine if there are any blocked time slots for a given day
-  function hasBlocked(day: boolean[]): boolean {
-    let blockedCount = 0;
-    for (const slot of day) {
-      if (slot === true) {
-        blockedCount += 1;
-      }
-    }
-
-    if (blockedCount > 0) {
-      return true;
-    }
-    return false;
+    return result;
   }
 
   // saving the "blocked" object to backend
   const saveOverrides = async () => {
-    let overrides = makeOverrides1(blocked, times);
+    let overrides = getOverrides(blocked, times); // changing for testing
     try {
       const response = await fetch("http://127.0.0.1:8000/api/schedule", {
         method: "POST", // Use PUT if updating an existing entry
