@@ -23,7 +23,7 @@ export default function Scheduling() {
     function handleAppointmentScheduled(time: Date) {
         setAppointmentTime(time);
     }
-
+    
     return (
         <>
             <div className="card w-50 p-3 me-5">
@@ -32,6 +32,7 @@ export default function Scheduling() {
                     onDaySelected={setSelectedDay}
                 />
             </div>
+            
             <div className="card w-50 p-3">
                 {
                     selectedDay === null ?
@@ -44,7 +45,6 @@ export default function Scheduling() {
                             onAppointmentScheduled={handleAppointmentScheduled}
                         />
                 }
-                //Calendar information for selecting dates, viewing the calendar on a timeline, and finding the available times.
                 
             </div>
             <Popup
