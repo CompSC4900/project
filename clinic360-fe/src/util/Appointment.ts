@@ -43,10 +43,10 @@ export interface AppointmentSettings {
 
 //Interface for the Appointment Creation information with the day, time, appointment type, and doctor number.
 export interface AppointmentCreationInfo {
-    dayId: number;
-    time: Date;
-    appointmentTypeId: number;
-    doctorId: number;
+    day: number;
+    time: string;
+    appointment_type: number;
+    doctor: number;
 }
 
 //Interface for the provider's full name.

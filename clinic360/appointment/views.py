@@ -46,10 +46,9 @@ class PatientAppointmentSettingsListView(generics.ListAPIView):
         doctor = self.request.query_params.get('doctor')
         if not doctor:
             raise ValidationError({'doctor': 'Doctor is required.'})
-        """
         if not self.request.user.associated_users.filter(id=doctor).exists():
             raise PermissionDenied()
-        """
+        
         settings = AppointmentSettings.objects.filter(active=True, doctor=doctor)
         if settings.count() > 1:
             raise ValidationError({'doctor': 'Multiple active settings found for doctor.'}, code='internal_error')
@@ -210,6 +209,7 @@ def save_schedule(request):
             return JsonResponse({"error": str(e)}, status=400)
 
     return JsonResponse({"error": "Invalid request"}, status=405)
+
 User = get_user_model()
 
 class AvailableProvidersView(APIView):

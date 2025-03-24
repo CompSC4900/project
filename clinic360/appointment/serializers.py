@@ -3,6 +3,9 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework import serializers
 from datetime import datetime, timedelta
 
+def times_match(t1, t2):
+    return abs((t1 - t2).total_seconds()) < 1  # allow < 1 second drift
+
 class AppointmentTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AppointmentType
@@ -180,13 +183,21 @@ class BaseAppointmentSerializer(serializers.ModelSerializer):
             appointment_day.day, 
             data['time']
         )
-        
+        print("Available slots:")
+        for slot in available_slots:
+            print(slot.isoformat())
+
+        print("Requested appointment slot range:", date_time)
+        print("Raw data['time']:", data['time'])
+        print("Parsed datetime from combine_date_time:", date_time.isoformat())
+
         for i in range(
             0,
             duration * appointment_day.appointment_settings.appointment_slot_duration,
             appointment_day.appointment_settings.appointment_slot_duration
         ):
-            if date_time + timedelta(minutes=i) not in available_slots:
+            check_slot = date_time + timedelta(minutes=i)
+            if not any(times_match(check_slot, s) for s in available_slots):
                 raise ValidationError({'time': 'Slot not available.'})
         return data
 

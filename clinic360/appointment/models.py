@@ -40,7 +40,7 @@ class AppointmentSettings(models.Model):
 
     # Safely combines a date and time and returns it in a timezone-aware format
     def combine_date_time(self, date, time):
-        native_datetime = datetime.combine(date, time)
+        native_datetime = datetime.combine(date, time.replace(second=0, microsecond=0))
         tz = pytz.timezone(self.timezone)
         return tz.localize(native_datetime)
 
