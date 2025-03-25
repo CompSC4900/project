@@ -4,9 +4,7 @@ from django.core.validators import RegexValidator
 from django.contrib.auth.password_validation import validate_password
 #Importing the Clinic360User model and regex validators from Django.
 
-class CreateAccountSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
-    password2 = serializers.CharField(write_only=True, required=True)
+class AccountSerializer(serializers.ModelSerializer):
     zip_code = serializers.CharField(required=True, validators=[RegexValidator(
         regex=r'^\d{5}$',
         message='Zip code must be 5 digits',
@@ -17,6 +15,14 @@ class CreateAccountSerializer(serializers.ModelSerializer):
         message='Phone number must be 10 digits',
         #Regex validator and message for the phone number needing 10 digits.
     )])
+
+    class Meta:
+        model = Clinic360User
+        fields = ('email', 'first_name', 'last_name', 'address', 'city', 'state', 'zip_code', 'birth_date', 'gender', 'phone_number')
+
+class CreateAccountSerializer(AccountSerializer):
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    password2 = serializers.CharField(write_only=True, required=True)
 
     class Meta:
         model = Clinic360User

@@ -10,11 +10,16 @@ import FormField from "./form/FormField";
 interface Props {
     setCleanedFormValues: (values: Record<string, string>) => void
     formErrors: Record<string, string>
+    initialFormValues?: Record<string, string>
     children?: React.ReactNode
 }
 
-export default function AccountInfo({setCleanedFormValues, formErrors, children}: Props) {
-    const [formValues, setFormValues] = useState<Record<string, string>>({});
+export default function AccountInfo({setCleanedFormValues, formErrors, initialFormValues, children}: Props) {
+    const [formValues, setFormValues] = useState<Record<string, string>>(initialFormValues || {});
+
+    useEffect(() => {
+        initialFormValues && setFormValues(initialFormValues);
+    }, [initialFormValues]);
 
     function preprocessFormValues() {
         const cleanedFormValues = {...formValues};

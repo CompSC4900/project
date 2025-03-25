@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Header from "./components/Header";
 import Home from "./components/tabs/Home";
@@ -29,6 +29,7 @@ const TABS = [
 
 export default function App() {
     const [activeTab, setActiveTab] = useState(TABS[0]);
+    const [username, setUsername] = useState<string | null>(null);
 
     const TabComponent = TAB_COMPONENTS[activeTab as keyof typeof TAB_COMPONENTS];
 
@@ -36,9 +37,9 @@ export default function App() {
         <AuthProvider>
             <ConfirmationProvider>
                 <div className="d-flex flex-column h-100">
-                    <Header tabs={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <Header tabs={TABS} activeTab={activeTab} setActiveTab={setActiveTab} usernameOverride={username} />
                     <div className="d-flex p-5 flex-grow-1 bg-body-tertiary" style={{minHeight: 0}}>
-                        <TabComponent setActiveTab={setActiveTab}/>
+                        <TabComponent setActiveTab={setActiveTab} onUsernameChange={setUsername}/>
                     </div>
                 </div>
             </ConfirmationProvider>
