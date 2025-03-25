@@ -8,6 +8,7 @@ import Availability from "./components/tabs/Availability"
 import Community from "./components/tabs/Community";
 import { ConfirmationProvider } from './components/ConfirmationContext';
 import { AuthProvider } from './components/AuthContext';
+import EditProfile from './components/tabs/EditProfile';
 
 const TAB_COMPONENTS = {
     "Home": Home,
@@ -15,11 +16,19 @@ const TAB_COMPONENTS = {
     "Messages": Messages,
     "Availability": Availability,
     "Community": Community,
+    "Edit Profile": EditProfile,
 } as const;
 
+const TABS = [
+    "Home",
+    "Scheduling",
+    "Messages",
+    "Availability",
+    "Community",
+];
+
 export default function App() {
-    const tabs = Object.keys(TAB_COMPONENTS);
-    const [activeTab, setActiveTab] = useState(tabs[0]);
+    const [activeTab, setActiveTab] = useState(TABS[0]);
 
     const TabComponent = TAB_COMPONENTS[activeTab as keyof typeof TAB_COMPONENTS];
 
@@ -27,7 +36,7 @@ export default function App() {
         <AuthProvider>
             <ConfirmationProvider>
                 <div className="d-flex flex-column h-100">
-                    <Header tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <Header tabs={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <div className="d-flex p-5 flex-grow-1 bg-body-tertiary" style={{minHeight: 0}}>
                         <TabComponent setActiveTab={setActiveTab}/>
                     </div>
