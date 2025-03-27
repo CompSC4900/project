@@ -12,6 +12,14 @@ export default function Scheduling() {
     "5:00 PM"
   ];
 
+  // new constant for keeping track of times in a format ideal for processing
+  const times24 = [
+    "9:00", "9:30", "10:00", "10:30", 
+    "11:00", "11:30", "12:30", "13:00", 
+    "13:30", "14:00", "14:30", "15:00", 
+    "15:30", "16:00", "16:30", "17:00"
+  ];
+
   // Get current Monday and week key
   const today = new Date();
   const shiftToMonday = (today.getDay() + 6) % 7;
@@ -161,7 +169,7 @@ export default function Scheduling() {
           }
 
           if (weekData[i][weekData[i].length-1] === false && startTime != null) { // handle end case, where last time slot is not blocked
-            slots.push({ start: startTime, end: "5:30"});
+            slots.push({ start: startTime, end: "17:30"});
           }
 
           result[formattedDate] = slots;
@@ -196,6 +204,49 @@ export default function Scheduling() {
       alert("Failed to save schedule. Please try again.");
     }
   };
+
+  // still need to figure out appointment_types issue
+  // sending availability info to backend to be saved in AppointmentSettings model
+  const createAppointmentSettingsModel = async () => {
+    const data = {
+      appointment_types: [1, 2], // hardcoded values for testing purposes ONLY, will need to change later
+      appointment_slot_duration: 30,
+      weekly_schedule: [
+          [], 
+          [{"start": "09:00", "end": "17:30"}], 
+          [{"start": "09:00", "end": "17:30"}], 
+          [{"start": "09:00", "end": "17:30"}], 
+          [{"start": "09:00", "end": "17:30"}], 
+          [{"start": "09:00", "end": "17:30"}], 
+          []
+      ],
+      day_overrides: getOverrides(blocked, times24),
+      reschedule_window: 48,
+      schedulable_duration: 30,
+      schedulable_cutoff_override: null,
+      doctor: 3 // hardcoded value for testing purposes ONLY, will need to change later
+    };
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/api/appointment/settings/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("access_token"), // authorization for API request, useful reference for future API requests
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const responseData = await response.json();
+        console.log("Success:", responseData);
+    } catch (error) {
+        console.error("Error:", error);
+    }
+};
 
   return (
     <div style={{ display: "flex", padding: 20 }}>
@@ -262,7 +313,7 @@ export default function Scheduling() {
               );
             })}
           </div>
-          <button onClick={saveOverrides} style={{ marginTop: 20, padding: 10, background: "#0D6EFD", color: "white", borderRadius: 10, border: 0 }}>
+          <button onClick={createAppointmentSettingsModel} style={{ marginTop: 20, padding: 10, background: "#0D6EFD", color: "white", borderRadius: 10, border: 0 }}>
             Save Schedule
           </button>
         </div>
