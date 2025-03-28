@@ -3,6 +3,7 @@ cd .\Clinic360
 python manage.py makemigrations accounts
 python manage.py makemigrations message
 python manage.py makemigrations appointment
+python manage.py makemigrations Social
 python manage.py migrate
 
 # Start Django server in a new PowerShell window
