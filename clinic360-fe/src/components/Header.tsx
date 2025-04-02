@@ -6,6 +6,7 @@ interface Props {
     tabs: string[]
     activeTab: string
     setActiveTab(tab: string): void;
+    usernameOverride: string | null
 }
 
 interface UserOption {
@@ -13,16 +14,18 @@ interface UserOption {
     callback: VoidFunction
 }
 
-export default function Header({tabs, activeTab, setActiveTab}: Props) {
+export default function Header({tabs, activeTab, setActiveTab, usernameOverride}: Props) {
     const auth = useAuth();
 
     const [username, setUsername] = useState("");
     const [isStaff, setStaff] = useState(false);
 
     useEffect(() => {(async () => {
-        const response = await auth.fetchProtectedData("userinfo/", "GET");
-        expectSuccess(response, auth);
-        setUsername(response.data.name);
+        if (usernameOverride === null) {
+            const response = await auth.fetchProtectedData("userinfo/", "GET");
+            expectSuccess(response, auth);
+            setUsername(response.data.first_name + " " + response.data.last_name);
+        }
 
         const response2 = await auth.fetchProtectedData("is_staff/", "GET");
         expectSuccess(response2, auth);
@@ -95,7 +98,7 @@ export default function Header({tabs, activeTab, setActiveTab}: Props) {
                 <div className="ms-auto bg-body rounded border border-secondary-subtle dropdown">
                     <button className="btn dropdown-toggle py-1 px-2" data-bs-toggle="dropdown" aria-expanded="false">
                         <img src="/dummy-pfp.png" className="rounded-circle me-2" style={{width: 40, height: 40}} />
-                        <span className="me-2">{username}</span>
+                        <span className="me-2">{usernameOverride ?? username}</span>
                     </button>
                     <ul className="dropdown-menu">
                         {userOptions.map(createUserOption)}

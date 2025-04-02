@@ -1,12 +1,15 @@
+/* Sets the root window to 100% in height and width. */
 #root {
     height: 100vh;
     width: 100vw;
 }
 
+/* Width is 100% in the class .fc. */
 .fc {
     width: 100%;
 }
 
+/* Unread notifications have a width and height of 10 pixels with 100% border-radius. */
 .unread-notif {
     background-color: var(--bs-primary);
     width: 10px;
@@ -14,10 +17,12 @@
     border-radius: 100%;
 }
 
+/* When the text is muted, the color is white. */
 .text-bg-primary .text-muted {
     color: #fff !important;
 }
 
+/* The background color of Clinic360 is a shade of blue. */
 .bg-clinic360 {
     background-color: #00b4d8;
 }

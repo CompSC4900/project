@@ -2,6 +2,7 @@
 
 PIDS=()
 
+#Cleanup function defined
 cleanup() {
     for PID in "${PIDS[@]}"; do
         kill "$PID"

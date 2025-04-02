@@ -70,7 +70,7 @@ const AppointmentScheduler: React.FC = () => {
             setLoading(true);
             const data = await getAppointmentDays(auth, parseInt(selectedMonth!, 10), new Date().getFullYear());
     
-            // ✅ Ensure data is an array before calling map()
+            //Ensure data is an array before calling map()
             if (!Array.isArray(data)) {
                 console.error("Error: Expected an array but received:", data);
                 setError("Unexpected response format.");
@@ -119,13 +119,16 @@ const AppointmentScheduler: React.FC = () => {
             if (!selectedTimeSlot) {
                 throw new Error("Please select a valid time slot.");
             }
-    
+            
+            console.log("Selected time slot (ISO):", selectedTimeSlot);
+            console.log("Formatted UTC time (HH:mm):", getUtcTime(selectedTimeSlot));
+
             await scheduleAppointment(auth, {
-                dayId: selectedDay!,
-                time: new Date(selectedTimeSlot), // Ensure selectedTimeSlot is a valid string
-                appointmentTypeId: selectedAppointmentType!,
-                doctorId: selectedProvider!,
-            });
+                day: selectedDay!,
+                time: getUtcTime(selectedTimeSlot),
+                appointment_type: selectedAppointmentType!,
+                doctor: selectedProvider!,
+              });              
     
             alert("Appointment successfully scheduled!");
             resetForm();
@@ -147,6 +150,14 @@ const AppointmentScheduler: React.FC = () => {
         setAvailableTimeSlots([]);
         setSelectedTimeSlot(null);
         setError(null);
+    };
+
+    //Function converts local time selected by user back to UTC before scheduling appointment
+    const getUtcTime = (isoString: string): string => {
+        const localDate = new Date(isoString);  // This is in local timezone
+        const utcHours = localDate.getUTCHours().toString().padStart(2, '0');
+        const utcMinutes = localDate.getUTCMinutes().toString().padStart(2, '0');
+        return `${utcHours}:${utcMinutes}:00`;
     };
     
     return (

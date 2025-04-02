@@ -40,9 +40,13 @@ class AppointmentSettings(models.Model):
 
     # Safely combines a date and time and returns it in a timezone-aware format
     def combine_date_time(self, date, time):
-        native_datetime = datetime.combine(date, time)
+        native_datetime = datetime.combine(date, time.replace(second=0, microsecond=0))
         tz = pytz.timezone(self.timezone)
+
+        if native_datetime.tzinfo is not None:
+            return native_datetime.astimezone(tz)
         return tz.localize(native_datetime)
+
 
     def get_slots_for_day(self, day):
         schedule = self.day_overrides.get(day.strftime('%Y-%m-%d'), None)

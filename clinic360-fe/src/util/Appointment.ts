@@ -1,6 +1,6 @@
+//API and authorization components for appointment functions.
 import { expectSuccess } from "./auth";
 import { AuthFunctions } from "../components/AuthContext";
-//API and authorization components for appointment functions.
 
 //Interface for the appointment preview that shows the date, number, doctor, patient, duration, and ID number.
 export interface AppointmentPreview {
@@ -43,10 +43,10 @@ export interface AppointmentSettings {
 
 //Interface for the Appointment Creation information with the day, time, appointment type, and doctor number.
 export interface AppointmentCreationInfo {
-    dayId: number;
-    time: Date;
-    appointmentTypeId: number;
-    doctorId: number;
+    day: number;
+    time: string;
+    appointment_type: number;
+    doctor: number;
 }
 
 //Interface for the provider's full name.
@@ -61,7 +61,7 @@ export async function getAppointmentDays(auth: AuthFunctions, month: number, yea
     const response = await auth.fetchProtectedData(`appointment/days/?month=${month}&year=${year}`, "GET");
     expectSuccess(response, auth);
 
-    // ✅ Ensure response has 'data' and is an array
+    // Ensure response has 'data' and is an array
     if (!response.data || !Array.isArray(response.data)) {
         console.error("Invalid response received in getAppointmentDays:", response);
         return [];
