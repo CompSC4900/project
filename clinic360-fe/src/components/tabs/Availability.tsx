@@ -141,7 +141,7 @@ export default function Scheduling() {
       for (let i = 0; i < weekData.length; i++) {
         // getting current date
         const currentDate = new Date(weekStart);
-        currentDate.setDate(weekStart.getDate() + (i-1));
+        currentDate.setDate(weekStart.getDate() + i);
         const formattedDate = currentDate.toISOString().split("T")[0];
 
         // Check if not all values are false for the given day
@@ -231,9 +231,9 @@ export default function Scheduling() {
       <div style={{ width: "50%" }}>
         {/* Week Navigation */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <button  onClick={saveOverrides} style={{ marginTop: 20, padding: 10, background: "#0D6EFD", color: "white", borderRadius: 10, border: 0 }} onClick={prevWeek}>Previous Week</button>
+        <button style={{ marginTop: 20, padding: 10, background: "#0D6EFD", color: "white", borderRadius: 10, border: 0 }} onClick={prevWeek}>Previous Week</button>
           <div>{weekRange}</div>
-          <button  onClick={saveOverrides} style={{ marginTop: 20, padding: 10, background: "#0D6EFD", color: "white", borderRadius: 10, border: 0 }} onClick={nextWeek}>Next Week</button>
+          <button style={{ marginTop: 20, padding: 10, background: "#0D6EFD", color: "white", borderRadius: 10, border: 0 }} onClick={nextWeek}>Next Week</button>
         </div>
 
         {/* Availability Grid */}
