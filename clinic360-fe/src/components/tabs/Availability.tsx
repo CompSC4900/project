@@ -61,10 +61,6 @@ export default function Scheduling() {
     });
   }, [currentWeekKey, times.length]);
 
-  useEffect(() => {
-    localStorage.setItem("blockedWeeks", JSON.stringify(blocked));
-  }, [blocked]);
-
   const toggleBlock = (dayIndex, timeIndex) => {
     setBlocked(prev => {
       const grid = prev[currentWeekKey] ?? Array.from({ length: 5 }, () =>
@@ -145,7 +141,7 @@ export default function Scheduling() {
       for (let i = 0; i < weekData.length; i++) {
         // getting current date
         const currentDate = new Date(weekStart);
-        currentDate.setDate(weekStart.getDate() + i);
+        currentDate.setDate(weekStart.getDate() + (i-1));
         const formattedDate = currentDate.toISOString().split("T")[0];
 
         // Check if not all values are false for the given day
@@ -181,30 +177,6 @@ export default function Scheduling() {
     return result;
   }
 
-  // saving the "blocked" object to backend
-  const saveOverrides = async () => {
-    let overrides = getOverrides(blocked, times); // changing for testing
-    try {
-      const response = await fetch("http://127.0.0.1:8000/api/schedule", {
-        method: "POST", // Use PUT if updating an existing entry
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ overrides }),
-      });
-  
-      if (!response.ok) {
-        throw new Error("Failed to save blocked schedule");
-      }
-  
-      console.log("Schedule saved successfully");
-      alert("Schedule saved!");
-    } catch (error) {
-      console.error("Error saving schedule:", error);
-      alert("Failed to save schedule. Please try again.");
-    }
-  };
-
   // still need to figure out appointment_types issue
   // sending availability info to backend to be saved in AppointmentSettings model
   const createAppointmentSettingsModel = async () => {
@@ -224,7 +196,7 @@ export default function Scheduling() {
       reschedule_window: 48,
       schedulable_duration: 30,
       schedulable_cutoff_override: null,
-      doctor: 3 // hardcoded value for testing purposes ONLY, will need to change later
+      doctor: 1
     };
 
     try {

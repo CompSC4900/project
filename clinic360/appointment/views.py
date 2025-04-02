@@ -1,4 +1,4 @@
-from rest_framework import generics, viewsets, mixins
+from rest_framework import generics, viewsets, mixins, permissions
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .serializers import (
     AppointmentSettingsSerializer,
@@ -37,6 +37,9 @@ class AppointmentSettingsView(generics.ListCreateAPIView):
     queryset = AppointmentSettings.objects.filter(active=True)
     permission_classes = (IsAdminUser,)
     serializer_class = AppointmentSettingsSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(doctor=self.request.user)
 
 class PatientAppointmentSettingsListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
