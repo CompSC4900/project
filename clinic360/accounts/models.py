@@ -122,5 +122,5 @@ class Clinic360User(PermissionsMixin, AbstractBaseUser):
     REQUIRED_FIELDS = ['first_name', 'last_name', 'address', 'city', 'state', 'zip_code', 'birth_date', 'gender', 'phone_number']
     #Ensures that the aforementioned information is required for data function
 
-    def full_name(self):
-        return f"{self.first_name} {self.last_name}"
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}".strip()

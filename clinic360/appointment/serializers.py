@@ -2,9 +2,13 @@ from .models import AppointmentSettings, AppointmentDay, Appointment, Appointmen
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework import serializers
 from datetime import datetime, timedelta
+import pytz
 
 def times_match(t1, t2):
-    return abs((t1 - t2).total_seconds()) < 1  # allow < 1 second drift
+    t1 = t1.astimezone(pytz.UTC)
+    t2 = t2.astimezone(pytz.UTC)
+    return abs((t1 - t2).total_seconds()) < 1
+
 
 class AppointmentTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -170,19 +174,28 @@ class StaffAppointmentDetailsSerializer(serializers.ModelSerializer):
 
 class BaseAppointmentSerializer(serializers.ModelSerializer):
     def validate(self, data):
-        # Get appointment day with a lock
+        # 🔁 Convert 'time' from string → datetime.time first
+        raw_time = data.get('time')
+        if isinstance(raw_time, str):
+            try:
+                data['time'] = datetime.strptime(raw_time, "%H:%M").time()
+            except ValueError:
+                raise ValidationError({"time": "Invalid time format. Expected HH:MM."})
+        print(raw_time)
+        # Then proceed with your validation
         appointment_day = (
             AppointmentDay.objects
             .select_for_update()
             .get(id=data['day'].id)
         )
-        
+
         available_slots = appointment_day.get_available_slots()
         duration = data['appointment_type'].duration
         date_time = appointment_day.appointment_settings.combine_date_time(
             appointment_day.day, 
-            data['time']
+            data['time']  # now guaranteed to be a time object
         )
+
         print("Available slots:")
         for slot in available_slots:
             print(slot.isoformat())
@@ -191,6 +204,9 @@ class BaseAppointmentSerializer(serializers.ModelSerializer):
         print("Raw data['time']:", data['time'])
         print("Parsed datetime from combine_date_time:", date_time.isoformat())
 
+        missing_slots = []
+        print("🧩 duration:", duration)
+        print("🧩 slot length:", appointment_day.appointment_settings.appointment_slot_duration)
         for i in range(
             0,
             duration * appointment_day.appointment_settings.appointment_slot_duration,
@@ -198,8 +214,14 @@ class BaseAppointmentSerializer(serializers.ModelSerializer):
         ):
             check_slot = date_time + timedelta(minutes=i)
             if not any(times_match(check_slot, s) for s in available_slots):
-                raise ValidationError({'time': 'Slot not available.'})
+                missing_slots.append(check_slot)
+
+        if missing_slots:
+            print("❌ These slots were missing:", [s.isoformat() for s in missing_slots])
+            raise ValidationError({'time': 'Slot not available.'})
+
         return data
+
 
 class PatientAppointmentSerializer(BaseAppointmentSerializer):
     class Meta:
