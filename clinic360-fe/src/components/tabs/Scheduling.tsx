@@ -12,9 +12,9 @@ export default function Scheduling() {
 
     //Details for a test event with a specified date and color.
     const event = {
-        title: "test",
+        title: "Today",
         time: new Date(),
-        color: "#fc7e80",
+        color: "#0D6EFD",
         allDay: false,
     };
     const events = [event];
