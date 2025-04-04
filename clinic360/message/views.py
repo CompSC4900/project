@@ -36,7 +36,7 @@ class MessageViewSet(viewsets.ModelViewSet):
         raw_contacts = request.user.associated_users.all()
         contacts = []
         for contact in raw_contacts:
-            contacts.append({"name": contact.full_name(), "id": contact.id})
+            contacts.append({"name": contact.get_full_name(), "id": contact.id})
         return Response({
             "contacts": contacts
         })

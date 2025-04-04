@@ -18,7 +18,7 @@ export default function Home({setActiveTab}: Props) {
     useEffect(() => {(async () => setMessages(await getInbox(auth, true)))()}, []);
 
     const event = {
-        title: "test",
+        title: "Today",
         time: new Date(),
         color: "var(--bs-primary)",
         allDay: false,

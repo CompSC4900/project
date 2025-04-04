@@ -1,4 +1,5 @@
 from .models import AppointmentSettings, AppointmentDay, Appointment, AppointmentType
+from .utils import send_appointment_confirmation_message
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework import serializers
 from datetime import datetime, timedelta
@@ -196,14 +197,6 @@ class BaseAppointmentSerializer(serializers.ModelSerializer):
             data['time']  # now guaranteed to be a time object
         )
 
-        print("Available slots:")
-        for slot in available_slots:
-            print(slot.isoformat())
-
-        print("Requested appointment slot range:", date_time)
-        print("Raw data['time']:", data['time'])
-        print("Parsed datetime from combine_date_time:", date_time.isoformat())
-
         missing_slots = []
         print("🧩 duration:", duration)
         print("🧩 slot length:", appointment_day.appointment_settings.appointment_slot_duration)
@@ -241,7 +234,11 @@ class PatientAppointmentSerializer(BaseAppointmentSerializer):
         validated_data['added_by'] = self.context['request'].user
         validated_data['patient'] = self.context['request'].user
         validated_data['status'] = 'PENDING'
-        return super().create(validated_data)
+        appointment = super().create(validated_data)
+
+        send_appointment_confirmation_message(appointment)
+
+        return appointment
 
 class StaffAppointmentSerializer(BaseAppointmentSerializer):
     class Meta:

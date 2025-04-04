@@ -54,15 +54,22 @@ export default function Community({ setActiveTab }: Props) {
 
     if (!validated) {
         return (
-            <div className="w-100 h-100 d-flex flex-column justify-content-center align-items-center">
-                <button className="btn btn-primary" onClick={() => {
-                    setActiveTab("profile"); // TODO: make sure this is correct
-                }}>
-                    Please Set Up Your Profile
-                </button>
+            <div className="w-100 d-flex flex-column justify-content-center align-items-center bg-light" style={{ minHeight: "80vh" }}>
+                <div className="text-center p-4 shadow rounded" style={{ background: "white", maxWidth: "400px" }}>
+                    <h2 className="mb-3">Welcome to the Community</h2>
+                    <p className="mb-4 text-muted">Let's get your profile ready so you can find friends!</p>
+                    <button 
+                        className="btn btn-primary btn-lg w-100" 
+                        onClick={() => setActiveTab("profile")}
+                    >
+                        Set Up Your Profile
+                    </button>
+                </div>
             </div>
         );
     }
+    
+    
 
     async function getFriendList(update: Array<"friends" | "outgoing" | "incoming">) {
         if (update.includes("friends")) {
