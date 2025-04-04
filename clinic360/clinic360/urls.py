@@ -19,6 +19,7 @@ from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from accounts.views import CreateAccountView, user_info, is_staff
 from appointment.views import save_schedule
+from accounts.views import verify_email
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -31,4 +32,5 @@ urlpatterns = [
     path('api/appointment/', include('appointment.urls')),
     path("api/schedule", save_schedule, name="save_schedule"),
     path('api/social/', include('social.urls')),
+    path('api/', include('accounts.urls')),
 ]

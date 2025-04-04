@@ -36,7 +36,8 @@ class CreateAccountSerializer(AccountSerializer):
         return attrs
 
     def create(self, validated_data):
-        return Clinic360User.objects.create_user(
+        is_active = validated_data.pop('is_active', False)
+        user = Clinic360User.objects.create_user(
             email=validated_data['email'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
@@ -50,3 +51,6 @@ class CreateAccountSerializer(AccountSerializer):
             password=validated_data['password'],
             #Validated date for a specific Clinic360 user
         )
+        user.is_active = is_active
+        user.save()
+        return user
