@@ -50,7 +50,7 @@ class IncomingMessageSerializer(serializers.ModelSerializer):
         fields = ('id', 'sender', 'subject', 'timestamp', 'read', 'sender_name')
     
     def get_sender_name(self, obj):
-        return obj.sender.full_name()
+        return obj.sender.get_full_name()
 
 class OutgoingMessageSerializer(serializers.ModelSerializer):
     recipient_name = serializers.SerializerMethodField()
@@ -63,7 +63,7 @@ class OutgoingMessageSerializer(serializers.ModelSerializer):
     
     def get_recipient_name(self, obj):
         if obj.recipient != None:
-            return obj.recipient.full_name()
+            return obj.recipient.get_full_name()
             #If there is a recipient, return the full name.
         else:
             return "No Recipient"
