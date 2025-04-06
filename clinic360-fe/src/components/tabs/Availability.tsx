@@ -1,9 +1,46 @@
 import Calendar from "../calendar/Calendar";
 import DayView from "../calendar/DayView";
 import { useState, useEffect } from "react";
+import { apiBase } from "../../util/auth";
 import Popup from "../Popup";
 
+// interface to store appointment type information
+export interface AppointmentType {
+  id: number;
+  name: string;
+  duration: number;
+  patient_facing: boolean;
+}
+
+// function to get appointment type IDs from backend for availability-saving functionality to reference
+async function fetchAppointmentTypes(): Promise<AppointmentType[]> {
+
+  const response = await fetch(apiBase + "appointment/staff/type/", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + localStorage.getItem("access_token"),
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch appointment types");
+  }
+
+  return await response.json();
+}
+
 export default function Scheduling() {
+  const [appointmentTypes, setAppointmentTypes] = useState<AppointmentType[]>([]);
+
+  useEffect(() => {
+    fetchAppointmentTypes()
+      .then(setAppointmentTypes)
+      .catch((err) => console.error("Error loading appointment types:", err));
+  }, []);
+
+  const appointmentTypeIds = appointmentTypes.map(type => type.id);
+
   const times = [
     "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM",
     "11:00 AM", "11:30 AM", "12:30 PM",
@@ -143,7 +180,7 @@ export default function Scheduling() {
     localStorage.setItem("blockedWeeks", JSON.stringify(blocked));
   
     const data = {
-      appointment_types: [1, 2],
+      appointment_types: appointmentTypeIds,
       appointment_slot_duration: 30,
       weekly_schedule: [[], [{ start: "09:00", end: "17:30" }], [{ start: "09:00", end: "17:30" }], [{ start: "09:00", end: "17:30" }], [{ start: "09:00", end: "17:30" }], [{ start: "09:00", end: "17:30" }], []],
       day_overrides: getOverrides(blocked, times24),
