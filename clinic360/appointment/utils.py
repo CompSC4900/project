@@ -2,6 +2,7 @@ from message.models import Message
 from django.utils import timezone
 
 def send_appointment_confirmation_message(appointment):
+    #Extraction for the patient, doctor, appointment type, and date time.
     patient = appointment.patient
     doctor = appointment.doctor
     appointment_type = appointment.appointment_type.name
@@ -9,6 +10,8 @@ def send_appointment_confirmation_message(appointment):
     
     # Automatic message when an appointment is scheduled
     subject = "Appointment Confirmation"
+
+    #HTML content for constructing the email and giving the supporting details.
     content = (
         f"<p>Hi <strong>{patient.first_name}</strong>,</p>"
 
