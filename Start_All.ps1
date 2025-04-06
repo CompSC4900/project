@@ -1,5 +1,8 @@
 venv\Scripts\activate
+#Changes directory to Clinic360
 cd .\Clinic360
+
+#Migrations for the corresponding Python information.
 python manage.py makemigrations accounts
 python manage.py makemigrations message
 python manage.py makemigrations appointment
