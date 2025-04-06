@@ -1,7 +1,9 @@
+#Import framework and models for serialization.
 from rest_framework import serializers
 from .models import SocialInfo, Condition, FriendRequest, Clinic360User
 
 class ConditionSerializer(serializers.ModelSerializer):
+    #Serializer class with Meta and the condition set to the model. The id field is read only.
     class Meta:
         model = Condition
         fields = ('id', 'name')
@@ -42,13 +44,16 @@ class FriendRequestSerializer(serializers.ModelSerializer):
             receiver = SocialInfo.objects.get(id=value)
             # Get the sender's social info
             sender = SocialInfo.objects.get(user=self.context['request'].user)
+            #Invalidates the request if the receiver is oneself.
             if receiver.user == self.context['request'].user:
                 raise serializers.ValidationError("You cannot send a friend request to yourself")
             return value
+        #Validation error if the social info doesn't exist.
         except SocialInfo.DoesNotExist:
             raise serializers.ValidationError("Social info does not exist")
 
     def create(self, validated_data):
+        #Override if there is a duplication and provide serialization errors for validation.
         sender_user = self.context['request'].user
         sender_social = SocialInfo.objects.get(user=sender_user)
         receiver_social = SocialInfo.objects.get(id=validated_data['receiver']['id'])
@@ -60,7 +65,8 @@ class FriendRequestSerializer(serializers.ModelSerializer):
         # Check if a friend request already exists
         if FriendRequest.objects.filter(sender=sender_social, receiver=receiver_social).exists():
             raise serializers.ValidationError("Friend request already sent")
-        
+
+        #Generate friend request with sender and receiver.
         friend_request = FriendRequest.objects.create(
             sender=sender_social,
             receiver=receiver_social

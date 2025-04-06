@@ -113,6 +113,8 @@ class Clinic360User(PermissionsMixin, AbstractBaseUser):
 
     associated_users = models.ManyToManyField('self', blank=True, symmetrical=False)
 
+    is_active = models.BooleanField(default=True)
+
     is_staff = models.BooleanField(default=False)
     
     objects = Clinic360UserManager()

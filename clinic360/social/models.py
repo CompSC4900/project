@@ -1,10 +1,13 @@
+#Imports models from Django and info on Clinic360User.
 from django.db import models
 from accounts.models import Clinic360User
 
 class Condition(models.Model):
+    #Max length for the character field is 255.
     name = models.CharField(max_length=255)
 
 class SocialInfo(models.Model):
+    #Models for the social info on the front end using boolean and cascade.
     public = models.BooleanField(default=False)
     banned = models.BooleanField(default=False)
     user = models.OneToOneField(Clinic360User, on_delete=models.CASCADE)
@@ -14,6 +17,7 @@ class SocialInfo(models.Model):
     friends = models.ManyToManyField('self', blank=True)
 
 class FriendRequest(models.Model):
+    #Makes a model for the sender and receiver of a friend request using a ForeignKey.
     sender = models.ForeignKey(SocialInfo, on_delete=models.CASCADE, related_name='friend_requests_sent')
     receiver = models.ForeignKey(SocialInfo, on_delete=models.CASCADE, related_name='friend_requests_received')
     
