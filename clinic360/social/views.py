@@ -1,3 +1,4 @@
+#Importing Django and framework models.
 from rest_framework import viewsets
 from .models import SocialInfo, Condition, FriendRequest
 from .serializers import PatientSocialInfoSerializer, StaffSocialInfoSerializer, ConditionSerializer, FriendRequestSerializer
@@ -7,42 +8,52 @@ from rest_framework.mixins import ListModelMixin, DestroyModelMixin, CreateModel
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 
+#Class for viewing the condition set.
 class ConditionViewSet(viewsets.ModelViewSet):
+    #Queries the condition for admins to view.
     queryset = Condition.objects.all()
     serializer_class = ConditionSerializer
     permission_classes = [IsAdminUser]
 
 class PatientSocialInfoView(GenericAPIView, ListModelMixin):
+    #Allows authenticated patients to view patient social info via query.
     queryset = SocialInfo.objects.filter(public=True, banned=False)
     serializer_class = PatientSocialInfoSerializer
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
+        #Returns list of social info.
         return self.list(request, *args, **kwargs)
 
 class SelfSocialInfoView(ListCreateAPIView):
+    #Managing one's own information through authenticated serializer.
     serializer_class = PatientSocialInfoSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return SocialInfo.objects.filter(user=self.request.user)
 
+#Class for handling the staff's social information restricted to admins.
 class StaffSocialInfoViewSet(viewsets.ModelViewSet):
+    #Only get and patch methods are allowed.
     http_method_names = ['get', 'patch']
     queryset = SocialInfo.objects.all()
     serializer_class = StaffSocialInfoSerializer
     permission_classes = [IsAdminUser]
 
 class IncomingFriendRequestView(GenericAPIView, ListModelMixin, DestroyModelMixin):
+    #Viewing incoming friend requests through authenticated users.
     serializer_class = FriendRequestSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user_social_info = SocialInfo.objects.get(user=self.request.user)
+        #Obtaining social information for the friend request.
         return FriendRequest.objects.filter(
             receiver=user_social_info, 
             sender__public=True, 
             sender__banned=False
+            #If banned, the request is invalid.
         )
 
     def get(self, request, *args, **kwargs):
@@ -52,6 +63,7 @@ class IncomingFriendRequestView(GenericAPIView, ListModelMixin, DestroyModelMixi
         return self.destroy(request, *args, **kwargs)
 
 class OutgoingFriendRequestView(GenericAPIView, ListModelMixin, CreateModelMixin, DestroyModelMixin):
+    #Manages outgoing friend request.
     serializer_class = FriendRequestSerializer
     permission_classes = [IsAuthenticated]
 
@@ -61,8 +73,10 @@ class OutgoingFriendRequestView(GenericAPIView, ListModelMixin, CreateModelMixin
             sender=user_social_info, 
             receiver__public=True, 
             receiver__banned=False
+            #If banned, the request is invalid for the receiver.
         )
 
+    #These allow for the reception, creation, and deletion of a friend request.
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
