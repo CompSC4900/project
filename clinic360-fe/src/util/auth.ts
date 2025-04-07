@@ -8,15 +8,26 @@ export interface FetchResult {
 
 export const apiBase = "http://localhost:8000/api/";
 
-export async function fetchData(endpoint: string, method: string, data?: any, extraHeaders?: Record<string, string>): Promise<FetchResult> {
+export async function fetchData(endpoint: string, method: string, data?: any, extraHeaders?: Record<string, string>, sendAsFormData: boolean = false): Promise<FetchResult> {
     let headers = extraHeaders || {};
+    let body: any;
+
     if (data) {
-        headers = {...headers, "Content-Type": "application/json"};
+        if (sendAsFormData) {
+            body = new FormData();
+            for (const key in data) {
+                body.append(key, data[key]);
+            }
+        } else {
+            headers = {...headers, "Content-Type": "application/json"};
+            body = JSON.stringify(data);
+        }
     }
+
     const response = await fetch(apiBase + endpoint, {
         method,
         headers,
-        body: data && JSON.stringify(data),
+        body,
     });
 
     let responseJson;

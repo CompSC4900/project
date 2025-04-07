@@ -37,12 +37,17 @@ export async function getMySocialInfo(auth: AuthFunctions): Promise<SocialInfo[]
     return response.data as SocialInfo[];
 }
 
-export async function updateMySocialInfo(auth: AuthFunctions, socialInfo: SocialInfoUpdate): Promise<void> {
-    let {id, profile_picture, ...rest} = socialInfo;
+export async function updateMySocialInfo(auth: AuthFunctions, socialInfo: SocialInfoUpdate): Promise<SocialInfo> {
+    let {id, ...rest} = socialInfo;
+    if (rest.profile_picture === undefined) {
+        delete rest.profile_picture;
+    }
     if (id === null) {
-        await auth.fetchProtectedData(`social/self/`, 'POST', rest);
+        const response = await auth.fetchProtectedData(`social/self/`, 'POST', rest, true);
+        return response.data as SocialInfo;
     } else {
-        await auth.fetchProtectedData(`social/self/${id}/`, 'PATCH', rest);
+        const response = await auth.fetchProtectedData(`social/self/${id}/`, 'PATCH', rest, true);
+        return response.data as SocialInfo;
     }
 }
 

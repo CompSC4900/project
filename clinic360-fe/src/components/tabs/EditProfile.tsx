@@ -23,13 +23,26 @@ export default function EditProfile({ profileTab, setProfileTab, onUsernameChang
     const [id, setId] = useState<number | null>(null);
 
     useEffect(() => {
+        setLoading(true);
         (async () => {
-            const fetchResult = await auth.fetchProtectedData("userinfo/", "GET");
-            expectSuccess(fetchResult, auth);
-            setInitialFormValues(fetchResult.data);
-            setLoading(false);
+            if (profileTab === "private") {
+                const fetchResult = await auth.fetchProtectedData("userinfo/", "GET");
+                expectSuccess(fetchResult, auth);
+                setInitialFormValues(fetchResult.data);
+                setLoading(false);
+            } else {
+                const socialInfo = await getMySocialInfo(auth);
+                if (socialInfo.length > 0) {
+                    setCleanedFormValues({
+                        about_me: socialInfo[0].about_me,
+                        public: socialInfo[0].public.toString(),
+                    });
+                    setId(socialInfo[0].id);
+                }
+                setLoading(false);
+            }
         })();
-    }, []);
+    }, [profileTab]);
 
     async function handleSaveProfile() {
         (async () => {
@@ -46,12 +59,13 @@ export default function EditProfile({ profileTab, setProfileTab, onUsernameChang
                         onUsernameChange(fetchResult.data.first_name + " " + fetchResult.data.last_name);
                     }
                 } else {
-                    await updateMySocialInfo(auth, {
+                    const socialInfo = await updateMySocialInfo(auth, {
                         id,
                         about_me: cleanedFormValues.about_me,
                         profile_picture: profilePicture ?? undefined,
                         public: cleanedFormValues.public === "true"
                     });
+                    setId(socialInfo.id);
                 }
             } catch (e) {
                 setFormErrors({"global": "An unknown error occured. Please try again later."})
@@ -60,24 +74,11 @@ export default function EditProfile({ profileTab, setProfileTab, onUsernameChang
     }
 
     function handleTabChange(tab: "private" | "public") {
+        setFormErrors({});
         setProfileTab(tab);
         if (tab === "private") {
             setCleanedFormValues({});
-        } else {
-            setLoading(true);
-            (async () => {
-                const socialInfo = await getMySocialInfo(auth);
-                if (socialInfo.length > 0) {
-                    setCleanedFormValues({
-                        about_me: socialInfo[0].about_me,
-                        public: socialInfo[0].public.toString(),
-                    });
-                    setId(socialInfo[0].id);
-                }
-                setLoading(false);
-            })();
         }
-        setFormErrors({});
     }
 
     function handleFileUpload(file: File) {

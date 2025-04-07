@@ -3,7 +3,7 @@ import { FetchResult, apiBase, fetchData } from "../util/auth";
 import Accounts from "./Accounts";
 
 export interface AuthFunctions {
-    fetchProtectedData(endpoint: string, method: string, data?: any): Promise<FetchResult>
+    fetchProtectedData(endpoint: string, method: string, data?: any, sendAsFormData?: boolean): Promise<FetchResult>
     logout(): void
     login(email: string, password: string): Promise<void>
 }
@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }, [tokens.refreshToken]);
 
-    const fetchProtectedData = useCallback(async (endpoint: string, method: string, data?: any, retryUsingToken?: string) => {
+    const fetchProtectedData = useCallback(async (endpoint: string, method: string, data?: any, sendAsFormData?: boolean, retryUsingToken?: string) => {
         if (!tokens.accessToken) {
             console.error("❌ ERROR: Request to access protected data while not authenticated.");
             throw new Error("Request to access protected data while not authenticated");
@@ -100,14 +100,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log(`🔍 Fetching data from: ${endpoint}, Method: ${method}`);
     
         const token = retryUsingToken || tokens.accessToken;
-        const response = await fetchData(endpoint, method, data, {"Authorization": `Bearer ${token}`});
+        const response = await fetchData(endpoint, method, data, {"Authorization": `Bearer ${token}`}, sendAsFormData);
     
         if (response.errorCode === 401 && !retryUsingToken) {
             console.warn("⚠️ Token expired. Attempting refresh...");
             const newAccessToken = await refreshToken();
             if (newAccessToken) {
                 console.log("✅ Token refreshed. Retrying request...");
-                return await fetchProtectedData(endpoint, method, data, newAccessToken);
+                return await fetchProtectedData(endpoint, method, data, sendAsFormData, newAccessToken);
             }
         }
     
