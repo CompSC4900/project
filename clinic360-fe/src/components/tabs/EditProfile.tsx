@@ -4,19 +4,23 @@ import { expectSuccess } from "../../util/auth";
 import AccountInfo from "../AccountInfo";
 import { Button, ButtonGroup } from "react-bootstrap";
 import FormFieldFactory from "../form/FormFieldFactory";
+import { getMySocialInfo, updateMySocialInfo } from "../../util/SocialInfo";
 
 interface Props {
+    profileTab: "private" | "public";
+    setProfileTab(tab: "private" | "public"): void;
     onUsernameChange(username: string): void
 }
 
-export default function EditProfile({ onUsernameChange }: Props) {
+export default function EditProfile({ profileTab, setProfileTab, onUsernameChange }: Props) {
     const auth = useAuth();
 
     const [loading, setLoading] = useState(true);
-    const [tab, setTab] = useState<"private" | "public">("private");
     const [cleanedFormValues, setCleanedFormValues] = useState<Record<string, string>>({});
     const [initialFormValues, setInitialFormValues] = useState<Record<string, string>>({});
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+    const [profilePicture, setProfilePicture] = useState<File | null>(null);
+    const [id, setId] = useState<number | null>(null);
 
     useEffect(() => {
         (async () => {
@@ -30,15 +34,24 @@ export default function EditProfile({ onUsernameChange }: Props) {
     async function handleSaveProfile() {
         (async () => {
             try {
-                const fetchResult = await auth.fetchProtectedData("userinfo/", "PUT", cleanedFormValues);
-                if (fetchResult.errorCode !== null) {
-                    const errors = fetchResult.error as Record<string, Array<string>>;
-                    setFormErrors(
-                        Object.entries(errors).reduce((obj, error) => ({...obj, [error[0]]: error[1][0]}), {} as Record<string, string>)
-                    );
+                if (profileTab === "private") {
+                    const fetchResult = await auth.fetchProtectedData("userinfo/", "PUT", cleanedFormValues);
+                    if (fetchResult.errorCode !== null) {
+                        const errors = fetchResult.error as Record<string, Array<string>>;
+                        setFormErrors(
+                            Object.entries(errors).reduce((obj, error) => ({...obj, [error[0]]: error[1][0]}), {} as Record<string, string>)
+                        );
+                    } else {
+                        setInitialFormValues(fetchResult.data);
+                        onUsernameChange(fetchResult.data.first_name + " " + fetchResult.data.last_name);
+                    }
                 } else {
-                    setInitialFormValues(fetchResult.data);
-                    onUsernameChange(fetchResult.data.first_name + " " + fetchResult.data.last_name);
+                    await updateMySocialInfo(auth, {
+                        id,
+                        about_me: cleanedFormValues.about_me,
+                        profile_picture: profilePicture ?? undefined,
+                        public: cleanedFormValues.public === "true"
+                    });
                 }
             } catch (e) {
                 setFormErrors({"global": "An unknown error occured. Please try again later."})
@@ -47,9 +60,28 @@ export default function EditProfile({ onUsernameChange }: Props) {
     }
 
     function handleTabChange(tab: "private" | "public") {
-        setTab(tab);
-        setCleanedFormValues({});
+        setProfileTab(tab);
+        if (tab === "private") {
+            setCleanedFormValues({});
+        } else {
+            setLoading(true);
+            (async () => {
+                const socialInfo = await getMySocialInfo(auth);
+                if (socialInfo.length > 0) {
+                    setCleanedFormValues({
+                        about_me: socialInfo[0].about_me,
+                        public: socialInfo[0].public.toString(),
+                    });
+                    setId(socialInfo[0].id);
+                }
+                setLoading(false);
+            })();
+        }
         setFormErrors({});
+    }
+
+    function handleFileUpload(file: File) {
+        setProfilePicture(file);
     }
 
     const formFieldFactory = new FormFieldFactory(cleanedFormValues, setCleanedFormValues, formErrors);
@@ -66,35 +98,35 @@ export default function EditProfile({ onUsernameChange }: Props) {
                     <div className="d-flex justify-content-between">
                         <h5 className="modal-title">Edit Profile</h5>
                         <ButtonGroup>
-                            <Button variant={tab === "private" ? "primary" : "secondary"} onClick={() => handleTabChange("private")}>
+                            <Button variant={profileTab === "private" ? "primary" : "secondary"} onClick={() => handleTabChange("private")}>
                                 Private
                             </Button>
-                            <Button variant={tab === "public" ? "primary" : "secondary"} onClick={() => handleTabChange("public")}>
+                            <Button variant={profileTab === "public" ? "primary" : "secondary"} onClick={() => handleTabChange("public")}>
                                 Public
                             </Button>
                         </ButtonGroup>
                     </div>
                     <hr />
-                    {tab === "private" && (
+                    {profileTab === "private" && (
                         <AccountInfo
                             setCleanedFormValues={setCleanedFormValues}
                             initialFormValues={initialFormValues}
                             formErrors={formErrors}
-                        >
-                            {formErrors["global"] && <div className="invalid-feedback d-block m-0 mb-3">{formErrors["global"]}</div>}
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-primary" onClick={handleSaveProfile}>
-                                    Save Changes
-                                </button>
-                            </div>
-                        </AccountInfo>
+                        />
                     )}
-                    {tab === "public" && (
+                    {profileTab === "public" && (
                         <>
-                            <formFieldFactory.FormField name="about_me" displayName="About Me" type="text" />
-                            
+                            {formFieldFactory.FormField({name: "about_me", displayName: "About Me", type: "text", className: "mb-3"})}
+                            {formFieldFactory.FormField({name: "public", displayName: "Public", type: "checkbox", className: "mb-3"})}
+                            {formFieldFactory.FormField({name: "profile_picture", displayName: "Change Profile Picture", type: "file", className: "mb-3", onFileUpload: handleFileUpload})}
                         </>
                     )}
+                    <div className="mt-auto">
+                        {formErrors["global"] && <div className="invalid-feedback d-block m-0 mb-3">{formErrors["global"]}</div>}
+                        <button type="button" className="btn btn-primary" onClick={handleSaveProfile}>
+                            Save Changes
+                        </button>
+                    </div>
                 </div>
             )}
         </div>

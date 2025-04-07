@@ -3,8 +3,8 @@ from rest_framework import viewsets
 from .models import SocialInfo, Condition, FriendRequest
 from .serializers import PatientSocialInfoSerializer, StaffSocialInfoSerializer, ConditionSerializer, FriendRequestSerializer
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from rest_framework.generics import GenericAPIView, ListCreateAPIView
-from rest_framework.mixins import ListModelMixin, DestroyModelMixin, CreateModelMixin
+from rest_framework.generics import GenericAPIView
+from rest_framework.mixins import ListModelMixin, DestroyModelMixin, CreateModelMixin, UpdateModelMixin
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 
@@ -25,13 +25,22 @@ class PatientSocialInfoView(GenericAPIView, ListModelMixin):
         #Returns list of social info.
         return self.list(request, *args, **kwargs)
 
-class SelfSocialInfoView(ListCreateAPIView):
+class SelfSocialInfoView(GenericAPIView, ListModelMixin, CreateModelMixin, UpdateModelMixin):
     #Managing one's own information through authenticated serializer.
     serializer_class = PatientSocialInfoSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return SocialInfo.objects.filter(user=self.request.user)
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
 
 #Class for handling the staff's social information restricted to admins.
 class StaffSocialInfoViewSet(viewsets.ModelViewSet):

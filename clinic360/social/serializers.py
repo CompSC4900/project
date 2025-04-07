@@ -10,9 +10,9 @@ class ConditionSerializer(serializers.ModelSerializer):
         read_only_fields = ('id',)
 
 class PatientSocialInfoSerializer(serializers.ModelSerializer):
-    conditions = ConditionSerializer(many=True)
-    first_name = serializers.CharField(source='user.first_name')
-    last_name = serializers.CharField(source='user.last_name')
+    conditions = ConditionSerializer(many=True, read_only=True)
+    first_name = serializers.CharField(source='user.first_name', read_only=True)
+    last_name = serializers.CharField(source='user.last_name', read_only=True)
     class Meta:
         model = SocialInfo
         fields = ('id', 'first_name', 'last_name', 'about_me', 'profile_picture', 'public', 'conditions')

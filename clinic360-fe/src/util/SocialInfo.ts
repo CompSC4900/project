@@ -18,6 +18,13 @@ export interface SocialInfo {
     friend_request_id?: number;
 }
 
+export interface SocialInfoUpdate {
+    id: number | null;
+    about_me?: string;
+    profile_picture?: File;
+    public?: boolean;
+}
+
 export interface FriendRequest {
     id: number;
     sender_id: number;
@@ -28,6 +35,15 @@ export async function getMySocialInfo(auth: AuthFunctions): Promise<SocialInfo[]
     const response = await auth.fetchProtectedData('social/self/', 'GET');
     expectSuccess(response, auth);
     return response.data as SocialInfo[];
+}
+
+export async function updateMySocialInfo(auth: AuthFunctions, socialInfo: SocialInfoUpdate): Promise<void> {
+    let {id, profile_picture, ...rest} = socialInfo;
+    if (id === null) {
+        await auth.fetchProtectedData(`social/self/`, 'POST', rest);
+    } else {
+        await auth.fetchProtectedData(`social/self/${id}/`, 'PATCH', rest);
+    }
 }
 
 export async function getPatientSocialInfo(auth: AuthFunctions): Promise<SocialInfo[]> {

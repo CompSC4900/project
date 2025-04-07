@@ -21,5 +21,6 @@ urlpatterns = [
     path('friends/remove/<int:pk>/', remove_friend, name='remove-friend'),
     path('friends/', get_friends, name='get-friends'),
     path('self/', SelfSocialInfoView.as_view(), name='self-social-info'),
+    path('self/<int:pk>/', SelfSocialInfoView.as_view(), name='self-social-info-update'),
     path('patient/', PatientSocialInfoView.as_view(), name='patient-social-info'),
 ]

@@ -30,6 +30,7 @@ const TABS = [
 export default function App() {
     const [activeTab, setActiveTab] = useState(TABS[0]);
     const [username, setUsername] = useState<string | null>(null);
+    const [profileTab, setProfileTab] = useState<"private" | "public">("private");
 
     const TabComponent = TAB_COMPONENTS[activeTab as keyof typeof TAB_COMPONENTS];
 
@@ -39,7 +40,7 @@ export default function App() {
                 <div className="d-flex flex-column h-100">
                     <Header tabs={TABS} activeTab={activeTab} setActiveTab={setActiveTab} usernameOverride={username} />
                     <div className="d-flex p-5 flex-grow-1 bg-body-tertiary" style={{minHeight: 0}}>
-                        <TabComponent setActiveTab={setActiveTab} onUsernameChange={setUsername}/>
+                        <TabComponent setActiveTab={setActiveTab} onUsernameChange={setUsername} profileTab={profileTab} setProfileTab={setProfileTab} />
                     </div>
                 </div>
             </ConfirmationProvider>

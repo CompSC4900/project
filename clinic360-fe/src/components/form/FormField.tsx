@@ -27,7 +27,16 @@ type DayFieldProps = BaseProps & {
     type: "time"
 }
 
-type Props = TextFieldProps | ChoiceFieldProps | DateFieldProps | DayFieldProps
+type CheckboxFieldProps = BaseProps & {
+    type: "checkbox"
+}
+
+type FileFieldProps = BaseProps & {
+    type: "file"
+    onFileUpload(file: File): void
+}
+
+type Props = TextFieldProps | ChoiceFieldProps | DateFieldProps | DayFieldProps | CheckboxFieldProps | FileFieldProps
 
 export default function FormField(props: Props) {
     const {type, name, displayName, error, value, className, onChange} = props;
@@ -38,6 +47,8 @@ export default function FormField(props: Props) {
         switch (type) {
             case "date":
             case "time":
+            case "checkbox":
+            case "file":
                 return type;
             default:
                 break;
@@ -58,13 +69,15 @@ export default function FormField(props: Props) {
         case "text":
         case "date":
         case "time":
+        case "checkbox":
+        case "file":
             inputElement = (
                 <input 
                     type={getHtmlType()}
                     inputMode={inputMode}
-                    className={`form-control ${error !== null ? "is-invalid" : ""}`} 
+                    className={`${type === "checkbox" ? "form-check-input ms-5" : "form-control"} ${error !== null ? "is-invalid" : ""}`} 
                     id={name}
-                    value={value}
+                    {...(type === "file" ? {accept: "image/*"} : type === "checkbox" ? {checked: value === "true"} : {value})}
                     onChange={handleChange}
                 />
             );
@@ -88,7 +101,11 @@ export default function FormField(props: Props) {
     }
 
     function handleChange(e: ChangeEvent<HTMLInputElement>) {
-        if (inputMode === "numeric") {
+        if (type === "file") {
+            e.target.files && (props as FileFieldProps).onFileUpload(e.target.files[0]);
+        } else if (type === "checkbox") {
+            onChange(e.target.checked.toString());
+        } else if (inputMode === "numeric") {
             onChange(e.target.value.replace(/\D/g, ''));
         } else if (inputMode === "tel") {
             onChange(e.target.value.replace(/[^\d\(\)\- ]/g, ''))

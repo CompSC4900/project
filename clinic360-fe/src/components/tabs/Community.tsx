@@ -5,6 +5,7 @@ import SocialInfoDisplay from "../SocialInfoDisplay";
 
 interface Props {
     setActiveTab(tab: string): void;
+    setProfileTab(tab: "private" | "public"): void;
 }
 
 interface FriendStatus {
@@ -12,7 +13,7 @@ interface FriendStatus {
     friendRequestId?: number;
 }
 
-export default function Community({ setActiveTab }: Props) {
+export default function Community({ setActiveTab, setProfileTab }: Props) {
     const auth = useAuth();
     const [validated, setValidated] = useState(false);
     const [patientInfo, setPatientInfo] = useState<Map<number, SocialInfo>>(new Map());
@@ -60,7 +61,10 @@ export default function Community({ setActiveTab }: Props) {
                     <p className="mb-4 text-muted">Let's get your profile ready so you can find friends!</p>
                     <button 
                         className="btn btn-primary btn-lg w-100" 
-                        onClick={() => setActiveTab("profile")}
+                        onClick={() => {
+                            setActiveTab("Edit Profile");
+                            setProfileTab("public");
+                        }}
                     >
                         Set Up Your Profile
                     </button>
