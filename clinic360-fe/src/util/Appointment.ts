@@ -33,6 +33,7 @@ export interface AppointmentDay {
     available_slots: Date[];
     appointments: AppointmentPreview[];
     doctor: number;
+    date: string
 }
 
 export interface AppointmentSettings {
@@ -47,6 +48,7 @@ export interface AppointmentCreationInfo {
     time: string;
     appointment_type: number;
     doctor: number;
+    local_time_display?: string;
 }
 
 //Interface for the provider's full name.
@@ -77,12 +79,6 @@ export async function getAppointmentFromPreview(auth: AuthFunctions, preview: Ap
     const response = await auth.fetchProtectedData(`appointment/patient/details/${preview.id}/`, "GET");
     expectSuccess(response, auth);
     return {...preview, ...response.data};
-}
-
-export async function createAppointment(auth: AuthFunctions, appointment: Appointment): Promise<Appointment> {
-    const response = await auth.fetchProtectedData("appointment/patient/appointment/", "POST", appointment);
-    expectSuccess(response, auth);
-    return response.data;
 }
 
 export async function getAppointmentSettings(auth: AuthFunctions, doctorId: number): Promise<AppointmentSettings> {

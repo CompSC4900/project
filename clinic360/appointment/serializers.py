@@ -94,10 +94,11 @@ class AppointmentDaySerializer(serializers.ModelSerializer):
     available_slots = serializers.SerializerMethodField()
     appointments = serializers.SerializerMethodField()
     doctor = serializers.SerializerMethodField()
+    date = serializers.DateField(source='day')
 
     class Meta:
         model = AppointmentDay
-        fields = ('id', 'available_slots', 'appointments', 'doctor')
+        fields = ('id', 'available_slots', 'appointments', 'doctor', 'date')
         read_only_fields = ('id',)
     
     def get_available_slots(self, obj):
@@ -235,8 +236,10 @@ class PatientAppointmentSerializer(BaseAppointmentSerializer):
         validated_data['patient'] = self.context['request'].user
         validated_data['status'] = 'PENDING'
         appointment = super().create(validated_data)
+        
+        local_time_display = self.context['request'].data.get("local_time_display")
 
-        send_appointment_confirmation_message(appointment)
+        send_appointment_confirmation_message(appointment, local_time_display)
 
         return appointment
 
