@@ -16,7 +16,13 @@ const AppointmentScheduler: React.FC = () => {
     const [selectedAppointmentType, setSelectedAppointmentType] = useState<number | null>(null);
 
     const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
-    const [availableDays, setAvailableDays] = useState<number[]>([]);
+    
+    type AppointmentDayOption = {
+        id: number;
+        date: string;
+    };
+    const [availableDays, setAvailableDays] = useState<AppointmentDayOption[]>([]);
+    
     const [selectedDay, setSelectedDay] = useState<number | null>(null);
     const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
@@ -83,7 +89,10 @@ const AppointmentScheduler: React.FC = () => {
                     Array.isArray(day.available_slots) &&
                     day.available_slots.length > 0
             );
-            setAvailableDays(daysWithAvailability.map(day => day.id));
+            setAvailableDays(
+                daysWithAvailability.map(day => ({ id: day.id, date: day.date }))
+            );
+            
     
             setError(null);
         } catch (error) {
@@ -122,12 +131,24 @@ const AppointmentScheduler: React.FC = () => {
             
             console.log("Selected time slot (ISO):", selectedTimeSlot);
             console.log("Formatted UTC time (HH:mm):", getUtcTime(selectedTimeSlot));
+            
+            //Used in the confirmation message
+            const formattedLocalTime = new Date(selectedTimeSlot).toLocaleString(undefined, {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true,
+              });
 
             await scheduleAppointment(auth, {
                 day: selectedDay!,
                 time: getUtcTime(selectedTimeSlot),
                 appointment_type: selectedAppointmentType!,
                 doctor: selectedProvider!,
+                local_time_display: formattedLocalTime
               });              
     
             alert("Appointment successfully scheduled!");
@@ -160,6 +181,17 @@ const AppointmentScheduler: React.FC = () => {
         return `${utcHours}:${utcMinutes}:00`;
     };
     
+    function formatLocalDate(dateString: string): string {
+        const [year, month, day] = dateString.split("-").map(Number);
+        const localDate = new Date(year, month - 1, day); // JS months are 0-based
+        return localDate.toLocaleDateString(undefined, {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+        });
+      }
+      
     return (
         <>
             {/* Floating "Schedule an Appointment" Button */}
@@ -227,8 +259,11 @@ const AppointmentScheduler: React.FC = () => {
                             <Form.Control as="select" onChange={e => setSelectedDay(parseInt(e.target.value))}>
                                 <option value="">-- Select --</option>
                                 {availableDays.map(day => (
-                                    <option key={day} value={day}>{day}</option>
-                                ))}
+                                <option key={day.id} value={day.id}>
+                                    {formatLocalDate(day.date)}
+                                </option>
+                            ))}
+
                             </Form.Control>
                             <Button className="mt-3" onClick={() => setStep(5)} disabled={selectedDay === null}>Next</Button>
                         </>

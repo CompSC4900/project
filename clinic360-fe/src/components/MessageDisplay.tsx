@@ -32,8 +32,8 @@ export default function MessageDisplay({messagePreview}: Props) {
         const cleanHTML = DOMPurify.sanitize(
             message.content.replace(/\n/g, "<br>"),
             {
-            ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'br', 'p', 'ul', 'ol', 'li'],
-            ALLOWED_ATTR: [],
+            ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'br', 'p', 'ul', 'ol', 'li', 'img', 'div'],
+            ALLOWED_ATTR: ['src', 'alt', 'style'],
         });
 
         return (
