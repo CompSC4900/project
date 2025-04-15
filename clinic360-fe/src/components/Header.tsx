@@ -19,6 +19,7 @@ export default function Header({tabs, activeTab, setActiveTab, usernameOverride}
 
     const [username, setUsername] = useState("");
     const [isStaff, setStaff] = useState(false);
+    const [profilePicture, setProfilePicture] = useState<string | null>(null);
 
     useEffect(() => {(async () => {
         if (usernameOverride === null) {
@@ -32,6 +33,14 @@ export default function Header({tabs, activeTab, setActiveTab, usernameOverride}
         setStaff(response2.data.staff);
 
         setActiveTab(tabs[0]);
+    })()}, []);
+
+    useEffect(() => {(async () => {
+        const response = await auth.fetchProtectedData("social/self/", "GET");
+        expectSuccess(response, auth);
+        if (response.data.length > 0 && response.data[0].profile_picture) {
+            setProfilePicture(response.data[0].profile_picture);
+        }
     })()}, []);
 
     const homeTab = tabs[0];
@@ -97,7 +106,7 @@ export default function Header({tabs, activeTab, setActiveTab, usernameOverride}
                 </div>
                 <div className="ms-auto bg-body rounded border border-secondary-subtle dropdown">
                     <button className="btn dropdown-toggle py-1 px-2" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="/dummy-pfp.png" className="rounded-circle me-2" style={{width: 40, height: 40}} />
+                        <img src={profilePicture ?? "/dummy-pfp.png"} className="rounded-circle me-2" style={{width: 40, height: 40}} />
                         <span className="me-2">{usernameOverride ?? username}</span>
                     </button>
                     <ul className="dropdown-menu">
