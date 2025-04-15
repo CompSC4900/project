@@ -21,6 +21,7 @@ export default function EditProfile({ profileTab, setProfileTab, onUsernameChang
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [profilePicture, setProfilePicture] = useState<File | null>(null);
     const [id, setId] = useState<number | null>(null);
+    const [savedFeedback, setSavedFeedback] = useState<string>("");
 
     useEffect(() => {
         setLoading(true);
@@ -66,6 +67,7 @@ export default function EditProfile({ profileTab, setProfileTab, onUsernameChang
                         public: cleanedFormValues.public === "true"
                     });
                     setId(socialInfo.id);
+                    setSavedFeedback("Profile saved successfully.");
                 }
             } catch (e) {
                 setFormErrors({"global": "An unknown error occured. Please try again later."})
@@ -124,9 +126,12 @@ export default function EditProfile({ profileTab, setProfileTab, onUsernameChang
                     )}
                     <div className="mt-auto">
                         {formErrors["global"] && <div className="invalid-feedback d-block m-0 mb-3">{formErrors["global"]}</div>}
-                        <button type="button" className="btn btn-primary" onClick={handleSaveProfile}>
-                            Save Changes
-                        </button>
+                        <div className="d-flex flex-row align-items-center">
+                            <button type="button" className="btn btn-primary" onClick={handleSaveProfile}>
+                                Save Changes
+                            </button>
+                            {savedFeedback && <div className="ms-3">{savedFeedback}</div>}
+                        </div>
                     </div>
                 </div>
             )}
