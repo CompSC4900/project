@@ -3,3 +3,4 @@
 db.sqlite3
 venv
 celerybeat-schedule
+media/profile_pictures/*

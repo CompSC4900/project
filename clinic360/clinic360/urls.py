@@ -20,6 +20,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from accounts.views import CreateAccountView, user_info, is_staff
 from appointment.views import save_schedule
 from accounts.views import verify_email
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -33,4 +35,4 @@ urlpatterns = [
     path("api/schedule", save_schedule, name="save_schedule"),
     path('api/social/', include('social.urls')),
     path('api/', include('accounts.urls')),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
