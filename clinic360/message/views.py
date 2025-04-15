@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from .models import Message
 from .serializers import MessageSerializer, IncomingMessageSerializer, OutgoingMessageSerializer
 from .permissions import MessagePermissions
+from social.models import SocialInfo
 from rest_framework.response import Response
 from django.utils import timezone
 from django.db.models import Q
@@ -32,11 +33,23 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'])
     def contacts(self, request):
-        #Finds raw contact list and allows for creation of contacts.
-        raw_contacts = request.user.associated_users.all()
+        # Finds contact list and ensures uniqueness.
+        official_contacts = list(request.user.associated_users.all())
+        
+        friend_users = []
+        social_info = SocialInfo.objects.filter(user=request.user).first()
+        if social_info:
+            friends = social_info.friends.all()
+            friend_users = [friend.user for friend in friends]
+
+        # Combine lists and remove duplicates using a set
+        all_potential_contacts = official_contacts + friend_users
+        unique_users = set(all_potential_contacts)
+
         contacts = []
-        for contact in raw_contacts:
+        for contact in unique_users:
             contacts.append({"name": contact.get_full_name(), "id": contact.id})
+        
         return Response({
             "contacts": contacts
         })
